@@ -1,10 +1,19 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App.tsx'
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import "../styles/global.css";
+import "@mantine/core/styles.css";
+import App from "./App.tsx";
+import { ColorSchemeScript, createTheme, MantineProvider } from "@mantine/core";
 
-createRoot(document.getElementById('root')!).render(
+const theme = createTheme({
+  fontFamily: "Inter, sans-serif",
+});
+
+createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <App />
-  </StrictMode>,
-)
+    <ColorSchemeScript />
+    <MantineProvider theme={theme} defaultColorScheme="dark">
+      <App />
+    </MantineProvider>
+  </StrictMode>
+);
