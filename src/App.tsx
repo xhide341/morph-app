@@ -1,11 +1,12 @@
 import Header from "./components/header";
+import { Clock } from "./components/clock";
 
 export const App = () => {
   return (
-    <div className="p-4 flex flex-col h-dvh mx-auto w-full max-w-dvw bg-gray-600">
-      <div className="flex flex-col w-full max-w-3xl mx-auto">
+    <div className="font-roboto mx-auto flex h-dvh w-full max-w-dvw flex-col bg-gray-600 p-4">
+      <div className="mx-auto flex w-full max-w-3xl flex-col">
         <Header />
-        {/* Clock UI */}
+        <Clock />
         {/* Progress Bar */}
       </div>
     </div>

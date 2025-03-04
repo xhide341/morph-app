@@ -5,7 +5,7 @@ import "./styles/globals.css";
 import { ColorSchemeScript, createTheme, MantineProvider } from "@mantine/core";
 
 const theme = createTheme({
-  fontFamily: "Inter, sans-serif",
+  fontFamily: "var(--font-roboto)",
 });
 
 createRoot(document.getElementById("root")!).render(
@@ -14,5 +14,5 @@ createRoot(document.getElementById("root")!).render(
     <MantineProvider theme={theme} defaultColorScheme="dark">
       <App />
     </MantineProvider>
-  </StrictMode>
+  </StrictMode>,
 );
