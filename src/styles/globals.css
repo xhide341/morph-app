@@ -3,37 +3,39 @@
 @layer base {
   :root {
     /* Default coffee theme */
-    --background: 20 49% 15%; /* dark */
-    --foreground: 35 50% 90%; /* very light */
-    --primary: 25 25% 47%; /* medium */
-    --secondary: 20 32% 29%; /* darker medium */
-    --accent: 20 30% 58%; /* light medium */
-
-    --font-roboto: "Roboto";
+    --background: 20 49% 15%;
+    --foreground: 35 50% 90%;
+    --primary: 25 25% 47%;
+    --secondary: 20 32% 29%;
+    --accent: 20 30% 58%;
   }
 
   [data-theme="forest"] {
-    --background: 160 25% 15%; /* dark */
-    --foreground: 120 30% 90%; /* very light */
-    --primary: 160 25% 47%; /* medium */
-    --secondary: 160 22% 29%; /* darker medium */
-    --accent: 110 25% 58%; /* light medium */
+    --background: 160 25% 15%;
+    --foreground: 120 30% 90%;
+    --primary: 160 25% 47%;
+    --secondary: 160 22% 29%;
+    --accent: 110 25% 58%;
   }
 
   [data-theme="ocean"] {
-    --background: 215 55% 15%; /* dark */
-    --foreground: 210 100% 90%; /* very light */
-    --primary: 215 60% 47%; /* medium */
-    --secondary: 215 55% 29%; /* darker medium */
-    --accent: 215 100% 58%; /* light medium */
+    --background: 215 55% 15%;
+    --foreground: 210 100% 90%;
+    --primary: 215 60% 47%;
+    --secondary: 215 55% 29%;
+    --accent: 215 100% 58%;
   }
 }
 
 @theme {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-primary: hsl(var(--primary));
+  --color-secondary: hsl(var(--secondary));
+  --color-accent: hsl(var(--accent));
   --font-roboto: "Roboto";
-  --background: hsl(var(--background));
-  --foreground: hsl(var(--foreground));
-  --primary: hsl(var(--primary));
-  --secondary: hsl(var(--secondary));
-  --accent: hsl(var(--accent));
+}
+
+body {
+  font-family: var(--font-roboto);
 }
