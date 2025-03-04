@@ -5,6 +5,7 @@ export const Clock = () => {
   const [timerInterval, setTimerInterval] = useState<NodeJS.Timeout | null>(
     null,
   );
+  const [isRunning, setIsRunning] = useState(false);
 
   const handleStart = () => {
     if (timerInterval) {
@@ -28,14 +29,17 @@ export const Clock = () => {
       });
     }, 1000);
 
+    setIsRunning(true);
+
     setTimerInterval(newInterval);
   };
 
-  const handleStop = () => {
+  const handlePause = () => {
     if (timerInterval) {
       clearInterval(timerInterval);
       setTimerInterval(null);
     }
+    setIsRunning(false);
   };
 
   const handleReset = () => {
@@ -44,6 +48,7 @@ export const Clock = () => {
       setTimerInterval(null);
     }
     setTime("25:00");
+    setIsRunning(false);
   };
 
   return (
@@ -63,24 +68,15 @@ export const Clock = () => {
       </nav>
       <div className="flex flex-col items-center justify-center">
         <h1 className="text-[8rem] font-bold">{time}</h1>
-        <div className="flex flex-row gap-2 text-xl">
+        <div className="flex flex-row gap-2 text-center text-3xl">
           <button
-            className="rounded-md bg-blue-500 p-2 text-white hover:scale-105 hover:cursor-pointer"
-            onClick={handleStart}
+            aria-label={isRunning ? "Pause" : "Start"}
+            className={`rounded-md px-4 py-2 text-white hover:scale-105 hover:cursor-pointer ${
+              isRunning ? "bg-red-500" : "bg-blue-500"
+            }`}
+            onClick={isRunning ? handlePause : handleStart}
           >
-            Start
-          </button>
-          <button
-            className="rounded-md bg-red-500 p-2 text-white hover:scale-105 hover:cursor-pointer"
-            onClick={handleStop}
-          >
-            Stop
-          </button>
-          <button
-            className="rounded-md bg-green-500 p-2 text-white hover:scale-105 hover:cursor-pointer"
-            onClick={handleReset}
-          >
-            Reset
+            {isRunning ? "Pause" : "Start"}
           </button>
         </div>
       </div>
