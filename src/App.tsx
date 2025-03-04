@@ -1,11 +1,15 @@
 import Header from "./components/header";
 
-function App() {
+export const App = () => {
   return (
-    <div className="flex flex-col items-center justify-center h-screen mx-auto max-w-xl w-full">
-      <Header />
+    <div className="p-4 flex flex-col h-dvh mx-auto w-full max-w-dvw bg-gray-600">
+      <div className="flex flex-col w-full max-w-3xl mx-auto">
+        <Header />
+        {/* Clock UI */}
+        {/* Progress Bar */}
+      </div>
     </div>
   );
-}
+};
 
 export default App;
