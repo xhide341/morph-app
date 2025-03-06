@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Play, Pause, RotateCcw } from "react-feather";
+import { useQuote } from "../hooks/useQuote";
 
 export const Clock = () => {
   const [time, setTime] = useState("25:00");
@@ -7,6 +8,8 @@ export const Clock = () => {
     null,
   );
   const [isRunning, setIsRunning] = useState(false);
+
+  const { quote, author } = useQuote();
 
   const handleStart = () => {
     if (timerInterval) {
@@ -74,6 +77,11 @@ export const Clock = () => {
           >
             <RotateCcw size={24} />
           </button>
+
+          <div className="flex flex-col items-center justify-center">
+            <blockquote className="text-2xl font-bold">{quote}</blockquote>
+            <p className="text-xl font-bold">{author}</p>
+          </div>
         </div>
       </div>
     </div>

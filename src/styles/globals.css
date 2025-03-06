@@ -43,7 +43,7 @@ body {
 .css-button-3d {
   min-width: 130px;
   height: 40px;
-  color: #fff;
+  color: var(--color-foreground);
   padding: 5px 10px;
   cursor: pointer;
   position: relative;
@@ -54,15 +54,15 @@ body {
   border-radius: 6px;
   border: none;
   background: var(--color-primary);
-  box-shadow: 0 6px var(--color-background);
+  box-shadow: 0 4px var(--color-background);
 }
 
 .css-button-3d.pressed {
   box-shadow: 0 0 var(--color-background);
-  top: 6px;
+  top: 4px;
 }
 
 .css-button-3d:active:not(.pressed) {
   box-shadow: 0 0 var(--color-background);
-  top: 6px;
+  top: 4px;
 }
