@@ -1,12 +1,42 @@
 import { Request, Response } from "express";
 import axios from "axios";
 
+interface Quote {
+  q: string;
+  a: string;
+}
+
+// Server-side cache
+const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
+const cache = {
+  data: null as Quote | null,
+  lastFetched: 0,
+};
+
 export const getToday = async (req: Request, res: Response) => {
   try {
-    const response = await axios.get("https://zenquotes.io/api/today");
-    console.log("API Response:", JSON.stringify(response.data, null, 2));
-    res.json(response.data);
+    // Check if we have a valid cached quote
+    const isCacheValid =
+      cache.data && Date.now() - cache.lastFetched < CACHE_DURATION;
+
+    if (isCacheValid) {
+      res.json(cache.data);
+      return;
+    }
+
+    // Fetch new quote if cache is invalid
+    const { data } = await axios.get("https://zenquotes.io/api/today");
+    cache.data = data[0];
+    cache.lastFetched = Date.now();
+
+    res.json(cache.data);
   } catch (error) {
+    console.error("ZenQuotes Error:", error);
+    // Return cached quote as fallback if available
+    if (cache.data) {
+      res.json(cache.data);
+      return;
+    }
     res.status(500).json({ error: "Error fetching daily quote" });
   }
 };

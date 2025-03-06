@@ -16,7 +16,8 @@ export const useQuote = () => {
         const response = await axios.get(
           "http://localhost:3000/api/quotes/today",
         );
-        const data = response.data[0] as Quote;
+        console.log("Response from server:", response.data);
+        const data = response.data as Quote;
         setQuote(data.q);
         setAuthor(data.a);
       } catch (error) {
