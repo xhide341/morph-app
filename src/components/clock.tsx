@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Play, Pause, RotateCcw } from "react-feather";
 import { useQuote } from "../hooks/useQuote";
 import { Navigation } from "./navigation";
+
+type TimerMode = "work" | "break";
 
 export const Clock = () => {
   const [time, setTime] = useState("25:00");
@@ -9,8 +11,19 @@ export const Clock = () => {
     null,
   );
   const [isRunning, setIsRunning] = useState(false);
-
+  const [timerMode, setTimerMode] = useState<TimerMode>("work");
   const { quote, author } = useQuote();
+
+  useEffect(() => {}, [timerMode]);
+
+  const handleTimerChange = (minutes: number) => {
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      setTimerInterval(null);
+    }
+    setTime(`${String(minutes).padStart(2, "0")}:00`);
+    setIsRunning(false);
+  };
 
   const handleStart = () => {
     if (timerInterval) {
@@ -53,12 +66,20 @@ export const Clock = () => {
       setTimerInterval(null);
     }
     setTime("25:00");
+    setTimerMode("work");
     setIsRunning(false);
   };
 
   return (
-    <div className="bg-secondary flex flex-col items-center justify-center rounded-xl p-10">
-      <Navigation />
+    <div
+      className={`${
+        timerMode === "work" ? "bg-secondary" : "bg-secondary/80"
+      } flex flex-col items-center justify-center rounded-xl p-10`}
+    >
+      <Navigation
+        onTimerChange={handleTimerChange}
+        onTimerModeChange={setTimerMode}
+      />
       <div className="flex flex-col items-center justify-center">
         <h1 className="text-[8rem] font-bold">{time}</h1>
         <div className="flex flex-row justify-center gap-4 text-center text-2xl">
@@ -68,7 +89,6 @@ export const Clock = () => {
             onClick={isRunning ? handlePause : handleStart}
           >
             {isRunning ? <Pause size={24} /> : <Play size={24} />}
-            {/* {isRunning ? "Pause" : "Start"} */}
           </button>
           <button
             aria-label="Reset"
@@ -78,9 +98,9 @@ export const Clock = () => {
             <RotateCcw size={24} />
           </button>
         </div>
-        <div className="mt-6 flex flex-col items-center justify-center">
+        <div className="mt-12 flex flex-col items-center justify-center gap-1">
           <blockquote className="font-base text-sm">"{quote}"</blockquote>
-          <p className="self-end text-sm font-semibold italic">{author}</p>
+          <p className="text-sm italic">{author}</p>
         </div>
       </div>
     </div>
