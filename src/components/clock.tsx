@@ -64,9 +64,7 @@ export const Clock = () => {
         <div className="flex flex-row justify-center gap-4 text-center text-2xl">
           <button
             aria-label={isRunning ? "Pause" : "Start"}
-            className={`css-button-3d ${
-              isRunning ? "pressed bg-green-600" : "bg-blue-600"
-            }`}
+            className={`css-button-3d w-24 p-4 ${isRunning ? "pressed" : ""}`}
             onClick={isRunning ? handlePause : handleStart}
           >
             {isRunning ? <Pause size={24} /> : <Play size={24} />}
@@ -74,7 +72,7 @@ export const Clock = () => {
           </button>
           <button
             aria-label="Reset"
-            className="css-button-3d bg-red-600"
+            className="css-button-3d w-24 p-4"
             onClick={handleReset}
           >
             <RotateCcw size={24} />

@@ -41,10 +41,9 @@ body {
 }
 
 .css-button-3d {
-  min-width: 130px;
+  max-width: 130px;
   height: 40px;
   color: var(--color-foreground);
-  padding: 5px 10px;
   cursor: pointer;
   position: relative;
   display: flex;
