@@ -2,8 +2,8 @@ import { Request, Response } from "express";
 import axios from "axios";
 
 interface Quote {
-  q: string;
-  a: string;
+  quote: string;
+  author: string;
 }
 
 // Server-side cache
@@ -25,8 +25,8 @@ export const getToday = async (req: Request, res: Response) => {
     }
 
     // Fetch new quote if cache is invalid
-    const { data } = await axios.get("https://zenquotes.io/api/today");
-    cache.data = data[0];
+    const { data } = await axios.get("https://qapi.vercel.app/api/random");
+    cache.data = data;
     cache.lastFetched = Date.now();
 
     res.json(cache.data);

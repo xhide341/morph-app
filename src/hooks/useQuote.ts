@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 
 interface Quote {
-  q: string;
-  a: string;
+  quote: string;
+  author: string;
 }
 
 export const useQuote = () => {
@@ -18,8 +18,8 @@ export const useQuote = () => {
         );
         console.log("Response from server:", response.data);
         const data = response.data as Quote;
-        setQuote(data.q);
-        setAuthor(data.a);
+        setQuote(data.quote);
+        setAuthor(data.author);
       } catch (error) {
         console.error("Error fetching quote", error);
       }
