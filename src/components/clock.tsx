@@ -70,6 +70,8 @@ export const Clock = () => {
     setIsRunning(false);
   };
 
+  // TODO: Think of a way to make the timer mode change more smoothly
+
   return (
     <div
       className={`${

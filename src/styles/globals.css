@@ -2,37 +2,44 @@
 
 @layer base {
   :root {
-    /* Default coffee theme */
-    --background: 20 49% 15%; /* Very dark */
-    --foreground: 35 50% 90%; /* Very light */
-    --primary: 25 25% 47%; /* Medium */
-    --secondary: 20 32% 29%; /* Dark */
-    --accent: 20 30% 58%; /* Medium-light */
+    --background: hsl(160, 25%, 15%);
+    --foreground: hsl(120, 30%, 90%);
+    --primary: hsl(160, 25%, 47%); /* Medium */
+    --secondary: hsl(160, 22%, 29%); /* Dark */
+    --accent: hsl(110, 25%, 58%); /* Medium-light */
+  }
+
+  [data-theme="coffee"] {
+    --background: hsl(20, 49%, 15%);
+    --foreground: hsl(35, 50%, 90%);
+    --primary: hsl(25, 25%, 47%); /* Medium */
+    --secondary: hsl(20, 32%, 29%); /* Dark */
+    --accent: hsl(20, 30%, 58%); /* Medium-light */
   }
 
   [data-theme="forest"] {
-    --background: 160 25% 15%; /* Very dark */
-    --foreground: 120 30% 90%; /* Very light */
-    --primary: 160 25% 47%; /* Medium */
-    --secondary: 160 22% 29%; /* Dark */
-    --accent: 110 25% 58%; /* Medium-light */
+    --background: hsl(160, 25%, 15%);
+    --foreground: hsl(120, 30%, 90%);
+    --primary: hsl(160, 25%, 47%); /* Medium */
+    --secondary: hsl(160, 22%, 29%); /* Dark */
+    --accent: hsl(110, 25%, 58%); /* Medium-light */
   }
 
   [data-theme="ocean"] {
-    --background: 215 55% 15%; /* Very dark */
-    --foreground: 210 100% 90%; /* Very light */
-    --primary: 215 60% 47%; /* Medium */
-    --secondary: 215 55% 29%; /* Dark */
-    --accent: 215 100% 58%; /* Medium-light */
+    --background: hsl(215, 55%, 15%);
+    --foreground: hsl(210, 100%, 90%);
+    --primary: hsl(215, 60%, 47%); /* Medium */
+    --secondary: hsl(215, 55%, 29%); /* Dark */
+    --accent: hsl(215, 100%, 58%); /* Medium-light */
   }
 }
 
 @theme {
-  --color-background: hsl(var(--background));
-  --color-foreground: hsl(var(--foreground));
-  --color-primary: hsl(var(--primary));
-  --color-secondary: hsl(var(--secondary));
-  --color-accent: hsl(var(--accent));
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
   --font-roboto: "Roboto";
 }
 
