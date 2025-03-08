@@ -17,3 +17,4 @@
     - `currentTime={time}`
     - `totalTime={timerMode === "work" ? lastWorkTime : lastBreakTime}`
   - Adjusted layout to accommodate progress bar with `w-full` class
+  - Fixed timer logic to stop at 00:00 instead of going negative

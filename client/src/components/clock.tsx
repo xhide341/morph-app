@@ -34,27 +34,29 @@ export const Clock = () => {
   };
 
   const handleStart = () => {
-    if (timerInterval) {
-      return;
-    }
+    if (timerInterval) return;
 
     const newInterval = setInterval(() => {
       setTime((prevTime) => {
-        const [minutes, seconds] = prevTime.split(":");
-        if (minutes === "00" && seconds === "00") {
+        const [minutes, seconds] = prevTime.split(":").map(Number);
+        
+        // Check if timer has reached zero
+        if (minutes === 0 && seconds === 0) {
           clearInterval(newInterval);
+          setTimerInterval(null);
+          setIsRunning(false);
+          return "00:00";
         }
 
-        const newSeconds = parseInt(seconds) - 1;
-        const newMinutes =
-          newSeconds < 0 ? parseInt(minutes) - 1 : parseInt(minutes);
+        const totalSeconds = minutes * 60 + seconds - 1;
+        const newMinutes = Math.floor(totalSeconds / 60);
+        const newSeconds = totalSeconds % 60;
 
-        return `${String(newMinutes).padStart(2, "0")}:${newSeconds < 0 ? "59" : String(newSeconds).padStart(2, "0")}`;
+        return `${String(newMinutes).padStart(2, "0")}:${String(newSeconds).padStart(2, "0")}`;
       });
     }, 1000);
 
     setIsRunning(true);
-
     setTimerInterval(newInterval);
   };
 
