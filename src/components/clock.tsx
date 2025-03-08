@@ -14,7 +14,9 @@ export const Clock = () => {
   const [timerMode, setTimerMode] = useState<TimerMode>("work");
   const { quote, author } = useQuote();
 
-  useEffect(() => {}, [timerMode]);
+  useEffect(() => {
+    // TODO:
+  }, [timerMode]);
 
   const handleTimerChange = (minutes: number) => {
     if (timerInterval) {
@@ -32,7 +34,6 @@ export const Clock = () => {
 
     const newInterval = setInterval(() => {
       setTime((prevTime) => {
-        // Split the time into minutes and seconds
         const [minutes, seconds] = prevTime.split(":");
         if (minutes === "00" && seconds === "00") {
           clearInterval(newInterval);
@@ -65,8 +66,8 @@ export const Clock = () => {
       clearInterval(timerInterval);
       setTimerInterval(null);
     }
-    setTime("25:00");
     setTimerMode("work");
+    setTime("00:00");
     setIsRunning(false);
   };
 
