@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import Header from "./components/header";
 import { Clock } from "./components/clock";
-import { ThemeSwitcher } from "./components/ThemeSwitcher";
+import { ThemeToggle } from "./components/theme-toggle";
 import { initTheme } from "./utils/themeSwitch";
 
 export const App = () => {
@@ -14,8 +14,7 @@ export const App = () => {
       <div className="mx-auto flex w-full max-w-3xl flex-col">
         <Header />
         <Clock />
-        <ThemeSwitcher />
-        {/* Progress Bar */}
+        <ThemeToggle />
       </div>
     </div>
   );

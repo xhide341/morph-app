@@ -1,6 +1,6 @@
 import { switchTheme } from "../utils/themeSwitch.ts";
 
-export function ThemeSwitcher() {
+export function ThemeToggle() {
   const themes = ["default", "coffee", "forest", "ocean"];
 
   return (

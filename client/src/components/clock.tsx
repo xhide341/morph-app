@@ -1,7 +1,9 @@
-import { useEffect, useState } from "react";
-import { Play, Pause, RotateCcw } from "react-feather";
+import { useState } from "react";
 import { useQuote } from "../hooks/useQuote";
+
+import { Play, Pause, RotateCcw } from "react-feather";
 import { Navigation } from "./navigation";
+import { ProgressBar } from "./progress-bar";
 
 type TimerMode = "work" | "break";
 
@@ -102,6 +104,12 @@ export const Clock = () => {
           >
             <RotateCcw size={24} />
           </button>
+        </div>
+        <div className="mt-12 w-full">
+          <ProgressBar
+            currentTime={time}
+            totalTime={timerMode === "work" ? lastWorkTime : lastBreakTime}
+          />
         </div>
         <div className="mt-12 flex flex-col items-center justify-center gap-1">
           <blockquote className="font-base text-sm">"{quote}"</blockquote>
