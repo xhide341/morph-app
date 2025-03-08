@@ -7,6 +7,8 @@ type TimerMode = "work" | "break";
 
 export const Clock = () => {
   const [time, setTime] = useState("25:00");
+  const [lastWorkTime, setLastWorkTime] = useState("25:00");
+  const [lastBreakTime, setLastBreakTime] = useState("05:00");
   const [timerInterval, setTimerInterval] = useState<NodeJS.Timeout | null>(
     null,
   );
@@ -14,16 +16,18 @@ export const Clock = () => {
   const [timerMode, setTimerMode] = useState<TimerMode>("work");
   const { quote, author } = useQuote();
 
-  useEffect(() => {
-    // TODO:
-  }, [timerMode]);
-
   const handleTimerChange = (minutes: number) => {
     if (timerInterval) {
       clearInterval(timerInterval);
       setTimerInterval(null);
     }
-    setTime(`${String(minutes).padStart(2, "0")}:00`);
+    const newTime = `${String(minutes).padStart(2, "0")}:00`;
+    if (timerMode === "work") {
+      setLastWorkTime(newTime);
+    } else {
+      setLastBreakTime(newTime);
+    }
+    setTime(newTime);
     setIsRunning(false);
   };
 
@@ -37,7 +41,6 @@ export const Clock = () => {
         const [minutes, seconds] = prevTime.split(":");
         if (minutes === "00" && seconds === "00") {
           clearInterval(newInterval);
-          return "25:00";
         }
 
         const newSeconds = parseInt(seconds) - 1;
@@ -66,8 +69,7 @@ export const Clock = () => {
       clearInterval(timerInterval);
       setTimerInterval(null);
     }
-    setTimerMode("work");
-    setTime("00:00");
+    setTime(timerMode === "work" ? lastWorkTime : lastBreakTime);
     setIsRunning(false);
   };
 
