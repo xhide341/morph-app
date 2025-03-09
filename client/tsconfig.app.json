@@ -24,11 +24,11 @@
     "noUncheckedSideEffectImports": true
   },
   "include": [
-    "src",
-    "client/src/components",
-    "client/src/hooks",
-    "client/src/utils",
-    "client/src/vite-env.d.ts",
-    "client/src/main.tsx"
+    "src/**/*",
+    "src/components",
+    "src/hooks",
+    "src/utils",
+    "src/vite-env.d.ts",
+    "src/main.tsx"
   ]
 }
