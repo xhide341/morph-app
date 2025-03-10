@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuote } from "../hooks/useQuote";
+import { useQuote } from "../hooks/use-quote";
 
 import { Play, Pause, RotateCcw } from "react-feather";
 import { Navigation } from "./navigation";
@@ -39,7 +39,7 @@ export const Clock = () => {
     const newInterval = setInterval(() => {
       setTime((prevTime) => {
         const [minutes, seconds] = prevTime.split(":").map(Number);
-        
+
         // Check if timer has reached zero
         if (minutes === 0 && seconds === 0) {
           clearInterval(newInterval);
@@ -76,8 +76,6 @@ export const Clock = () => {
     setTime(timerMode === "work" ? lastWorkTime : lastBreakTime);
     setIsRunning(false);
   };
-
-  // TODO: Think of a way to make the timer mode change more smoothly
 
   return (
     <div

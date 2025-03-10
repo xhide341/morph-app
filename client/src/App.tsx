@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import Header from "./components/header";
 import { Clock } from "./components/clock";
 import { ThemeToggle } from "./components/theme-toggle";
-import { initTheme } from "./utils/themeSwitch";
+import { initTheme } from "./utils/theme-switch";
 
 export const App = () => {
   useEffect(() => {

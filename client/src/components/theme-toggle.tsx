@@ -1,19 +1,24 @@
-import { switchTheme } from "../utils/themeSwitch.ts";
+import { switchTheme } from "../utils/theme-switch.ts";
 
 export function ThemeToggle() {
-  const themes = ["default", "coffee", "forest", "ocean"];
+  const themes = ["coffee", "forest", "ocean"];
 
   return (
     <div>
-      {themes.map((theme) => (
-        <button
-          key={theme}
-          onClick={() => switchTheme(theme)}
-          className="css-button-3d"
-        >
-          {theme}
-        </button>
-      ))}
+      <select
+        onChange={(e) => switchTheme(e.target.value)}
+        className="css-button-3d w-24 p-2 text-center"
+      >
+        {themes.map((theme) => (
+          <option
+            key={theme}
+            value={theme}
+            className="active:bg-primary focus:bg-primary"
+          >
+            {theme}
+          </option>
+        ))}
+      </select>
     </div>
   );
 }
