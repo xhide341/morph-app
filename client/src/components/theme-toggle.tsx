@@ -2,7 +2,7 @@ import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import { ChevronDownIcon } from "@heroicons/react/16/solid";
 import { switchTheme } from "../utils/theme-switch.ts";
 
-export function ThemeToggle() {
+export const ThemeToggle = () => {
   const themes = ["coffee", "forest", "ocean"];
 
   return (
@@ -22,7 +22,7 @@ export function ThemeToggle() {
             <MenuItem key={theme}>
               <button
                 onClick={() => switchTheme(theme)}
-                className="group flex w-full items-center gap-2 rounded-lg px-3 py-1.5 data-[focus]:bg-[var(--color-secondary)] text-[var(--color-foreground)]"
+                className="group flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-[var(--color-foreground)] data-[focus]:bg-[var(--color-secondary)]"
               >
                 {theme}
               </button>
@@ -32,4 +32,6 @@ export function ThemeToggle() {
       </Menu>
     </div>
   );
-}
+};
+
+export default ThemeToggle;
