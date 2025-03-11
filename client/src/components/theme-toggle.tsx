@@ -22,7 +22,7 @@ export function ThemeToggle() {
             <MenuItem key={theme}>
               <button
                 onClick={() => switchTheme(theme)}
-                className="group flex w-full items-center gap-2 rounded-lg px-3 py-1.5 data-[focus]:bg-[var(--color-secondary)]"
+                className="group flex w-full items-center gap-2 rounded-lg px-3 py-1.5 data-[focus]:bg-[var(--color-secondary)] text-[var(--color-foreground)]"
               >
                 {theme}
               </button>
