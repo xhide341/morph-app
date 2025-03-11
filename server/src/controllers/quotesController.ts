@@ -15,7 +15,7 @@ const cache = {
 
 export const getToday = async (req: Request, res: Response) => {
   try {
-    // Check if we have a valid cached quote
+    // Check if valid cached quote
     const isCacheValid =
       cache.data && Date.now() - cache.lastFetched < CACHE_DURATION;
 
