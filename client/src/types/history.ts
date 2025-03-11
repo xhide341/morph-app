@@ -4,4 +4,7 @@ export interface TimerHistory {
   duration: number;
   date: string;
   userName: string;
+  type: "pomodoro" | "custom";
+  completed: boolean;
+  pomodoroType?: "25" | "55";
 }
