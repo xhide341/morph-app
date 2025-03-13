@@ -2,6 +2,7 @@ import express, { Request, Response } from "express";
 import cors from "cors";
 import quotesRouter from "./routes/quotes";
 import redisTestRouter from "./routes/redis-test";
+import activityRouter from "./routes/activity";
 import { connectRedis } from "./config/redis";
 
 const app = express();
@@ -20,6 +21,7 @@ app.use(
 app.use(express.json());
 app.use("/api/quotes", quotesRouter);
 app.use("/api/redis", redisTestRouter);
+app.use("/api/activity", activityRouter);
 
 app.get("/", (req: Request, res: Response) => {
   res.send("hello world!");
