@@ -18,6 +18,19 @@
 - User preferences
 - Historical session data
 
+## WebSocket Integration
+
+- [ ] Setup WebSocket service
+  - [ ] Create WebSocket singleton service
+  - [ ] Add connection management
+  - [ ] Add reconnection logic
+  - [ ] Add message types and handlers
+- [ ] Real-time Features
+  - [ ] Room activity sync
+  - [ ] Timer state sync
+  - [ ] User presence
+  - [ ] Error handling
+
 ## Redis Integration Checklist
 
 ### Backend Setup ✅
@@ -42,6 +55,10 @@
 
 ### Testing
 
+- [ ] Test WebSocket Integration
+  - [ ] Test connection handling
+  - [ ] Test message broadcasting
+  - [ ] Test room synchronization
 - [ ] Test Redis endpoints with Postman
   - [ ] Test activity creation
   - [ ] Test activity retrieval
