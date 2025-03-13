@@ -1,54 +1,40 @@
-# React + TypeScript + Vite
+# 🕰️ Pomodoro App - MVP Plan
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## 🚀 Project Overview
 
-Currently, two official plugins are available:
+A **Minimal Viable Product (MVP)** for a Pomodoro app using **MERN stack** and **Better Auth.js** for authentication.  
+The goal is to create a functional Pomodoro timer with **basic customization** and **user authentication**.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## Expanding the ESLint configuration
+## ✅ MVP Scope
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### **📌 Core Features (Must-Have)**
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ["./tsconfig.node.json", "./tsconfig.app.json"],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-});
-```
+- ✅ **Pomodoro Timer** – Countdown logic with start/pause/reset
+- ✅ **Session Customization** – Change default 25-minute timer
+- ✅ **User Authentication** (Better Auth.js) – Login, Register, Logout
+- ✅ **Theme Variants** – Theme toggle (stored in localStorage)
+- ✅ **Quote of the Day** – Daily quote from an API
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### **🚀 Optional Enhancements (After MVP)**
 
-```js
-// eslint.config.js
-import reactX from "eslint-plugin-react-x";
-import reactDom from "eslint-plugin-react-dom";
+- 🔹 **Session History** – Track past focus sessions
+- 🔹 **Notifications** – Sound/vibration when session ends
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    "react-x": reactX,
-    "react-dom": reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs["recommended-typescript"].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-});
-```
+---
+
+## 🛠️ Tech Stack
+
+- **Frontend:** Vite + React-Ts + TailwindCSS
+- **Backend:** Express + Node.js
+- **Authentication:** Better Auth.js
+- **Caching:** Redis
+
+---
+
+## 📂 Folder Structure
+
+- **client:** React + Vite + TailwindCSS
+- **server:** Express + Node.js
+- **common:** Shared types and utilities

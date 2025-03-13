@@ -1,35 +1,42 @@
-# 🕰️ Pomodoro App - MVP Plan
+# 🕰️ Pomodoro App Implementation Plan
 
-## 🚀 Project Overview
+## Redis Integration Checklist
 
-A **Minimal Viable Product (MVP)** for a Pomodoro app using **MERN stack** and **Better Auth.js** for authentication.  
-The goal is to create a functional Pomodoro timer with **basic customization** and **user authentication**.
+### Backend Setup ✅
 
----
+- [x] Configure Redis client
+- [x] Create activity types
+- [x] Setup Redis service
+- [x] Create API routes
 
-## ✅ MVP Scope
+### Frontend Integration
 
-### **📌 Core Features (Must-Have)**
+- [ ] Create activity hooks
+  - [ ] useRoomActivity hook
+  - [ ] useTimerHistory hook
+- [ ] Room Component Updates
+  - [ ] Add activity tracking on join/leave
+  - [ ] Add activity tracking for timer events
+  - [ ] Display activity list
+- [ ] Timer Component Updates
+  - [ ] Track timer starts/completions
+  - [ ] Save completed sessions to history
 
-- ✅ **Pomodoro Timer** – Countdown logic with start/pause/reset
-- ✅ **Session Customization** – Change default 25-minute timer
-- ✅ **User Authentication** (Better Auth.js) – Login, Register, Logout
-- ✅ **Theme Variants** – Theme toggle (stored in localStorage)
-- ✅ **Quote of the Day** – Daily quote from an API
+### Testing
 
-### **🚀 Optional Enhancements (After MVP)**
+- [ ] Test Redis endpoints with Postman
+  - [ ] Test activity creation
+  - [ ] Test activity retrieval
+  - [ ] Test history creation
+  - [ ] Test history retrieval
+- [ ] Test frontend integration
+  - [ ] Test room activities
+  - [ ] Test timer history
+  - [ ] Test real-time updates
 
-- 🔹 **Session History** – Track past focus sessions
-- 🔹 **Notifications** – Sound/vibration when session ends
+### Final Steps
 
----
-
-## 🛠️ Tech Stack
-
-- **Frontend:** Vite + React-Ts + TailwindCSS
-- **Backend:** Express + Node.js
-- **Authentication:** Better Auth.js
-
----
-
-## 📂 Folder Structure
+- [ ] Add error handling
+- [ ] Add loading states
+- [ ] Add activity cleanup
+- [ ] Test full user flow
