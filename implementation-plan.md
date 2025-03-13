@@ -1,5 +1,23 @@
 # 🕰️ Pomodoro App Implementation Plan
 
+## Database Architecture
+
+### Redis (Real-time & Caching)
+
+- Room activities and presence
+- Active timer states
+- Temporary session data
+- Real-time user interactions
+- Short-term activity history (24h)
+
+### MongoDB (Persistent Storage)
+
+- User accounts and profiles
+- Long-term timer history
+- Statistics and achievements
+- User preferences
+- Historical session data
+
 ## Redis Integration Checklist
 
 ### Backend Setup ✅
@@ -11,9 +29,9 @@
 
 ### Frontend Integration
 
-- [ ] Create activity hooks
-  - [ ] useRoomActivity hook
-  - [ ] useTimerHistory hook
+- [x] Create activity hooks
+  - [x] useRoomActivity hook
+  - [x] useTimerHistory hook
 - [ ] Room Component Updates
   - [ ] Add activity tracking on join/leave
   - [ ] Add activity tracking for timer events

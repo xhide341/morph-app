@@ -4,16 +4,20 @@ import { TimerHistory } from "../types/history";
 export const useTimerHistory = () => {
   const [history, setHistory] = useState<TimerHistory[]>([]);
 
-  const addToHistory = (session: Omit<TimerHistory, "id" | "date">) => {
+  const addToHistory = async (session: Omit<TimerHistory, "id" | "date">) => {
     const newSession: TimerHistory = {
       ...session,
-      id: crypto.randomUUID(),
+      id: crypto.randomUUID(), // Note: This ID will be replaced by MongoDB's _id
       date: new Date().toISOString(),
     };
 
-    const newHistory = [...history, newSession];
-    setHistory(newHistory);
-    localStorage.setItem("timerHistory", JSON.stringify(newHistory));
+    // TODO: Add API call to save to MongoDB
+    // const response = await fetch('/api/timer-history', {
+    //   method: 'POST',
+    //   body: JSON.stringify(newSession)
+    // });
+
+    setHistory([...history, newSession]);
   };
 
   const getPomodoroStats = () => {
@@ -31,10 +35,13 @@ export const useTimerHistory = () => {
   };
 
   useEffect(() => {
-    const savedHistory = localStorage.getItem("timerHistory");
-    if (savedHistory) {
-      setHistory(JSON.parse(savedHistory) as TimerHistory[]);
-    }
+    // TODO: Add API call to fetch history from MongoDB
+    // const fetchHistory = async () => {
+    //   const response = await fetch('/api/timer-history');
+    //   const data = await response.json();
+    //   setHistory(data);
+    // };
+    // fetchHistory();
   }, []);
 
   return { history, addToHistory, getPomodoroStats };
