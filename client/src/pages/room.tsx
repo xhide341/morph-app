@@ -2,6 +2,8 @@ import { Clock } from "../components/clock";
 import { ThemeToggle } from "../components/theme-toggle";
 import { useParams } from "react-router-dom";
 import { Header } from "../components/header";
+import { ActivityLog } from "../components/activity-log";
+
 export function RoomPage() {
   const { sessionId } = useParams();
 
@@ -11,10 +13,10 @@ export function RoomPage() {
       <div className="absolute top-4 right-4">
         <ThemeToggle />
       </div>
-
       <div className="mx-auto flex w-full max-w-3xl flex-col">
         <Clock />
       </div>
+      <ActivityLog />
     </div>
   );
 }
