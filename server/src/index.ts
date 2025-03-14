@@ -4,9 +4,13 @@ import quotesRouter from "./routes/quotes";
 import redisTestRouter from "./routes/redis-test";
 import activityRouter from "./routes/activity";
 import { connectRedis } from "./config/redis";
+import { createServer } from "http";
+import { WebSocketServer } from "ws";
 
 const app = express();
 const port = process.env.PORT || 3000;
+const server = createServer(app);
+const wss = new WebSocketServer({ server });
 
 // Connect to Redis
 connectRedis().catch(console.error);
@@ -23,10 +27,11 @@ app.use("/api/quotes", quotesRouter);
 app.use("/api/redis", redisTestRouter);
 app.use("/api/activity", activityRouter);
 
-app.get("/", (req: Request, res: Response) => {
-  res.send("hello world!");
+wss.on("connection", (ws) => {
+  console.log("Client connected");
+  ws.send("Hello from server");
 });
 
-app.listen(port, () => {
+server.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });

@@ -21,7 +21,7 @@ class WebSocketService {
     if (this.socket) return;
 
     this.socket = new WebSocket(
-      `${process.env.NEXT_PUBLIC_WS_URL}/rooms/${roomId}`,
+      `${process.env.REACT_APP_WS_URL}/rooms/${roomId}`,
     );
 
     this.socket.onopen = () => {

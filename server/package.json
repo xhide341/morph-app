@@ -14,11 +14,13 @@
   "license": "ISC",
   "packageManager": "pnpm@10.4.1",
   "dependencies": {
+    "@types/ws": "^8.18.0",
     "axios": "^1.8.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
-    "redis": "^4.7.0"
+    "redis": "^4.7.0",
+    "ws": "^8.18.1"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
