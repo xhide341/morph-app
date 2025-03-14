@@ -28,10 +28,49 @@ app.use("/api/redis", redisTestRouter);
 app.use("/api/activity", activityRouter);
 
 wss.on("connection", (ws) => {
-  console.log("Client connected");
-  ws.send("Hello from server");
+  console.log("New client connected");
+
+  // Send welcome message to new client
+  ws.send(
+    JSON.stringify({
+      type: "connection",
+      payload: "Connected to WebSocket server",
+    })
+  );
+
+  // Handle incoming messages
+  ws.on("message", (message) => {
+    try {
+      const data = JSON.parse(message.toString());
+      console.log("Received:", data);
+
+      // Echo message type for testing
+      if (data.type === "test") {
+        console.log("Test message received:", data.payload);
+      }
+
+      // Broadcast to all clients
+      wss.clients.forEach((client) => {
+        if (client !== ws && client.readyState === ws.OPEN) {
+          client.send(JSON.stringify(data));
+        }
+      });
+    } catch (error) {
+      console.error("Error processing message:", error);
+    }
+  });
+
+  // Handle client disconnection
+  ws.on("close", () => {
+    console.log("Client disconnected");
+  });
+
+  // Handle errors
+  ws.on("error", (error) => {
+    console.error("WebSocket error:", error);
+  });
 });
 
 server.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+  console.log(`Server running on port ${port} with WebSocket support`);
 });

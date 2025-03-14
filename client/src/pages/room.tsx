@@ -3,6 +3,7 @@ import { ThemeToggle } from "../components/theme-toggle";
 import { useParams } from "react-router-dom";
 import { Header } from "../components/header";
 import { ActivityLog } from "../components/activity-log";
+import { WebSocketTest } from "../components/websocket_test";
 
 export function RoomPage() {
   const { sessionId } = useParams();
@@ -17,6 +18,7 @@ export function RoomPage() {
         <Clock />
       </div>
       <ActivityLog />
+      <WebSocketTest />
     </div>
   );
 }

@@ -1,5 +1,5 @@
 type WebSocketMessage = {
-  type: "activity" | "recent_activities" | "timer_update";
+  type: "activity" | "recent_activities" | "timer_update" | "test";
   payload: any;
 };
 
@@ -20,9 +20,10 @@ class WebSocketService {
   connect(roomId: string) {
     if (this.socket) return;
 
-    this.socket = new WebSocket(
-      `${process.env.REACT_APP_WS_URL}/rooms/${roomId}`,
-    );
+    const WS_URL = "ws://localhost:3000";
+
+    console.log("Connecting to:", `${WS_URL}/rooms/${roomId}`);
+    this.socket = new WebSocket(`${WS_URL}/rooms/${roomId}`);
 
     this.socket.onopen = () => {
       console.log("Connected to WebSocket");
@@ -36,6 +37,10 @@ class WebSocketService {
     this.socket.onclose = () => {
       console.log("Disconnected from WebSocket");
       setTimeout(() => this.connect(roomId), 1000);
+    };
+
+    this.socket.onerror = (error) => {
+      console.error("WebSocket error:", error);
     };
   }
 
