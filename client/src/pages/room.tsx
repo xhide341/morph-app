@@ -5,7 +5,7 @@ import { Header } from "../components/header";
 import { ActivityLog } from "../components/activity-log";
 
 export function RoomPage() {
-  const { sessionId } = useParams<{ sessionId: string }>();
+  const { roomId } = useParams<{ roomId: string }>();
 
   return (
     <div className="font-roboto mx-auto flex h-dvh w-full max-w-2xl flex-col bg-[var(--color-background)] p-4 text-[var(--color-foreground)]">
@@ -16,7 +16,7 @@ export function RoomPage() {
       <div className="mx-auto flex w-full max-w-3xl flex-col">
         <Clock />
       </div>
-      {sessionId && <ActivityLog roomId={sessionId} />}
+      {roomId && <ActivityLog roomId={roomId} />}
     </div>
   );
 }

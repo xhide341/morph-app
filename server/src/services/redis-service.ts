@@ -3,8 +3,8 @@ import { RoomActivity, TimerHistory } from "../types/activities";
 
 const redisService = {
   // Add activity to Redis
-  async addActivity(sessionId: string, activity: RoomActivity) {
-    const key = `room:${sessionId}:activities`;
+  async addActivity(roomId: string, activity: RoomActivity) {
+    const key = `room:${roomId}:activities`;
     const activities = await this.getActivities(key);
     activities.push(activity);
     await redis.set(key, JSON.stringify(activities));
@@ -12,8 +12,8 @@ const redisService = {
   },
 
   // Get activities from Redis
-  async getActivities(sessionId: string): Promise<RoomActivity[]> {
-    const key = `room:${sessionId}:activities`;
+  async getActivities(roomId: string): Promise<RoomActivity[]> {
+    const key = `room:${roomId}:activities`;
     const data = await redis.get(key);
     return data ? JSON.parse(data) : [];
   },

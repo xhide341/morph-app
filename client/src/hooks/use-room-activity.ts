@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { RoomActivity } from "../types/activity";
-import { wsService } from "../services/websocket_service";
+import { wsService } from "../services/websocket-service";
 
 export const useRoomActivity = (roomId: string) => {
   const [activities, setActivities] = useState<RoomActivity[]>([]);
@@ -14,6 +14,7 @@ export const useRoomActivity = (roomId: string) => {
       timeStamp: new Date().toISOString(),
     };
 
+    console.log("Sending activity:", newActivity);
     try {
       wsService.send({
         type: "activity",
@@ -39,6 +40,7 @@ export const useRoomActivity = (roomId: string) => {
   useEffect(() => {
     wsService.connect(roomId);
     wsService.subscribe("activity", (data) => {
+      console.log("WebSocket received:", data);
       const newActivity = data.payload as RoomActivity;
       setActivities((prev) => [...prev, newActivity]);
     });
@@ -46,8 +48,9 @@ export const useRoomActivity = (roomId: string) => {
     const fetchActivities = async () => {
       try {
         const response = await fetch(`/api/activity/room/${roomId}`);
+        console.log("Response status:", response.status);
         if (!response.ok) {
-          throw new Error("Failed to fetch activities");
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
         setActivities(data);

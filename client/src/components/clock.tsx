@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useQuote } from "../hooks/use-quote";
+import { useParams } from "react-router-dom";
+import { useRoomActivity } from "../hooks/use-room-activity";
 
 import { Play, Pause, RotateCcw } from "react-feather";
 import { Navigation } from "./navigation";
@@ -8,6 +10,8 @@ import { ProgressBar } from "./progress-bar";
 type TimerMode = "work" | "break";
 
 export const Clock = () => {
+  const { roomId } = useParams<{ roomId: string }>();
+  const { addActivity } = useRoomActivity(roomId || "");
   const [time, setTime] = useState("25:00");
   const [lastWorkTime, setLastWorkTime] = useState("25:00");
   const [lastBreakTime, setLastBreakTime] = useState("05:00");
@@ -36,6 +40,14 @@ export const Clock = () => {
   const handleStart = () => {
     if (timerInterval) return;
 
+    if (roomId) {
+      addActivity({
+        type: "start_timer",
+        userName: "John Doe", // TODO: get user name from session
+        roomId: roomId,
+      });
+    }
+
     const newInterval = setInterval(() => {
       setTime((prevTime) => {
         const [minutes, seconds] = prevTime.split(":").map(Number);
@@ -62,6 +74,13 @@ export const Clock = () => {
 
   const handlePause = () => {
     if (timerInterval) {
+      if (roomId && isRunning) {
+        // addActivity({
+        //   type: "pause_timer",
+        //   userName: "John Doe", // TODO: get user name from session
+        //   roomId: roomId,
+        // });
+      }
       clearInterval(timerInterval);
       setTimerInterval(null);
     }
@@ -70,9 +89,18 @@ export const Clock = () => {
 
   const handleReset = () => {
     if (timerInterval) {
+      if (isRunning && roomId) {
+        console.log("isRunning:", isRunning);
+        addActivity({
+          type: "reset_timer",
+          userName: "John Doe",
+          roomId: roomId,
+        });
+      }
       clearInterval(timerInterval);
       setTimerInterval(null);
     }
+
     setTime(timerMode === "work" ? lastWorkTime : lastBreakTime);
     setIsRunning(false);
   };

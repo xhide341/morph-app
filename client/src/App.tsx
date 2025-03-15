@@ -14,7 +14,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Navigate to="/session" replace />} />
           <Route path="/session" element={<SessionPage />} />
-          <Route path="/room/:sessionId" element={<RoomPage />} />
+          <Route path="/room/:roomId" element={<RoomPage />} />
         </Routes>
       </div>
     </Router>
