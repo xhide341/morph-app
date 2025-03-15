@@ -1,6 +1,8 @@
+import { RoomActivity } from "../types/activity";
+
 type WebSocketMessage = {
   type: "activity" | "recent_activities" | "timer_update" | "test";
-  payload: any;
+  payload: RoomActivity;
 };
 
 class WebSocketService {

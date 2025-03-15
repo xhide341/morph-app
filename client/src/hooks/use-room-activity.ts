@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { RoomActivity } from "../types/activity";
+import { wsService } from "../services/websocket_service";
 
-export const useRoomActivity = () => {
+export const useRoomActivity = (roomId: string) => {
   const [activities, setActivities] = useState<RoomActivity[]>([]);
 
   const addActivity = async (
@@ -13,31 +14,43 @@ export const useRoomActivity = () => {
       timeStamp: new Date().toISOString(),
     };
 
-    // TODO: Add API call to Redis
-    // const response = await fetch('/api/room-activity', {
-    //   method: 'POST',
-    //   body: JSON.stringify(newActivity)
-    // });
+    try {
+      wsService.send({
+        type: "activity",
+        payload: newActivity,
+      });
+
+      const response = await fetch("/api/activity", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newActivity),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to add activity to Redis");
+      }
+    } catch (error) {
+      console.error("Error adding activity to Redis:", error);
+    }
 
     setActivities([...activities, newActivity]);
   };
 
   useEffect(() => {
-    // TODO: Setup WebSocket connection for real-time updates
-    // const socket = new WebSocket('ws://your-server/room-activities');
-    // socket.onmessage = (event) => {
-    //   const newActivity = JSON.parse(event.data);
-    //   setActivities(prev => [...prev, newActivity]);
-    // };
-    // TODO: Fetch recent activities from Redis (last 24h)
-    // const fetchActivities = async () => {
-    //   const response = await fetch('/api/room-activity/recent');
-    //   const data = await response.json();
-    //   setActivities(data);
-    // };
-    // fetchActivities();
-    // return () => socket.close();
-  }, []);
+    wsService.connect(roomId);
+    wsService.subscribe("activity", (data) => {
+      const newActivity = data.payload as RoomActivity;
+      setActivities((prev) => [...prev, newActivity]);
+    });
+
+    const fetchActivities = async () => {
+      const response = await fetch(`/api/activity/${roomId}`);
+      const data = await response.json();
+      setActivities(data);
+    };
+
+    fetchActivities();
+  }, [roomId]);
 
   return { activities, addActivity };
 };

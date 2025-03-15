@@ -17,7 +17,13 @@ export const WebSocketTest = () => {
     console.log("Sending message:", inputMessage);
     wsService.send({
       type: "test",
-      payload: inputMessage,
+      payload: {
+        id: "1",
+        type: "join",
+        userName: "test",
+        timeStamp: Date.now().toString(),
+        sessionName: "test",
+      },
     });
     setInputMessage("");
   };
