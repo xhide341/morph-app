@@ -9,42 +9,14 @@ interface Activity {
   timestamp: number;
 }
 
-export const ActivityLog = () => {
-  // This hook will be implemented later as per the implementation plan
-  // const activities = useRoomActivity();
-
-  const activities: Activity[] = [
-    {
-      id: "1",
-      type: "join",
-      username: "Alice",
-      timestamp: Date.now() - 5000,
-    },
-    {
-      id: "2",
-      type: "leave",
-      username: "Bob",
-      timestamp: Date.now() - 3000,
-    },
-    {
-      id: "3",
-      type: "timer_start",
-      username: "Charlie",
-      timestamp: Date.now() - 2000,
-    },
-    {
-      id: "4",
-      type: "timer_complete",
-      username: "David",
-      timestamp: Date.now() - 1000,
-    },
-  ];
+export const ActivityLog = ({ roomId }: { roomId: string }) => {
+  const { activities } = useRoomActivity(roomId);
 
   return (
     <div className="max-h-[400px] overflow-y-auto p-4">
       <div className="relative">
         <AnimatePresence initial={false}>
-          {activities?.map((activity: Activity) => (
+          {activities?.map((activity) => (
             <motion.div
               key={activity.id}
               initial={{ opacity: 0, height: 0, y: -20 }}
@@ -59,16 +31,17 @@ export const ActivityLog = () => {
             >
               <div className="rounded-lg p-1">
                 <div className="flex items-center gap-1 text-xs">
-                  <span className="font-medium">{activity.username}</span>
+                  <span className="font-medium">{activity.userName}</span>
                   <span className="text-primary">
                     {activity.type === "join" && "joined the room"}
                     {activity.type === "leave" && "left the room"}
-                    {activity.type === "timer_start" && "started a timer"}
-                    {activity.type === "timer_complete" &&
+                    {activity.type === "start_timer" && "started a timer"}
+                    {activity.type === "pause_timer" && "paused the timer"}
+                    {activity.type === "complete_timer" &&
                       "completed the session"}
                   </span>
                   <span className="ml-auto text-xs text-gray-400">
-                    {format(activity.timestamp, "HH:mm")}
+                    {format(new Date(activity.timeStamp), "HH:mm")}
                   </span>
                 </div>
               </div>

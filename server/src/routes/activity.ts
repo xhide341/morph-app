@@ -59,4 +59,15 @@ router.get("/history/:userName", async (req, res) => {
   }
 });
 
+router.get("/:roomId", async (req, res) => {
+  try {
+    const { roomId } = req.params;
+    const activities = await redisService.getActivities(roomId);
+    res.json(activities || []);
+  } catch (error) {
+    console.error("Error fetching activities:", error);
+    res.status(500).json([]);
+  }
+});
+
 export default router;

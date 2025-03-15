@@ -3,10 +3,9 @@ import { ThemeToggle } from "../components/theme-toggle";
 import { useParams } from "react-router-dom";
 import { Header } from "../components/header";
 import { ActivityLog } from "../components/activity-log";
-import { WebSocketTest } from "../components/websocket_test";
 
 export function RoomPage() {
-  const { sessionId } = useParams();
+  const { sessionId } = useParams<{ sessionId: string }>();
 
   return (
     <div className="font-roboto mx-auto flex h-dvh w-full max-w-2xl flex-col bg-[var(--color-background)] p-4 text-[var(--color-foreground)]">
@@ -17,8 +16,7 @@ export function RoomPage() {
       <div className="mx-auto flex w-full max-w-3xl flex-col">
         <Clock />
       </div>
-      <ActivityLog />
-      <WebSocketTest />
+      {sessionId && <ActivityLog roomId={sessionId} />}
     </div>
   );
 }

@@ -20,17 +20,17 @@ export const useRoomActivity = (roomId: string) => {
         payload: newActivity,
       });
 
-      const response = await fetch("/api/activity", {
+      const response = await fetch(`/api/activity/room/${roomId}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newActivity),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to add activity to Redis");
+        throw new Error("Failed to add activity");
       }
     } catch (error) {
-      console.error("Error adding activity to Redis:", error);
+      console.error("Error:", error);
     }
 
     setActivities([...activities, newActivity]);
@@ -44,9 +44,17 @@ export const useRoomActivity = (roomId: string) => {
     });
 
     const fetchActivities = async () => {
-      const response = await fetch(`/api/activity/${roomId}`);
-      const data = await response.json();
-      setActivities(data);
+      try {
+        const response = await fetch(`/api/activity/room/${roomId}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch activities");
+        }
+        const data = await response.json();
+        setActivities(data);
+      } catch (error) {
+        console.error("Error fetching activities:", error);
+        setActivities([]);
+      }
     };
 
     fetchActivities();
