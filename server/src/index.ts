@@ -42,16 +42,9 @@ wss.on("connection", (ws) => {
   ws.on("message", (message) => {
     try {
       const data = JSON.parse(message.toString());
-      console.log("Received:", data);
 
-      // Echo message type for testing
-      if (data.type === "test") {
-        console.log("Test message received:", data.payload);
-      }
-
-      // Broadcast to all clients
       wss.clients.forEach((client) => {
-        if (client !== ws && client.readyState === ws.OPEN) {
+        if (client.readyState === ws.OPEN) {
           client.send(JSON.stringify(data));
         }
       });

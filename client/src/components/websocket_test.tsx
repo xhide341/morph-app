@@ -6,26 +6,23 @@ export const WebSocketTest = () => {
   const [inputMessage, setInputMessage] = useState("");
 
   useEffect(() => {
-    // Connect to WebSocket
     wsService.connect("test-room");
 
-    // Subscribe to test messages
     wsService.subscribe("test", (data) => {
       setMessages((prev) => [...prev, data.payload]);
     });
-
-    return () => {
-      wsService.disconnect();
-    };
   }, []);
 
   const sendMessage = () => {
+    console.log("Sending message:", inputMessage);
     wsService.send({
       type: "test",
       payload: inputMessage,
     });
     setInputMessage("");
   };
+
+  console.log("Current messages:", messages);
 
   return (
     <div className="p-4">

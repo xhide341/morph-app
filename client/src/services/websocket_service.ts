@@ -30,8 +30,10 @@ class WebSocketService {
     };
 
     this.socket.onmessage = (event) => {
+      console.log("Raw message received:", event.data);
       const message: WebSocketMessage = JSON.parse(event.data);
-      this.notifySubscribers(message.type, message.payload);
+      console.log("Parsed message:", message);
+      this.notifySubscribers(message.type, message);
     };
 
     this.socket.onclose = () => {
@@ -45,10 +47,12 @@ class WebSocketService {
   }
 
   subscribe(type: string, callback: (data: any) => void) {
+    console.log("Subscribing to:", type);
     if (!this.subscribers.has(type)) {
       this.subscribers.set(type, new Set());
     }
     this.subscribers.get(type)?.add(callback);
+    console.log("Current subscribers:", this.subscribers);
   }
 
   unsubscribe(type: string, callback: (data: any) => void) {
@@ -56,10 +60,12 @@ class WebSocketService {
   }
 
   private notifySubscribers(type: string, data: any) {
+    console.log("Notifying subscribers for type:", type, "with data:", data);
     this.subscribers.get(type)?.forEach((callback) => callback(data));
   }
 
   send(message: WebSocketMessage) {
+    console.log("Sending to server:", message);
     if (this.socket?.readyState === WebSocket.OPEN) {
       this.socket.send(JSON.stringify(message));
     }
