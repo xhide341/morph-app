@@ -5,9 +5,10 @@ import { Header } from "../components/header";
 import { ActivityLog } from "../components/activity-log";
 import { useRoomActivity } from "../hooks/use-room-activity";
 
-export function RoomPage() {
+export const RoomPage = () => {
   const { roomId } = useParams<{ roomId: string }>();
   const { activities, addActivity } = useRoomActivity(roomId || "");
+  const latestActivity = activities[activities.length - 1];
 
   return (
     <div className="font-roboto mx-auto flex h-dvh w-full max-w-2xl flex-col bg-[var(--color-background)] p-4 text-[var(--color-foreground)]">
@@ -16,9 +17,9 @@ export function RoomPage() {
         <ThemeToggle />
       </div>
       <div className="mx-auto flex w-full max-w-3xl flex-col">
-        <Clock addActivity={addActivity} />
+        <Clock addActivity={addActivity} latestActivity={latestActivity} />
       </div>
       {roomId && <ActivityLog activities={activities} />}
     </div>
   );
-}
+};

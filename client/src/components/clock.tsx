@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuote } from "../hooks/use-quote";
 import { useParams } from "react-router-dom";
 import { RoomActivity } from "../types/activity";
@@ -11,8 +11,10 @@ type TimerMode = "work" | "break";
 
 export const Clock = ({
   addActivity,
+  latestActivity,
 }: {
   addActivity: (activity: Omit<RoomActivity, "id" | "timeStamp">) => void;
+  latestActivity: RoomActivity | null;
 }) => {
   const { roomId } = useParams<{ roomId: string }>();
   const [time, setTime] = useState("25:00");
@@ -23,6 +25,7 @@ export const Clock = ({
   );
   const [isRunning, setIsRunning] = useState(false);
   const [timerMode, setTimerMode] = useState<TimerMode>("work");
+
   const { quote, author } = useQuote();
 
   const handleTimerChange = (minutes: number) => {
@@ -46,15 +49,12 @@ export const Clock = ({
     const newInterval = setInterval(() => {
       setTime((prevTime) => {
         const [minutes, seconds] = prevTime.split(":").map(Number);
-
-        // Check if timer has reached zero
         if (minutes === 0 && seconds === 0) {
           clearInterval(newInterval);
           setTimerInterval(null);
           setIsRunning(false);
           return "00:00";
         }
-
         const totalSeconds = minutes * 60 + seconds - 1;
         const newMinutes = Math.floor(totalSeconds / 60);
         const newSeconds = totalSeconds % 60;
@@ -62,51 +62,70 @@ export const Clock = ({
         return `${String(newMinutes).padStart(2, "0")}:${String(newSeconds).padStart(2, "0")}`;
       });
     }, 1000);
-
     setIsRunning(true);
     setTimerInterval(newInterval);
-
-    if (!roomId) return;
 
     addActivity({
       type: "start_timer",
       userName: "John Doe",
-      roomId: roomId,
+      roomId: roomId || "",
+      timeRemaining: time,
+      timerMode: timerMode,
     });
   };
 
   const handlePause = () => {
     if (timerInterval) {
-      if (roomId && isRunning) {
-        addActivity({
-          type: "pause_timer",
-          userName: "John Doe", // TODO: get user name from session
-          roomId: roomId,
-        });
-      }
       clearInterval(timerInterval);
       setTimerInterval(null);
     }
     setIsRunning(false);
+
+    addActivity({
+      type: "pause_timer",
+      userName: "John Doe",
+      roomId: roomId || "",
+      timeRemaining: time,
+      timerMode: timerMode,
+    });
   };
 
   const handleReset = () => {
     if (timerInterval) {
-      if (isRunning && roomId) {
-        console.log("isRunning:", isRunning);
-        addActivity({
-          type: "reset_timer",
-          userName: "John Doe",
-          roomId: roomId,
-        });
-      }
       clearInterval(timerInterval);
       setTimerInterval(null);
     }
-
     setTime(timerMode === "work" ? lastWorkTime : lastBreakTime);
     setIsRunning(false);
+
+    addActivity({
+      type: "reset_timer",
+      userName: "John Doe",
+      roomId: roomId || "",
+      timeRemaining: time,
+      timerMode: timerMode,
+    });
   };
+
+  useEffect(() => {
+    if (roomId) return;
+
+    const handleTimerSync = (activity: RoomActivity) => {
+      if (activity.type === "start_timer") {
+        handleStart();
+      }
+      if (activity.type === "pause_timer") {
+        handlePause();
+      }
+      if (activity.type === "reset_timer") {
+        handleReset();
+      }
+    };
+
+    if (latestActivity) {
+      handleTimerSync(latestActivity);
+    }
+  }, [roomId, latestActivity]);
 
   return (
     <div

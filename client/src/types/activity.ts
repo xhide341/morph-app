@@ -10,8 +10,7 @@ export type RoomActivity = {
   userName: string;
   timeStamp: string;
   roomId: string;
-  details?: {
-    timerDuration?: number;
-    pomodoroType?: "25" | "55";
-  };
+  timerDuration?: number;
+  timeRemaining?: string;
+  timerMode?: "work" | "break";
 };

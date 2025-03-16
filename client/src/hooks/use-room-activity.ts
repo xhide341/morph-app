@@ -27,7 +27,6 @@ export const useRoomActivity = (roomId: string) => {
       setActivities((prev) => [...prev, newActivity]);
     });
 
-    // Initial fetch
     fetchActivities(roomId).then(setActivities);
 
     return () => wsService.disconnect();
