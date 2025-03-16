@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuote } from "../hooks/use-quote";
 import { useParams } from "react-router-dom";
-import { useRoomActivity } from "../hooks/use-room-activity";
+import { RoomActivity } from "../types/activity";
 
 import { Play, Pause, RotateCcw } from "react-feather";
 import { Navigation } from "./navigation";
@@ -9,9 +9,12 @@ import { ProgressBar } from "./progress-bar";
 
 type TimerMode = "work" | "break";
 
-export const Clock = () => {
+export const Clock = ({
+  addActivity,
+}: {
+  addActivity: (activity: Omit<RoomActivity, "id" | "timeStamp">) => void;
+}) => {
   const { roomId } = useParams<{ roomId: string }>();
-  const { addActivity } = useRoomActivity(roomId || "");
   const [time, setTime] = useState("25:00");
   const [lastWorkTime, setLastWorkTime] = useState("25:00");
   const [lastBreakTime, setLastBreakTime] = useState("05:00");
@@ -40,14 +43,6 @@ export const Clock = () => {
   const handleStart = () => {
     if (timerInterval) return;
 
-    if (roomId) {
-      addActivity({
-        type: "start_timer",
-        userName: "John Doe", // TODO: get user name from session
-        roomId: roomId,
-      });
-    }
-
     const newInterval = setInterval(() => {
       setTime((prevTime) => {
         const [minutes, seconds] = prevTime.split(":").map(Number);
@@ -70,16 +65,24 @@ export const Clock = () => {
 
     setIsRunning(true);
     setTimerInterval(newInterval);
+
+    if (!roomId) return;
+
+    addActivity({
+      type: "start_timer",
+      userName: "John Doe",
+      roomId: roomId,
+    });
   };
 
   const handlePause = () => {
     if (timerInterval) {
       if (roomId && isRunning) {
-        // addActivity({
-        //   type: "pause_timer",
-        //   userName: "John Doe", // TODO: get user name from session
-        //   roomId: roomId,
-        // });
+        addActivity({
+          type: "pause_timer",
+          userName: "John Doe", // TODO: get user name from session
+          roomId: roomId,
+        });
       }
       clearInterval(timerInterval);
       setTimerInterval(null);

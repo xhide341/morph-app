@@ -1,16 +1,14 @@
 import { motion, AnimatePresence } from "motion/react";
-import { useRoomActivity } from "../hooks/use-room-activity";
+import { RoomActivity } from "../types/activity";
+
 import { format } from "date-fns";
 
-export const ActivityLog = ({ roomId }: { roomId: string }) => {
-  const { activities } = useRoomActivity(roomId);
-
+export const ActivityLog = ({ activities }: { activities: RoomActivity[] }) => {
   return (
     <div className="max-h-[400px] overflow-y-auto p-4">
       <div className="relative">
         <AnimatePresence initial={false}>
           {activities?.map((activity) => {
-            console.log("Rendering activity:", activity);
             return (
               <motion.div
                 key={activity.id}

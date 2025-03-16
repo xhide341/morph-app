@@ -5,6 +5,34 @@ import { wsService } from "../services/websocket-service";
 export const useRoomActivity = (roomId: string) => {
   const [activities, setActivities] = useState<RoomActivity[]>([]);
 
+  const fetchActivities = async (roomId: string) => {
+    try {
+      const response = await fetch(`/api/activity/room/${roomId}`);
+      if (!response.ok)
+        throw new Error(`HTTP error! status: ${response.status}`);
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Error fetching activities:", error);
+      return [];
+    }
+  };
+
+  useEffect(() => {
+    if (!roomId) return;
+
+    wsService.connect(roomId);
+    wsService.subscribe("activity", (data) => {
+      const newActivity = data.payload as RoomActivity;
+      setActivities((prev) => [...prev, newActivity]);
+    });
+
+    // Initial fetch
+    fetchActivities(roomId).then(setActivities);
+
+    return () => wsService.disconnect();
+  }, [roomId]);
+
   const addActivity = async (
     activity: Omit<RoomActivity, "id" | "timeStamp">,
   ) => {
@@ -13,6 +41,8 @@ export const useRoomActivity = (roomId: string) => {
       id: crypto.randomUUID(),
       timeStamp: new Date().toISOString(),
     };
+
+    setActivities((prev) => [...prev, newActivity]);
 
     console.log("Sending activity:", newActivity);
     try {
@@ -33,35 +63,7 @@ export const useRoomActivity = (roomId: string) => {
     } catch (error) {
       console.error("Error:", error);
     }
-
-    setActivities([...activities, newActivity]);
   };
-
-  useEffect(() => {
-    wsService.connect(roomId);
-    wsService.subscribe("activity", (data) => {
-      console.log("WebSocket received:", data);
-      const newActivity = data.payload as RoomActivity;
-      setActivities((prev) => [...prev, newActivity]);
-    });
-
-    const fetchActivities = async () => {
-      try {
-        const response = await fetch(`/api/activity/room/${roomId}`);
-        console.log("Response status:", response.status);
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        setActivities(data);
-      } catch (error) {
-        console.error("Error fetching activities:", error);
-        setActivities([]);
-      }
-    };
-
-    fetchActivities();
-  }, [roomId]);
 
   return { activities, addActivity };
 };

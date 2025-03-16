@@ -3,9 +3,11 @@ import { ThemeToggle } from "../components/theme-toggle";
 import { useParams } from "react-router-dom";
 import { Header } from "../components/header";
 import { ActivityLog } from "../components/activity-log";
+import { useRoomActivity } from "../hooks/use-room-activity";
 
 export function RoomPage() {
   const { roomId } = useParams<{ roomId: string }>();
+  const { activities, addActivity } = useRoomActivity(roomId || "");
 
   return (
     <div className="font-roboto mx-auto flex h-dvh w-full max-w-2xl flex-col bg-[var(--color-background)] p-4 text-[var(--color-foreground)]">
@@ -14,9 +16,9 @@ export function RoomPage() {
         <ThemeToggle />
       </div>
       <div className="mx-auto flex w-full max-w-3xl flex-col">
-        <Clock />
+        <Clock addActivity={addActivity} />
       </div>
-      {roomId && <ActivityLog roomId={roomId} />}
+      {roomId && <ActivityLog activities={activities} />}
     </div>
   );
 }
