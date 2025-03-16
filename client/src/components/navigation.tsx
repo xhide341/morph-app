@@ -56,11 +56,11 @@ export const Navigation = ({ onTimerChange }: NavigationProps) => {
           <button
             className="css-button-3d w-20 p-2"
             onClick={() => {
-              onTimerChange(55, "work");
+              onTimerChange(1, "work");
               setIsSwitchingTimer(false);
             }}
           >
-            55:00
+            01:00
           </button>
           <button
             className="css-button-3d w-20 p-2"

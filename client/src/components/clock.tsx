@@ -65,6 +65,12 @@ export const Clock = ({
     const [min, sec] = time.split(":").map(Number);
     const totalSeconds = min * 60 + sec;
 
+    if (totalSeconds <= 0) {
+      const resetTime = timerMode === "work" ? lastWorkTime : lastBreakTime;
+      setTime(resetTime);
+      return;
+    }
+
     const newInterval = setInterval(() => {
       const elapsed = Math.floor((Date.now() - startTime) / 1000);
       const remaining = Math.max(0, totalSeconds - elapsed);
@@ -72,16 +78,24 @@ export const Clock = ({
       const newMinutes = Math.floor(remaining / 60);
       const newSeconds = remaining % 60;
 
-      setTime(
-        `${String(newMinutes).padStart(2, "0")}:${String(newSeconds).padStart(2, "0")}`,
-      );
+      const newTime = `${String(newMinutes).padStart(2, "0")}:${String(newSeconds).padStart(2, "0")}`;
+      setTime(newTime);
 
       if (remaining <= 0) {
-        if (timerInterval) {
-          clearInterval(timerInterval);
-        }
+        clearInterval(newInterval);
         setTimerInterval(null);
         setIsRunning(false);
+
+        if (!isSync && newTime === "00:00") {
+          addActivity({
+            type: "complete_timer",
+            userName: "John Doe",
+            roomId: roomId || "",
+            timeRemaining: "00:00",
+            timerMode: timerMode,
+          });
+        }
+        return;
       }
     }, 100);
 
