@@ -21,7 +21,11 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+    "baseUrl": ".",
+    "paths": {
+      "server/*": ["../server/src/*"]
+    }
   },
   "include": [
     "src/**/*",
@@ -29,6 +33,7 @@
     "src/hooks",
     "src/utils",
     "src/vite-env.d.ts",
-    "src/main.tsx"
+    "src/main.tsx",
+    "../server/src/types/**/*"
   ]
 }

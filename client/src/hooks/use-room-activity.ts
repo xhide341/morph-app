@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { RoomActivity } from "../types/room";
-import { wsService } from "../services/websocket-service";
+import { RoomActivity } from "server/types/room";
+import { wsService } from "server/services/websocket-service";
 
 export const useRoomActivity = (roomId: string) => {
   const [activities, setActivities] = useState<RoomActivity[]>([]);

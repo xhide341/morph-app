@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { RoomActivity } from "../types/room";
-import { redisService } from "../services/redis-service";
+import { RoomActivity } from "server/types/room";
+import redisService from "server/services/redis-service";
 
 export const useRoom = (roomId: string) => {
   const [room, setRoom] = useState<RoomActivity[]>([]);

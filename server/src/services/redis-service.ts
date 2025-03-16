@@ -1,5 +1,5 @@
 import { redis } from "../config/redis";
-import { RoomActivity, TimerHistory } from "../types/activities";
+import { RoomActivity } from "../types/room";
 
 const ROOM_INACTIVITY_EXPIRY = 10 * 60; // 10 minutes in seconds
 
@@ -87,21 +87,6 @@ const redisService = {
   async getRoomInfo(roomId: string) {
     const roomKey = `room:${roomId}`;
     return await redis.hGetAll(roomKey);
-  },
-
-  // User history
-  async addHistory(history: TimerHistory) {
-    const key = `user:${history.userName}:history`;
-    const userHistory = await this.getHistory(history.userName);
-    userHistory.push(history);
-    await redis.set(key, JSON.stringify(userHistory));
-    return history;
-  },
-
-  async getHistory(userName: string): Promise<TimerHistory[]> {
-    const key = `user:${userName}:history`;
-    const data = await redis.get(key);
-    return data ? JSON.parse(data) : [];
   },
 };
 
