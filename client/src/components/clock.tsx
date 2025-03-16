@@ -46,22 +46,30 @@ export const Clock = ({
   const handleStart = (isSync: boolean = false) => {
     if (timerInterval) return;
 
-    const newInterval = setInterval(() => {
-      setTime((prevTime) => {
-        const [minutes, seconds] = prevTime.split(":").map(Number);
-        if (minutes === 0 && seconds === 0) {
-          clearInterval(newInterval);
-          setTimerInterval(null);
-          setIsRunning(false);
-          return "00:00";
-        }
-        const totalSeconds = minutes * 60 + seconds - 1;
-        const newMinutes = Math.floor(totalSeconds / 60);
-        const newSeconds = totalSeconds % 60;
+    const startTime = Date.now();
+    const [min, sec] = time.split(":").map(Number);
+    const totalSeconds = min * 60 + sec;
 
-        return `${String(newMinutes).padStart(2, "0")}:${String(newSeconds).padStart(2, "0")}`;
-      });
-    }, 1000);
+    const newInterval = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - startTime) / 1000);
+      const remaining = Math.max(0, totalSeconds - elapsed);
+
+      const newMinutes = Math.floor(remaining / 60);
+      const newSeconds = remaining % 60;
+
+      setTime(
+        `${String(newMinutes).padStart(2, "0")}:${String(newSeconds).padStart(2, "0")}`,
+      );
+
+      if (remaining <= 0) {
+        if (timerInterval) {
+          clearInterval(timerInterval);
+        }
+        setTimerInterval(null);
+        setIsRunning(false);
+      }
+    }, 100);
+
     setIsRunning(true);
     setTimerInterval(newInterval);
 
@@ -129,7 +137,6 @@ export const Clock = ({
         Math.abs(currentTotalSeconds - activityTotalSeconds) > 2 ||
         timerMode !== activity.timerMode;
 
-      // Both pause and reset should always be processed
       if (
         !needsSync &&
         activity.type !== "pause_timer" &&
@@ -143,10 +150,6 @@ export const Clock = ({
         handlePause(true);
       }
       if (activity.type === "start_timer") {
-        if (timerInterval) {
-          clearInterval(timerInterval);
-          setTimerInterval(null);
-        }
         setTime(activity.timeRemaining || time);
         setTimerMode(activity.timerMode || "work");
         handleStart(true);
