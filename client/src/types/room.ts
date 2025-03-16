@@ -17,6 +17,19 @@ export type RoomActivity = {
 };
 
 export type RoomInfo = {
-  activeUsers: string;
+  createdBy: string;
+  createdAt: string;
   lastActive: string;
+  activeUsers: number;
+};
+
+export type RoomUser = {
+  userName: string;
+  joinedAt: string;
+};
+
+export type RoomResponse = {
+  roomInfo: RoomInfo;
+  users: RoomUser[];
+  exists: boolean;
 };
