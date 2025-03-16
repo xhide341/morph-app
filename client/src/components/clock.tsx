@@ -25,7 +25,7 @@ export const Clock = ({
   );
   const [isRunning, setIsRunning] = useState(false);
   const [timerMode, setTimerMode] = useState<TimerMode>("work");
-
+  const [isSync, setIsSync] = useState(false);
   const { quote, author } = useQuote();
 
   const handleTimerChange = (minutes: number) => {
@@ -43,7 +43,7 @@ export const Clock = ({
     setIsRunning(false);
   };
 
-  const handleStart = () => {
+  const handleStart = (isSync: boolean = false) => {
     if (timerInterval) return;
 
     const newInterval = setInterval(() => {
@@ -65,66 +65,100 @@ export const Clock = ({
     setIsRunning(true);
     setTimerInterval(newInterval);
 
-    addActivity({
-      type: "start_timer",
-      userName: "John Doe",
-      roomId: roomId || "",
-      timeRemaining: time,
-      timerMode: timerMode,
-    });
+    if (!isSync) {
+      addActivity({
+        type: "start_timer",
+        userName: "John Doe",
+        roomId: roomId || "",
+        timeRemaining: time,
+        timerMode: timerMode,
+      });
+    }
   };
 
-  const handlePause = () => {
+  const handlePause = (isSync: boolean = false) => {
     if (timerInterval) {
       clearInterval(timerInterval);
       setTimerInterval(null);
     }
     setIsRunning(false);
 
-    addActivity({
-      type: "pause_timer",
-      userName: "John Doe",
-      roomId: roomId || "",
-      timeRemaining: time,
-      timerMode: timerMode,
-    });
+    if (!isSync) {
+      addActivity({
+        type: "pause_timer",
+        userName: "John Doe",
+        roomId: roomId || "",
+        timeRemaining: time,
+        timerMode: timerMode,
+      });
+    }
   };
 
   const handleReset = () => {
     if (timerInterval) {
       clearInterval(timerInterval);
       setTimerInterval(null);
+
+      if (!isSync) {
+        addActivity({
+          type: "reset_timer",
+          userName: "John Doe",
+          roomId: roomId || "",
+          timeRemaining: time,
+          timerMode: timerMode,
+        });
+      }
     }
     setTime(timerMode === "work" ? lastWorkTime : lastBreakTime);
     setIsRunning(false);
-
-    addActivity({
-      type: "reset_timer",
-      userName: "John Doe",
-      roomId: roomId || "",
-      timeRemaining: time,
-      timerMode: timerMode,
-    });
   };
 
   useEffect(() => {
-    if (roomId) return;
+    if (!roomId || !latestActivity) return;
 
     const handleTimerSync = (activity: RoomActivity) => {
-      if (activity.type === "start_timer") {
-        handleStart();
-      }
+      const [currentMin, currentSec] = time.split(":").map(Number);
+      const [activityMin, activitySec] = (activity.timeRemaining || "00:00")
+        .split(":")
+        .map(Number);
+      const currentTotalSeconds = currentMin * 60 + currentSec;
+      const activityTotalSeconds = activityMin * 60 + activitySec;
+
+      const needsSync =
+        !isRunning ||
+        Math.abs(currentTotalSeconds - activityTotalSeconds) > 2 ||
+        timerMode !== activity.timerMode;
+
+      // Both pause and reset should always be processed
+      if (
+        !needsSync &&
+        activity.type !== "pause_timer" &&
+        activity.type !== "reset_timer"
+      )
+        return;
+
+      setIsSync(true);
       if (activity.type === "pause_timer") {
-        handlePause();
+        setTime(activity.timeRemaining || time);
+        handlePause(true);
+      }
+      if (activity.type === "start_timer") {
+        if (timerInterval) {
+          clearInterval(timerInterval);
+          setTimerInterval(null);
+        }
+        setTime(activity.timeRemaining || time);
+        setTimerMode(activity.timerMode || "work");
+        handleStart(true);
       }
       if (activity.type === "reset_timer") {
+        setTime(activity.timeRemaining || time);
         handleReset();
       }
+      setIsSync(false);
     };
 
-    if (latestActivity) {
-      handleTimerSync(latestActivity);
-    }
+    handleTimerSync(latestActivity);
   }, [roomId, latestActivity]);
 
   return (
@@ -143,7 +177,7 @@ export const Clock = ({
           <button
             aria-label={isRunning ? "Pause" : "Start"}
             className={`css-button-3d w-24 p-4 ${isRunning ? "pressed" : ""}`}
-            onClick={isRunning ? handlePause : handleStart}
+            onClick={isRunning ? () => handlePause() : () => handleStart()}
           >
             {isRunning ? <Pause size={24} /> : <Play size={24} />}
           </button>
