@@ -14,6 +14,7 @@ export function SessionPage() {
       return;
     }
     if (sessionName.trim()) {
+      // TODO: add userName and session to redis
       localStorage.setItem("userName", userName.trim() || "user");
       const sessionId = `${sessionName.toLowerCase().replace(/\s+/g, "-")}-${Date.now()}`;
       navigate(`/room/${sessionId}`);
