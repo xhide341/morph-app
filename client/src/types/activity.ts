@@ -6,7 +6,8 @@ export type RoomActivity = {
     | "start_timer"
     | "pause_timer"
     | "complete_timer"
-    | "reset_timer";
+    | "reset_timer"
+    | "change_timer";
   userName: string;
   timeStamp: string;
   roomId: string;

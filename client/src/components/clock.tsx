@@ -28,19 +28,34 @@ export const Clock = ({
   const [isSync, setIsSync] = useState(false);
   const { quote, author } = useQuote();
 
-  const handleTimerChange = (minutes: number) => {
+  const handleTimerChange = (
+    minutes: number,
+    mode: TimerMode,
+    isSync: boolean = false,
+  ) => {
     if (timerInterval) {
       clearInterval(timerInterval);
       setTimerInterval(null);
     }
     const newTime = `${String(minutes).padStart(2, "0")}:00`;
-    if (timerMode === "work") {
+    setTimerMode(mode);
+    if (mode === "work") {
       setLastWorkTime(newTime);
     } else {
       setLastBreakTime(newTime);
     }
     setTime(newTime);
     setIsRunning(false);
+
+    if (!isSync) {
+      addActivity({
+        type: "change_timer",
+        userName: "John Doe",
+        roomId: roomId || "",
+        timeRemaining: newTime,
+        timerMode: mode,
+      });
+    }
   };
 
   const handleStart = (isSync: boolean = false) => {
@@ -137,6 +152,14 @@ export const Clock = ({
         Math.abs(currentTotalSeconds - activityTotalSeconds) > 2 ||
         timerMode !== activity.timerMode;
 
+      // Always process timer changes
+      if (activity.type === "change_timer") {
+        const minutes = parseInt(activity.timeRemaining?.split(":")[0] || "25");
+        handleTimerChange(minutes, activity.timerMode || "work", true);
+        return;
+      }
+
+      // Rest of sync logic for other activities
       if (
         !needsSync &&
         activity.type !== "pause_timer" &&
@@ -170,10 +193,7 @@ export const Clock = ({
         timerMode === "work" ? "bg-secondary" : "bg-secondary/80"
       } flex flex-col items-center justify-center rounded-xl p-10`}
     >
-      <Navigation
-        onTimerChange={handleTimerChange}
-        onTimerModeChange={setTimerMode}
-      />
+      <Navigation onTimerChange={handleTimerChange} />
       <div className="flex flex-col items-center justify-center">
         <h1 className="text-[8rem] font-bold">{time}</h1>
         <div className="flex flex-row justify-center gap-4 text-center text-2xl">

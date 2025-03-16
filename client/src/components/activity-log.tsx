@@ -33,6 +33,8 @@ export const ActivityLog = ({ activities }: { activities: RoomActivity[] }) => {
                       {activity.type === "complete_timer" &&
                         "completed the session"}
                       {activity.type === "reset_timer" && "stopped the timer"}
+                      {activity.type === "change_timer" &&
+                        `set timer to ${activity.timeRemaining?.split(":")[0]}-minute ${activity.timerMode}`}
                     </span>
                     <span className="ml-auto text-xs text-gray-400">
                       {format(new Date(activity.timeStamp), "HH:mm")}

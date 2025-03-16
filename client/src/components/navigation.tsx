@@ -4,14 +4,10 @@ import { ArrowLeft } from "react-feather";
 type TimerMode = "work" | "break";
 
 interface NavigationProps {
-  onTimerChange: (timer: number) => void;
-  onTimerModeChange: (mode: TimerMode) => void;
+  onTimerChange: (minutes: number, mode: TimerMode) => void;
 }
 
-export const Navigation = ({
-  onTimerChange,
-  onTimerModeChange,
-}: NavigationProps) => {
+export const Navigation = ({ onTimerChange }: NavigationProps) => {
   const [isSwitchingTimer, setIsSwitchingTimer] = useState(false);
   const [isTakingBreak, setIsTakingBreak] = useState(false);
 
@@ -60,9 +56,8 @@ export const Navigation = ({
           <button
             className="css-button-3d w-20 p-2"
             onClick={() => {
-              onTimerChange(55);
+              onTimerChange(55, "work");
               setIsSwitchingTimer(false);
-              onTimerModeChange("work");
             }}
           >
             55:00
@@ -70,9 +65,8 @@ export const Navigation = ({
           <button
             className="css-button-3d w-20 p-2"
             onClick={() => {
-              onTimerChange(25);
+              onTimerChange(25, "work");
               setIsSwitchingTimer(false);
-              onTimerModeChange("work");
             }}
           >
             25:00
@@ -88,9 +82,8 @@ export const Navigation = ({
           <button
             className="css-button-3d w-20 p-2"
             onClick={() => {
-              onTimerChange(5);
+              onTimerChange(5, "break");
               setIsTakingBreak(false);
-              onTimerModeChange("break");
             }}
           >
             5:00
@@ -98,9 +91,8 @@ export const Navigation = ({
           <button
             className="css-button-3d w-20 p-2"
             onClick={() => {
-              onTimerChange(15);
+              onTimerChange(15, "break");
               setIsTakingBreak(false);
-              onTimerModeChange("break");
             }}
           >
             15:00
