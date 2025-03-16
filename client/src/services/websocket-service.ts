@@ -1,4 +1,4 @@
-import { RoomActivity } from "../types/activity";
+import { RoomActivity } from "../types/room";
 
 type WebSocketMessage = {
   type: "activity" | "recent_activities" | "timer_update" | "test";

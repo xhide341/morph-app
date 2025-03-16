@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { RoomActivity } from "../types/activity";
+import { RoomActivity } from "../types/room";
 import { wsService } from "../services/websocket-service";
 
 export const useRoomActivity = (roomId: string) => {

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuote } from "../hooks/use-quote";
 import { useParams } from "react-router-dom";
-import { RoomActivity } from "../types/activity";
+import { RoomActivity } from "../types/room";
 
 import { Play, Pause, RotateCcw } from "react-feather";
 import { Navigation } from "./navigation";

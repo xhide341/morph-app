@@ -1,22 +1,35 @@
 export interface RoomActivity {
   id: string;
-  type: "join" | "leave" | "start_timer" | "pause_timer" | "complete_timer";
+  type:
+    | "join"
+    | "leave"
+    | "start_timer"
+    | "pause_timer"
+    | "complete_timer"
+    | "reset_timer"
+    | "change_timer";
   userName: string;
   timeStamp: string;
-  sessionName: string;
-  details?: {
-    timerDuration?: number;
-    pomodoroType?: "25" | "55";
-  };
+  roomId: string;
+  timerDuration?: number;
+  timeRemaining?: string;
+  timerMode?: "work" | "break";
 }
 
 export interface TimerHistory {
   id: string;
-  sessionName: string;
+  roomId: string;
   duration: number;
   date: string;
   userName: string;
-  type: "pomodoro" | "custom";
+  type: "work" | "break";
   completed: boolean;
-  pomodoroType?: "25" | "55";
+  timeRemaining?: string;
+}
+
+export interface RoomInfo {
+  createdBy: string;
+  createdAt: number;
+  lastActive: number;
+  activeUsers: string;
 }

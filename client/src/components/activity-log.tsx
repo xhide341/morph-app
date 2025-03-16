@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "motion/react";
-import { RoomActivity } from "../types/activity";
+import { RoomActivity } from "../types/room";
 
 import { format } from "date-fns";
 

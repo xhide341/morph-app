@@ -15,3 +15,8 @@ export type RoomActivity = {
   timeRemaining?: string;
   timerMode?: "work" | "break";
 };
+
+export type RoomInfo = {
+  activeUsers: string;
+  lastActive: string;
+};
