@@ -34,6 +34,7 @@
     "src/utils",
     "src/vite-env.d.ts",
     "src/main.tsx",
-    "../server/src/types/**/*"
+    "../server/src/types/**/*",
+    "../server/src/schemas/session.ts"
   ]
 }

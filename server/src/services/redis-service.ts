@@ -79,7 +79,7 @@ const redisService = {
       await redis.persist(userHashKey);
       await redis.persist(`room:${roomId}:activities`);
 
-      const data = await redis.hSet(
+      await redis.hSet(
         userHashKey,
         userName,
         JSON.stringify({
@@ -88,7 +88,10 @@ const redisService = {
         })
       );
 
-      return data;
+      return {
+        userCount: Number(userCount),
+        lastActive: Date.now(),
+      };
     } catch (error) {
       console.error(error);
       return;

@@ -1,11 +1,22 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useRoom } from "../hooks/use-room";
 import { ThemeToggle } from "../components/theme-toggle";
 
 export function SessionPage() {
   const [userName, setUserName] = useState("");
   const [sessionName, setSessionName] = useState("");
   const navigate = useNavigate();
+  const { addRoom } = useRoom();
+
+  const validateSessionName = (name: string): string | null => {
+    if (!name.trim()) return "Session name cannot be empty";
+    if (name.length > 10) return "Session name must be less than 10 characters";
+    if (name.includes(" ")) return "Session name must not contain spaces";
+    if (name !== name.replace(/[^a-zA-Z0-9]/g, ""))
+      return "Session name must only contain alphanumeric characters";
+    return null;
+  };
 
   const handleCreateSession = (e: React.FormEvent) => {
     e.preventDefault();
@@ -14,9 +25,20 @@ export function SessionPage() {
       return;
     }
     if (sessionName.trim()) {
-      // TODO: add userName and session to redis
-      localStorage.setItem("userName", userName.trim() || "user");
-      const sessionId = `${sessionName.toLowerCase().replace(/\s+/g, "-")}-${Date.now()}`;
+      if (sessionName.length > 10) {
+        alert("Session name must be less than 10 characters");
+        return;
+      }
+      if (sessionName.includes(" ")) {
+        alert("Session name must not contain spaces");
+        return;
+      }
+      if (sessionName !== sessionName.replace(/[^a-zA-Z0-9]/g, "")) {
+        alert("Session name must only contain alphanumeric characters");
+        return;
+      }
+      const sessionId = `${sessionName.toLowerCase()}`;
+      addRoom(sessionId, userName.trim());
       navigate(`/room/${sessionId}`);
     }
   };

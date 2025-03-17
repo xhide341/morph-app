@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { RoomInfo, RoomUser } from "server/types/room";
 import redisService from "server/services/redis-service";
 
-export const useRoom = (roomId: string) => {
+export const useRoom = (roomId?: string) => {
   const [roomInfo, setRoomInfo] = useState<RoomInfo | null>(null);
   const [roomUsers, setRoomUsers] = useState<RoomUser[]>([]);
 
@@ -17,11 +17,11 @@ export const useRoom = (roomId: string) => {
   };
 
   useEffect(() => {
-    if (!roomId || !roomUsers) return;
+    if (!roomId) return;
 
     fetchRoom(roomId);
     fetchRoomUsers(roomId);
-  }, [roomId, roomUsers]);
+  }, [roomId]);
 
   const addRoom = async (roomId: string, userName: string) => {
     try {
@@ -83,4 +83,16 @@ export const useRoom = (roomId: string) => {
       console.error(error);
     }
   };
+
+  return {
+    roomInfo,
+    roomUsers,
+    addRoom,
+    addUserToRoom,
+    removeUserFromRoom,
+    fetchRoomUsers,
+    fetchRoomInfo,
+  };
 };
+
+export default useRoom;
