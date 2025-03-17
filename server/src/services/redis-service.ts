@@ -1,5 +1,5 @@
 import { redis } from "../config/redis";
-import { RoomActivity } from "../types/room";
+import { RoomActivity, RoomUser } from "../types/room";
 
 const ROOM_INACTIVITY_EXPIRY = 10 * 60; // 10 minutes in seconds
 
@@ -28,10 +28,10 @@ const redisService = {
   // Room management
   async createRoom(roomId: string, userName: string) {
     const roomKey = `room:${roomId}`;
-    await redis.hSet(roomKey, {
+    return await redis.hSet(roomKey, {
       createdBy: userName,
-      createdAt: Date.now(),
-      lastActive: Date.now(),
+      createdAt: Date.now().toString(),
+      lastActive: Date.now().toString(),
       activeUsers: "1",
     });
   },
@@ -39,54 +39,74 @@ const redisService = {
   // User presence management
   async userJoinRoom(roomId: string, userName: string) {
     const roomKey = `room:${roomId}`;
-    const userSetKey = `room:${roomId}:users`;
+    const userHashKey = `room:${roomId}:users`;
 
-    // Add user to room's user set
-    await redis.sAdd(userSetKey, userName);
+    // Add to user HASH with joinedAt
+    await redis.hSet(
+      userHashKey,
+      userName,
+      JSON.stringify({
+        userName,
+        joinedAt: Date.now(),
+      })
+    );
 
-    // Update active users count and last active timestamp
-    const userCount = await redis.sCard(userSetKey);
+    // Update room info HASH
+    const userCount = await redis.hLen(userHashKey);
     await redis.hSet(roomKey, {
       activeUsers: String(userCount),
-      lastActive: Date.now(),
+      lastActive: Date.now().toString(),
     });
 
     // Remove expiry since users are present
     await redis.persist(roomKey);
-    await redis.persist(userSetKey);
+    await redis.persist(userHashKey);
     await redis.persist(`room:${roomId}:activities`);
+
+    return {
+      userCount,
+      lastActive: Date.now(),
+    };
   },
 
   async userLeaveRoom(roomId: string, userName: string) {
     const roomKey = `room:${roomId}`;
-    const userSetKey = `room:${roomId}:users`;
+    const userHashKey = `room:${roomId}:users`;
 
     // Remove user from room's user set
-    await redis.sRem(userSetKey, userName);
+    await redis.hDel(userHashKey, userName);
 
     // Update active users count
-    const userCount = await redis.sCard(userSetKey);
+    const userCount = await redis.hLen(userHashKey);
     await redis.hSet(roomKey, {
       activeUsers: String(userCount),
-      lastActive: Date.now(),
+      lastActive: Date.now().toString(),
     });
 
     // If no users left, set 10-minute expiry
     if (userCount === 0) {
       await redis.expire(roomKey, ROOM_INACTIVITY_EXPIRY);
-      await redis.expire(userSetKey, ROOM_INACTIVITY_EXPIRY);
+      await redis.expire(userHashKey, ROOM_INACTIVITY_EXPIRY);
       await redis.expire(`room:${roomId}:activities`, ROOM_INACTIVITY_EXPIRY);
     }
+
+    return {
+      userCount,
+      lastActive: Date.now().toString(),
+    };
   },
 
-  async getRoomUsers(roomId: string): Promise<string[]> {
-    const userSetKey = `room:${roomId}:users`;
-    return await redis.sMembers(userSetKey);
+  async getRoomUsers(roomId: string): Promise<RoomUser[]> {
+    const userHashKey = `room:${roomId}:users`;
+    const usersData = await redis.hGetAll(userHashKey);
+
+    return Object.values(usersData).map((data) => JSON.parse(data));
   },
 
   async getRoomInfo(roomId: string) {
     const roomKey = `room:${roomId}`;
-    return await redis.hGetAll(roomKey);
+    const roomData = await redis.hGetAll(roomKey);
+    return roomData;
   },
 };
 
