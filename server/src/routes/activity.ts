@@ -1,6 +1,6 @@
 import { Router } from "express";
 import redisService from "../services/redis-service";
-import { RoomActivity, TimerHistory } from "../types/room";
+import { RoomActivity } from "../types/room";
 
 const router = Router();
 
@@ -33,31 +33,31 @@ router.get("/room/:roomId", async (req, res) => {
 });
 
 // Add user history to Redis
-router.post("/history/:userName", async (req, res) => {
-  try {
-    const history: TimerHistory = {
-      ...req.body,
-      id: crypto.randomUUID(),
-      date: new Date().toISOString(),
-    };
+// router.post("/history/:userName", async (req, res) => {
+//   try {
+//     const history: TimerHistory = {
+//       ...req.body,
+//       id: crypto.randomUUID(),
+//       date: new Date().toISOString(),
+//     };
 
-    const result = await redisService.addHistory(history);
-    res.status(201).json(result);
-  } catch (error) {
-    res.status(500).json({ error: "Failed to add history" });
-  }
-});
+//     const result = await redisService.addHistory(history);
+//     res.status(201).json(result);
+//   } catch (error) {
+//     res.status(500).json({ error: "Failed to add history" });
+//   }
+// });
 
-// Get user history from Redis
-router.get("/history/:userName", async (req, res) => {
-  try {
-    const { userName } = req.params;
-    const history = await redisService.getHistory(userName);
-    res.json(history);
-  } catch (error) {
-    res.status(500).json({ error: "Failed to get history" });
-  }
-});
+// // Get user history from Redis
+// router.get("/history/:userName", async (req, res) => {
+//   try {
+//     const { userName } = req.params;
+//     const history = await redisService.getHistory(userName);
+//     res.json(history);
+//   } catch (error) {
+//     res.status(500).json({ error: "Failed to get history" });
+//   }
+// });
 
 router.get("/:roomId", async (req, res) => {
   try {

@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRoom } from "../hooks/use-room";
 import { ThemeToggle } from "../components/theme-toggle";
+import { z } from "zod";
+import { sessionSchema } from "../schemas/session";
 
 export function SessionPage() {
   const [userName, setUserName] = useState("");
@@ -9,37 +11,22 @@ export function SessionPage() {
   const navigate = useNavigate();
   const { addRoom } = useRoom();
 
-  const validateSessionName = (name: string): string | null => {
-    if (!name.trim()) return "Session name cannot be empty";
-    if (name.length > 10) return "Session name must be less than 10 characters";
-    if (name.includes(" ")) return "Session name must not contain spaces";
-    if (name !== name.replace(/[^a-zA-Z0-9]/g, ""))
-      return "Session name must only contain alphanumeric characters";
-    return null;
-  };
-
-  const handleCreateSession = (e: React.FormEvent) => {
+  const handleCreateSession = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!userName.trim()) {
-      alert("Please enter your name first");
-      return;
-    }
-    if (sessionName.trim()) {
-      if (sessionName.length > 10) {
-        alert("Session name must be less than 10 characters");
-        return;
-      }
-      if (sessionName.includes(" ")) {
-        alert("Session name must not contain spaces");
-        return;
-      }
-      if (sessionName !== sessionName.replace(/[^a-zA-Z0-9]/g, "")) {
-        alert("Session name must only contain alphanumeric characters");
-        return;
-      }
-      const sessionId = `${sessionName.toLowerCase()}`;
-      addRoom(sessionId, userName.trim());
+
+    try {
+      const result = sessionSchema.parse({
+        userName: userName.trim(),
+        sessionName: sessionName.trim(),
+      });
+
+      const sessionId = result.sessionName.toLowerCase();
+      await addRoom(sessionId, result.userName);
       navigate(`/room/${sessionId}`);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        alert(error.errors[0].message);
+      }
     }
   };
 

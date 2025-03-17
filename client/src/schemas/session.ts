@@ -13,3 +13,5 @@ export const sessionSchema = z.object({
     .max(10, "Session name must be less than 10 characters")
     .regex(/^[a-zA-Z0-9]+$/, "Only alphanumeric characters allowed"),
 });
+
+export type SessionInput = z.infer<typeof sessionSchema>;
