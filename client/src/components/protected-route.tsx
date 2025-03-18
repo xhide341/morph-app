@@ -5,7 +5,6 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { userName } = useUserInfo();
   const location = useLocation();
 
-  // If no username, redirect to session page
   if (!userName) {
     return <Navigate to="/session" replace state={{ from: location }} />;
   }

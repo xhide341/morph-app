@@ -27,7 +27,7 @@ app.use("/api/quotes", quotesRouter);
 app.use("/api/activity", activityRouter);
 app.use("/api/room", roomRouter);
 
-wss.on("connection", (ws) => {  
+wss.on("connection", (ws) => {
   // Handle incoming messages
   ws.on("message", (message) => {
     try {
