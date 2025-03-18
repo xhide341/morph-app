@@ -4,15 +4,19 @@ import { useRoom } from "../hooks/use-room";
 import { ThemeToggle } from "../components/theme-toggle";
 import { z } from "zod";
 import { roomSchema } from "../schemas/room-schema";
+import { useUserInfo } from "../contexts/user-context";
 
 export function SessionPage() {
-  const [userName, setUserName] = useState("");
+  const [userName, setUserNameInput] = useState("");
   const [roomName, setRoomName] = useState("");
   const navigate = useNavigate();
   const { addRoom } = useRoom();
+  const { setUserName } = useUserInfo();
 
   const handleCreateRoom = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // TODO: Add join session option
 
     try {
       const result = roomSchema.parse({
@@ -22,6 +26,8 @@ export function SessionPage() {
 
       const roomId = result.roomName.toLowerCase();
       await addRoom(roomId, result.userName);
+
+      setUserName(result.userName);
 
       navigate(`/room/${roomId}`);
     } catch (error) {
@@ -50,7 +56,7 @@ export function SessionPage() {
             <input
               type="text"
               value={userName}
-              onChange={(e) => setUserName(e.target.value)}
+              onChange={(e) => setUserNameInput(e.target.value)}
               placeholder="Enter your name"
               className="w-full rounded-md bg-[var(--color-secondary)] p-3 text-[var(--color-foreground)] placeholder:text-[var(--color-foreground)]/50 focus:ring-2 focus:ring-[var(--color-accent)] focus:outline-none"
             />

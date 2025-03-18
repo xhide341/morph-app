@@ -32,10 +32,7 @@ export const Clock = ({
   const { quote, author } = useQuote();
   const navigate = useNavigate();
 
-  if (!roomId) {
-    navigate("/session");
-    return null;
-  }
+  if (!roomId) return null;
 
   const handleTimerChange = (
     minutes: number,

@@ -26,7 +26,6 @@ export default function App() {
             />
 
             <Route path="/" element={<Navigate to="/session" replace />} />
-            <Route path="*" element={<Navigate to="/session" replace />} />
           </Routes>
         </div>
       </Router>
