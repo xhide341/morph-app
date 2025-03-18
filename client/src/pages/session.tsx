@@ -3,26 +3,27 @@ import { useNavigate } from "react-router-dom";
 import { useRoom } from "../hooks/use-room";
 import { ThemeToggle } from "../components/theme-toggle";
 import { z } from "zod";
-import { sessionSchema } from "../schemas/session";
+import { roomSchema } from "../schemas/room-schema";
 
 export function SessionPage() {
   const [userName, setUserName] = useState("");
-  const [sessionName, setSessionName] = useState("");
+  const [roomName, setRoomName] = useState("");
   const navigate = useNavigate();
   const { addRoom } = useRoom();
 
-  const handleCreateSession = async (e: React.FormEvent) => {
+  const handleCreateRoom = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
-      const result = sessionSchema.parse({
+      const result = roomSchema.parse({
         userName: userName.trim(),
-        sessionName: sessionName.trim(),
+        roomName: roomName.trim(),
       });
 
-      const sessionId = result.sessionName.toLowerCase();
-      await addRoom(sessionId, result.userName);
-      navigate(`/room/${sessionId}`);
+      const roomId = result.roomName.toLowerCase();
+      await addRoom(roomId, result.userName);
+
+      navigate(`/room/${roomId}`);
     } catch (error) {
       if (error instanceof z.ZodError) {
         alert(error.errors[0].message);
@@ -45,7 +46,7 @@ export function SessionPage() {
             </p>
           </div>
 
-          <form onSubmit={handleCreateSession} className="space-y-4">
+          <form onSubmit={handleCreateRoom} className="space-y-4">
             <input
               type="text"
               value={userName}
@@ -56,9 +57,9 @@ export function SessionPage() {
 
             <input
               type="text"
-              value={sessionName}
-              onChange={(e) => setSessionName(e.target.value)}
-              placeholder="Enter session name"
+              value={roomName}
+              onChange={(e) => setRoomName(e.target.value)}
+              placeholder="Enter room name"
               className="w-full rounded-md bg-[var(--color-secondary)] p-3 text-[var(--color-foreground)] placeholder:text-[var(--color-foreground)]/50 focus:ring-2 focus:ring-[var(--color-accent)] focus:outline-none"
             />
 
