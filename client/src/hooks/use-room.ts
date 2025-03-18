@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { RoomInfo, RoomUser } from "server/types/room";
-import redisService from "server/services/redis-service";
 
 export const useRoom = (roomId?: string) => {
   const [roomInfo, setRoomInfo] = useState<RoomInfo | null>(null);
@@ -8,7 +7,8 @@ export const useRoom = (roomId?: string) => {
 
   const fetchRoom = async (roomId: string) => {
     try {
-      const data = await redisService.getRoomInfo(roomId);
+      const response = await fetch(`/api/room/${roomId}`);
+      const data = await response.json();
       if (!data) return;
       setRoomInfo(data);
     } catch (error) {
@@ -25,9 +25,13 @@ export const useRoom = (roomId?: string) => {
 
   const addRoom = async (roomId: string, userName: string) => {
     try {
-      const data = await redisService.createRoom(roomId, userName);
+      const response = await fetch("/api/room/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ roomId, userName }),
+      });
+      const data = await response.json();
       if (!data) return;
-
       setRoomInfo(data);
     } catch (error) {
       console.error(error);
@@ -36,7 +40,12 @@ export const useRoom = (roomId?: string) => {
 
   const addUserToRoom = async (roomId: string, userName: string) => {
     try {
-      const data = await redisService.userJoinRoom(roomId, userName);
+      const response = await fetch("/api/room/join", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ roomId, userName }),
+      });
+      const data = await response.json();
       if (!data || !roomInfo) return;
 
       setRoomInfo({
@@ -51,7 +60,12 @@ export const useRoom = (roomId?: string) => {
 
   const removeUserFromRoom = async (roomId: string, userName: string) => {
     try {
-      const data = await redisService.userLeaveRoom(roomId, userName);
+      const response = await fetch("/api/room/leave", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ roomId, userName }),
+      });
+      const data = await response.json();
       if (!data || !roomInfo) return;
 
       setRoomInfo({
@@ -66,7 +80,8 @@ export const useRoom = (roomId?: string) => {
 
   const fetchRoomUsers = async (roomId: string) => {
     try {
-      const data = await redisService.getRoomUsers(roomId);
+      const response = await fetch(`/api/room/users/${roomId}`);
+      const data = await response.json();
       if (!data) return;
       setRoomUsers(data);
     } catch (error) {
@@ -76,7 +91,8 @@ export const useRoom = (roomId?: string) => {
 
   const fetchRoomInfo = async (roomId: string) => {
     try {
-      const data = await redisService.getRoomInfo(roomId);
+      const response = await fetch(`/api/room/${roomId}`);
+      const data = await response.json();
       if (!data) return;
       setRoomInfo(data);
     } catch (error) {
