@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useQuote } from "../hooks/use-quote";
-import { useParams } from "react-router-dom";
-import { RoomActivity } from "../types/room";
+import { useParams, useNavigate } from "react-router-dom";
+import { RoomActivity } from "server/types/room";
+import { useUserInfo } from "../contexts/user-context";
 
 import { Play, Pause, RotateCcw } from "react-feather";
 import { Navigation } from "./navigation";
@@ -17,6 +18,8 @@ export const Clock = ({
   latestActivity: RoomActivity | null;
 }) => {
   const { roomId } = useParams<{ roomId: string }>();
+  const { userName } = useUserInfo();
+
   const [time, setTime] = useState("25:00");
   const [lastWorkTime, setLastWorkTime] = useState("25:00");
   const [lastBreakTime, setLastBreakTime] = useState("05:00");
@@ -27,6 +30,12 @@ export const Clock = ({
   const [timerMode, setTimerMode] = useState<TimerMode>("work");
   const [isSync, setIsSync] = useState(false);
   const { quote, author } = useQuote();
+  const navigate = useNavigate();
+
+  if (!roomId) {
+    navigate("/session");
+    return null;
+  }
 
   const handleTimerChange = (
     minutes: number,
@@ -50,8 +59,8 @@ export const Clock = ({
     if (!isSync) {
       addActivity({
         type: "change_timer",
-        userName: "John Doe",
-        roomId: roomId || "",
+        userName: userName,
+        roomId: roomId,
         timeRemaining: newTime,
         timerMode: mode,
       });
@@ -89,8 +98,8 @@ export const Clock = ({
         if (!isSync && newTime === "00:00") {
           addActivity({
             type: "complete_timer",
-            userName: "John Doe",
-            roomId: roomId || "",
+            userName: userName,
+            roomId: roomId,
             timeRemaining: "00:00",
             timerMode: timerMode,
           });
@@ -105,8 +114,8 @@ export const Clock = ({
     if (!isSync) {
       addActivity({
         type: "start_timer",
-        userName: "John Doe",
-        roomId: roomId || "",
+        userName: userName,
+        roomId: roomId,
         timeRemaining: time,
         timerMode: timerMode,
       });
@@ -123,8 +132,8 @@ export const Clock = ({
     if (!isSync) {
       addActivity({
         type: "pause_timer",
-        userName: "John Doe",
-        roomId: roomId || "",
+        userName: userName,
+        roomId: roomId,
         timeRemaining: time,
         timerMode: timerMode,
       });
@@ -139,8 +148,8 @@ export const Clock = ({
       if (!isSync) {
         addActivity({
           type: "reset_timer",
-          userName: "John Doe",
-          roomId: roomId || "",
+          userName: userName,
+          roomId: roomId,
           timeRemaining: time,
           timerMode: timerMode,
         });

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { RoomActivity } from "server/types/room";
 import { wsService } from "server/services/websocket-service";
 
-export const useRoomActivity = (roomId: string) => {
+export const useActivityTracker = (roomId: string) => {
   const [activities, setActivities] = useState<RoomActivity[]>([]);
 
   const fetchActivities = async (roomId: string) => {
@@ -43,7 +43,6 @@ export const useRoomActivity = (roomId: string) => {
 
     setActivities((prev) => [...prev, newActivity]);
 
-    console.log("Sending activity:", newActivity);
     try {
       wsService.send({
         type: "activity",

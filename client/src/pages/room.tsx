@@ -3,11 +3,11 @@ import { ThemeToggle } from "../components/theme-toggle";
 import { useParams } from "react-router-dom";
 import { Header } from "../components/header";
 import { ActivityLog } from "../components/activity-log";
-import { useRoomActivity } from "../hooks/use-room-activity";
+import { useActivityTracker } from "../hooks/use-activity-tracker";
 
 export const RoomPage = () => {
   const { roomId } = useParams<{ roomId: string }>();
-  const { activities, addActivity } = useRoomActivity(roomId || "");
+  const { activities, addActivity } = useActivityTracker(roomId || "");
   const latestActivity = activities[activities.length - 1];
 
   return (
