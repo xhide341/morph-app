@@ -1,14 +1,39 @@
-import { Clock } from "../components/clock";
-import { ThemeToggle } from "../components/theme-toggle";
 import { useParams } from "react-router-dom";
-import { Header } from "../components/header";
-import { ActivityLog } from "../components/activity-log";
 import { useActivityTracker } from "../hooks/use-activity-tracker";
+import { useUserInfo } from "../contexts/user-context";
+import { useRoom } from "../hooks/use-room";
+import { useEffect } from "react";
+
+import { Clock } from "../components/clock";
+import { Header } from "../components/header";
+import { ThemeToggle } from "../components/theme-toggle";
+import { ActivityLog } from "../components/activity-log";
 
 export const RoomPage = () => {
   const { roomId } = useParams<{ roomId: string }>();
+  const { userName } = useUserInfo();
+  const { removeUserFromRoom } = useRoom();
   const { activities, addActivity } = useActivityTracker(roomId || "");
   const latestActivity = activities[activities.length - 1];
+
+  useEffect(() => {
+    if (!roomId || !userName) return;
+
+    addActivity({
+      type: "join",
+      userName,
+      roomId,
+    });
+
+    return () => {
+      addActivity({
+        type: "leave",
+        userName,
+        roomId,
+      });
+      removeUserFromRoom(roomId, userName);
+    };
+  }, [roomId, userName]);
 
   return (
     <div className="font-roboto mx-auto flex h-dvh w-full max-w-2xl flex-col bg-[var(--color-background)] p-4 text-[var(--color-foreground)]">

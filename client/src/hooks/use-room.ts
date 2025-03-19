@@ -11,6 +11,8 @@ export const useRoom = (roomId?: string) => {
       const data = await response.json();
       if (!data) return;
       setRoomInfo(data);
+
+      return data;
     } catch (error) {
       console.error(error);
     }
@@ -33,6 +35,8 @@ export const useRoom = (roomId?: string) => {
       const data = await response.json();
       if (!data) return;
       setRoomInfo(data);
+
+      return data;
     } catch (error) {
       console.error(error);
     }
@@ -53,6 +57,8 @@ export const useRoom = (roomId?: string) => {
         activeUsers: roomInfo.activeUsers,
         lastActive: roomInfo.lastActive,
       });
+
+      return data;
     } catch (error) {
       console.error(error);
     }
@@ -73,6 +79,8 @@ export const useRoom = (roomId?: string) => {
         activeUsers: data.userCount,
         lastActive: data.lastActive,
       });
+
+      return data;
     } catch (error) {
       console.error(error);
     }
@@ -84,17 +92,8 @@ export const useRoom = (roomId?: string) => {
       const data = await response.json();
       if (!data) return;
       setRoomUsers(data);
-    } catch (error) {
-      console.error(error);
-    }
-  };
 
-  const fetchRoomInfo = async (roomId: string) => {
-    try {
-      const response = await fetch(`/api/room/${roomId}`);
-      const data = await response.json();
-      if (!data) return;
-      setRoomInfo(data);
+      return data;
     } catch (error) {
       console.error(error);
     }
@@ -103,11 +102,11 @@ export const useRoom = (roomId?: string) => {
   return {
     roomInfo,
     roomUsers,
+    fetchRoom,
     addRoom,
     addUserToRoom,
     removeUserFromRoom,
     fetchRoomUsers,
-    fetchRoomInfo,
   };
 };
 

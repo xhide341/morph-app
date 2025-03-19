@@ -1,34 +1,50 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRoom } from "../hooks/use-room";
-import { ThemeToggle } from "../components/theme-toggle";
+import { useUserInfo } from "../contexts/user-context";
 import { z } from "zod";
 import { roomSchema } from "../schemas/room-schema";
-import { useUserInfo } from "../contexts/user-context";
+
+import { ThemeToggle } from "../components/theme-toggle";
 
 export function SessionPage() {
+  const navigate = useNavigate();
+  const { addRoom, addUserToRoom, fetchRoom } = useRoom();
+  const { setUserName } = useUserInfo();
   const [userName, setUserNameInput] = useState("");
   const [roomName, setRoomName] = useState("");
-  const navigate = useNavigate();
-  const { addRoom } = useRoom();
-  const { setUserName } = useUserInfo();
 
-  const handleCreateRoom = async (e: React.FormEvent) => {
+  const handleRoom = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // TODO: Add join session option
 
     try {
       const result = roomSchema.parse({
-        userName: userName.trim(),
-        roomName: roomName.trim(),
+        userName: userName.trim().toLowerCase(),
+        roomName: roomName.trim().toLowerCase(),
       });
+      if (!result) return;
 
-      const roomId = result.roomName.toLowerCase();
-      await addRoom(roomId, result.userName);
+      const roomId = result.roomName;
+      const userId = result.userName;
 
-      setUserName(result.userName);
+      const joinOrCreateRoom = async () => {
+        const roomExists = await fetchRoom(roomId);
+        // create room
+        if (!roomExists) {
+          const newRoom = await addRoom(roomId, userId);
+          if (!newRoom) return;
+          return newRoom;
+        }
+        // join room
+        const joinedRoom = await addUserToRoom(roomId, userId);
+        if (!joinedRoom) return;
+        return joinedRoom;
+      };
 
+      const room = await joinOrCreateRoom();
+      if (!room) return;
+
+      setUserName(userId);
       navigate(`/room/${roomId}`);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -52,7 +68,7 @@ export function SessionPage() {
             </p>
           </div>
 
-          <form onSubmit={handleCreateRoom} className="space-y-4">
+          <form onSubmit={handleRoom} className="space-y-4">
             <input
               type="text"
               value={userName}
