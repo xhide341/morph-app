@@ -10,6 +10,8 @@ import { ProgressBar } from "./progress-bar";
 
 type TimerMode = "work" | "break";
 
+// TODO: Fix progress bar length relying on quote length
+
 export const Clock = ({
   addActivity,
   latestActivity,

@@ -41,15 +41,29 @@ const redisService = {
 
   async createRoom(roomId: string, userName: string): Promise<RoomInfo | null> {
     const roomKey = `room:${roomId}`;
+    const userHashKey = `room:${roomId}:users`;
     const timestamp = Date.now().toString();
 
     try {
-      await redis.hSet(roomKey, {
-        createdBy: userName,
-        createdAt: timestamp,
-        lastActive: timestamp,
-        activeUsers: "1",
-      });
+      const result = await redis
+        .multi()
+        .hSet(roomKey, {
+          createdBy: userName,
+          createdAt: timestamp,
+          lastActive: timestamp,
+          activeUsers: "1",
+        })
+        .hSet(
+          userHashKey,
+          userName,
+          JSON.stringify({
+            userName,
+            joinedAt: timestamp,
+          })
+        )
+        .exec();
+
+      if (!result) return null;
 
       return {
         createdBy: userName,
@@ -69,24 +83,28 @@ const redisService = {
     const userHashKey = `room:${roomId}:users`;
 
     try {
-      const userCount = await redis.hLen(userHashKey);
+      const result = await redis
+        .multi()
+        .hSet(
+          userHashKey,
+          userName,
+          JSON.stringify({ userName, joinedAt: Date.now() })
+        )
+        .hLen(userHashKey)
+        .exec();
+
+      if (!result) return null;
+
+      const userCount = result[1];
+
       await redis.hSet(roomKey, {
-        activeUsers: userCount,
+        activeUsers: String(userCount),
         lastActive: Date.now(),
       });
       // remove expiry
       await redis.persist(roomKey);
       await redis.persist(userHashKey);
       await redis.persist(`room:${roomId}:activities`);
-
-      await redis.hSet(
-        userHashKey,
-        userName,
-        JSON.stringify({
-          userName,
-          joinedAt: Date.now(),
-        })
-      );
 
       return {
         userCount: Number(userCount),
@@ -115,9 +133,12 @@ const redisService = {
 
       // if no users, set 10-minute expiry
       if (userCount === 0) {
-        await redis.expire(roomKey, ROOM_INACTIVITY_EXPIRY);
-        await redis.expire(userHashKey, ROOM_INACTIVITY_EXPIRY);
-        await redis.expire(`room:${roomId}:activities`, ROOM_INACTIVITY_EXPIRY);
+        const result = await redis
+          .multi()
+          .expire(roomKey, ROOM_INACTIVITY_EXPIRY)
+          .expire(`room:${roomId}:activities`, ROOM_INACTIVITY_EXPIRY)
+          .exec();
+        console.log("Room expired:", result);
       }
 
       return {

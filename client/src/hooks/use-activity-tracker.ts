@@ -58,6 +58,8 @@ export const useActivityTracker = (roomId: string) => {
       if (!response.ok) {
         throw new Error("Failed to add activity");
       }
+
+      console.log("Activity added: ", newActivity);
     } catch (error) {
       console.error("Error:", error);
     }

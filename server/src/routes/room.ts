@@ -1,9 +1,9 @@
 import { Router } from "express";
 import redisService from "../services/redis-service";
 
-const router = Router();
+const roomRouter = Router();
 
-router.post("/create", async (req, res) => {
+roomRouter.post("/create", async (req, res) => {
   try {
     const { roomId, userName } = req.body;
     const room = await redisService.createRoom(roomId, userName);
@@ -13,7 +13,7 @@ router.post("/create", async (req, res) => {
   }
 });
 
-router.post("/:roomId/join", async (req, res) => {
+roomRouter.post("/:roomId/join", async (req, res) => {
   try {
     const { roomId } = req.params;
     const { userName } = req.body;
@@ -24,4 +24,35 @@ router.post("/:roomId/join", async (req, res) => {
   }
 });
 
-export default router;
+roomRouter.post("/:roomId/leave", async (req, res) => {
+  try {
+    const { roomId } = req.params;
+    const { userName } = req.body;
+    const result = await redisService.userLeaveRoom(roomId, userName);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to leave room" });
+  }
+});
+
+roomRouter.get("/:roomId/info", async (req, res) => {
+  try {
+    const { roomId } = req.params;
+    const result = await redisService.getRoomInfo(roomId);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to get room info" });
+  }
+});
+
+roomRouter.get("/:roomId/users", async (req, res) => {
+  try {
+    const { roomId } = req.params;
+    const result = await redisService.getRoomUsers(roomId);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to get room users" });
+  }
+});
+
+export default roomRouter;

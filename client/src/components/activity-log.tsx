@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "motion/react";
-import { RoomActivity } from "../types/room";
+import { RoomActivity } from "server/types/room";
 
 import { format } from "date-fns";
 
@@ -26,6 +26,7 @@ export const ActivityLog = ({ activities }: { activities: RoomActivity[] }) => {
                   <div className="flex items-center gap-1 text-xs">
                     <span className="font-medium">{activity.userName}</span>
                     <span className="text-primary">
+                      {/* TODO: add condition if user is first one then user "created" the room */}
                       {activity.type === "join" && "joined the room"}
                       {activity.type === "leave" && "left the room"}
                       {activity.type === "start_timer" && "started a timer"}

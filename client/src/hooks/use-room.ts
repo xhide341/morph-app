@@ -7,7 +7,11 @@ export const useRoom = (roomId?: string) => {
 
   const fetchRoom = async (roomId: string) => {
     try {
-      const response = await fetch(`/api/room/${roomId}`);
+      const response = await fetch(`/api/room/${roomId}/info`);
+      if (!response.ok) {
+        console.error("Failed to fetch room info");
+        return;
+      }
       const data = await response.json();
       if (!data) return;
       setRoomInfo(data);
@@ -32,6 +36,10 @@ export const useRoom = (roomId?: string) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ roomId, userName }),
       });
+      if (!response.ok) {
+        console.error("Failed to create room");
+        return;
+      }
       const data = await response.json();
       if (!data) return;
       setRoomInfo(data);
@@ -44,11 +52,15 @@ export const useRoom = (roomId?: string) => {
 
   const addUserToRoom = async (roomId: string, userName: string) => {
     try {
-      const response = await fetch("/api/room/join", {
+      const response = await fetch(`/api/room/${roomId}/join`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ roomId, userName }),
+        body: JSON.stringify({ userName }),
       });
+      if (!response.ok) {
+        console.error("Failed to join room");
+        return;
+      }
       const data = await response.json();
       if (!data || !roomInfo) return;
 
@@ -66,11 +78,15 @@ export const useRoom = (roomId?: string) => {
 
   const removeUserFromRoom = async (roomId: string, userName: string) => {
     try {
-      const response = await fetch("/api/room/leave", {
+      const response = await fetch(`/api/room/${roomId}/leave`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ roomId, userName }),
+        body: JSON.stringify({ userName }),
       });
+      if (!response.ok) {
+        console.error("Failed to leave room");
+        return;
+      }
       const data = await response.json();
       if (!data || !roomInfo) return;
 
@@ -88,7 +104,11 @@ export const useRoom = (roomId?: string) => {
 
   const fetchRoomUsers = async (roomId: string) => {
     try {
-      const response = await fetch(`/api/room/users/${roomId}`);
+      const response = await fetch(`/api/room/${roomId}/users`);
+      if (!response.ok) {
+        console.error("Failed to fetch room users");
+        return;
+      }
       const data = await response.json();
       if (!data) return;
       setRoomUsers(data);

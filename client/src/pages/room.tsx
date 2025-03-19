@@ -2,7 +2,7 @@ import { useParams } from "react-router-dom";
 import { useActivityTracker } from "../hooks/use-activity-tracker";
 import { useUserInfo } from "../contexts/user-context";
 import { useRoom } from "../hooks/use-room";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import { Clock } from "../components/clock";
 import { Header } from "../components/header";
@@ -14,10 +14,12 @@ export const RoomPage = () => {
   const { userName } = useUserInfo();
   const { removeUserFromRoom } = useRoom();
   const { activities, addActivity } = useActivityTracker(roomId || "");
+  const [forceRender, setForceRender] = useState(0);
   const latestActivity = activities[activities.length - 1];
 
   useEffect(() => {
     if (!roomId || !userName) return;
+    console.log("Effect triggered", { roomId, userName });
 
     addActivity({
       type: "join",
@@ -33,7 +35,7 @@ export const RoomPage = () => {
       });
       removeUserFromRoom(roomId, userName);
     };
-  }, [roomId, userName]);
+  }, [roomId, userName, forceRender]);
 
   return (
     <div className="font-roboto mx-auto flex h-dvh w-full max-w-2xl flex-col bg-[var(--color-background)] p-4 text-[var(--color-foreground)]">
@@ -44,6 +46,9 @@ export const RoomPage = () => {
       <div className="mx-auto flex w-full max-w-3xl flex-col">
         <Clock addActivity={addActivity} latestActivity={latestActivity} />
       </div>
+      <button onClick={() => setForceRender((prev) => prev + 1)}>
+        Trigger Effect
+      </button>
       {roomId && <ActivityLog activities={activities} />}
     </div>
   );

@@ -9,6 +9,8 @@ import { RoomPage } from "./pages/room";
 import { UserProvider } from "./contexts/user-context";
 import { ProtectedRoute } from "./components/protected-route";
 
+// TODO: still need to make sure other routes that are not protected are not accessible/redirected to session page
+
 export default function App() {
   return (
     <UserProvider>
