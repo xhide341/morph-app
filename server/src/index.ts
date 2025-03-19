@@ -5,7 +5,7 @@ import activityRouter from "./routes/activity";
 import roomRouter from "./routes/room";
 import { connectRedis } from "./config/redis";
 import { createServer } from "http";
-import { WebSocketServer } from "ws";
+import { WebSocketServer, WebSocket } from "ws";
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -27,14 +27,26 @@ app.use("/api/quotes", quotesRouter);
 app.use("/api/activity", activityRouter);
 app.use("/api/room", roomRouter);
 
-wss.on("connection", (ws) => {
+// Track clients and their rooms
+const clients = new Map<WebSocket, string>();
+
+wss.on("connection", (ws: WebSocket) => {
   // Handle incoming messages
   ws.on("message", (message) => {
     try {
       const data = JSON.parse(message.toString());
+      const roomId = data.roomId; // Get roomId from message
 
+      // Store client's room
+      clients.set(ws, roomId);
+
+      // Only send to clients in the same room
       wss.clients.forEach((client) => {
-        if (client.readyState === ws.OPEN && client !== ws) {
+        if (
+          client.readyState === ws.OPEN &&
+          client !== ws &&
+          clients.get(client) === roomId
+        ) {
           client.send(JSON.stringify(data));
         }
       });
@@ -45,7 +57,7 @@ wss.on("connection", (ws) => {
 
   // Handle client disconnection
   ws.on("close", () => {
-    console.log("Client disconnected");
+    clients.delete(ws);
   });
 
   // Handle errors

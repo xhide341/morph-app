@@ -123,25 +123,25 @@ export const Clock = ({
   };
 
   const handlePause = (isSync: boolean = false) => {
-    if (timerInterval) {
+    if (timerInterval && isRunning) {
       clearInterval(timerInterval);
       setTimerInterval(null);
-    }
-    setIsRunning(false);
+      setIsRunning(false);
 
-    if (!isSync) {
-      addActivity({
-        type: "pause_timer",
-        userName: userName,
-        roomId: roomId,
-        timeRemaining: time,
-        timerMode: timerMode,
-      });
+      if (!isSync) {
+        addActivity({
+          type: "pause_timer",
+          userName: userName,
+          roomId: roomId,
+          timeRemaining: time,
+          timerMode: timerMode,
+        });
+      }
     }
   };
 
-  const handleReset = () => {
-    if (timerInterval) {
+  const handleReset = (isSync: boolean = false) => {
+    if (timerInterval && isRunning) {
       clearInterval(timerInterval);
       setTimerInterval(null);
 
@@ -201,8 +201,7 @@ export const Clock = ({
         handleStart(true);
       }
       if (activity.type === "reset_timer") {
-        setTime(activity.timeRemaining || time);
-        handleReset();
+        handleReset(true);
       }
       setIsSync(false);
     };
@@ -223,14 +222,16 @@ export const Clock = ({
           <button
             aria-label={isRunning ? "Pause" : "Start"}
             className={`css-button-3d w-24 p-4 ${isRunning ? "pressed" : ""}`}
-            onClick={isRunning ? () => handlePause() : () => handleStart()}
+            onClick={
+              isRunning ? () => handlePause(false) : () => handleStart(false)
+            }
           >
             {isRunning ? <Pause size={24} /> : <Play size={24} />}
           </button>
           <button
             aria-label="Reset"
             className="css-button-3d w-24 p-4"
-            onClick={handleReset}
+            onClick={() => handleReset(false)}
           >
             <RotateCcw size={24} />
           </button>
