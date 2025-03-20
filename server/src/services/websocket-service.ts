@@ -9,6 +9,7 @@ class WebSocketService {
   private static instance: WebSocketService;
   private socket: WebSocket | null = null;
   private subscribers: Map<string, Set<(data: any) => void>> = new Map();
+  private shouldReconnect: boolean = true;
 
   private constructor() {}
 
@@ -21,6 +22,7 @@ class WebSocketService {
 
   connect(roomId: string) {
     if (this.socket) return;
+    this.shouldReconnect = true;
 
     const WS_URL = "ws://localhost:3000";
 
@@ -40,7 +42,9 @@ class WebSocketService {
 
     this.socket.onclose = () => {
       console.log("Disconnected from WebSocket");
-      setTimeout(() => this.connect(roomId), 1000);
+      if (this.shouldReconnect) {
+        setTimeout(() => this.connect(roomId), 1000);
+      }
     };
 
     this.socket.onerror = (error) => {
@@ -74,8 +78,13 @@ class WebSocketService {
   }
 
   disconnect() {
+    this.shouldReconnect = false;
     this.socket?.close();
     this.socket = null;
+  }
+
+  getSocket() {
+    return this.socket;
   }
 }
 

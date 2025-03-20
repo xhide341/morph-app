@@ -8,6 +8,7 @@ import { Clock } from "../components/clock";
 import { Header } from "../components/header";
 import { ThemeToggle } from "../components/theme-toggle";
 import { ActivityLog } from "../components/activity-log";
+import { useConnectionState } from "../hooks/use-connection-state";
 
 export const RoomPage = () => {
   const { roomId } = useParams<{ roomId: string }>();
@@ -19,21 +20,36 @@ export const RoomPage = () => {
 
   useEffect(() => {
     if (!roomId || !userName) return;
-    console.log("Effect triggered", { roomId, userName });
 
-    addActivity({
-      type: "join",
-      userName,
-      roomId,
-    });
+    let isActive = true;
 
-    return () => {
+    // Normal join
+    const joinTimeout = setTimeout(() => {
+      if (isActive) {
+        addActivity({
+          type: "join",
+          userName,
+          roomId,
+        });
+      }
+    }, 100);
+
+    // Add window close handler
+    const handleWindowClose = () => {
       addActivity({
         type: "leave",
         userName,
         roomId,
       });
       removeUserFromRoom(roomId, userName);
+    };
+
+    window.addEventListener("beforeunload", handleWindowClose);
+
+    return () => {
+      isActive = false;
+      clearTimeout(joinTimeout);
+      window.removeEventListener("beforeunload", handleWindowClose);
     };
   }, [roomId, userName, forceRender]);
 

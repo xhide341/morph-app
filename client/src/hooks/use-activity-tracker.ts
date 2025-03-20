@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { RoomActivity } from "server/types/room";
 import { wsService } from "server/services/websocket-service";
 
@@ -29,41 +29,46 @@ export const useActivityTracker = (roomId: string) => {
 
     fetchActivities(roomId).then(setActivities);
 
-    return () => wsService.disconnect();
+    // No need for explicit disconnect here as it's handled by addActivity
   }, [roomId]);
 
-  const addActivity = async (
-    activity: Omit<RoomActivity, "id" | "timeStamp">,
-  ) => {
-    const newActivity: RoomActivity = {
-      ...activity,
-      id: crypto.randomUUID(),
-      timeStamp: new Date().toISOString(),
-    };
+  const addActivity = useCallback(
+    async (activity: Omit<RoomActivity, "id" | "timeStamp">) => {
+      const newActivity: RoomActivity = {
+        ...activity,
+        id: crypto.randomUUID(),
+        timeStamp: new Date().toISOString(),
+      };
 
-    setActivities((prev) => [...prev, newActivity]);
+      setActivities((prev) => [...prev, newActivity]);
 
-    try {
-      wsService.send({
-        type: "activity",
-        payload: newActivity,
-      });
+      try {
+        if (activity.type === "leave") {
+          wsService.disconnect(); // Disconnect when leaving
+        }
 
-      const response = await fetch(`/api/activity/room/${roomId}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newActivity),
-      });
+        wsService.send({
+          type: "activity",
+          payload: newActivity,
+        });
 
-      if (!response.ok) {
-        throw new Error("Failed to add activity");
+        const response = await fetch(`/api/activity/room/${roomId}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(newActivity),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to add activity");
+        }
+
+        console.log("Activity added: ", newActivity);
+      } catch (error) {
+        console.error("Error:", error);
       }
-
-      console.log("Activity added: ", newActivity);
-    } catch (error) {
-      console.error("Error:", error);
-    }
-  };
+    },
+    [roomId],
+  );
 
   return { activities, addActivity };
 };
