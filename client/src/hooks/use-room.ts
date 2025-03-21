@@ -29,7 +29,7 @@ export const useRoom = (roomId?: string) => {
     fetchRoomUsers(roomId);
   }, [roomId]);
 
-  const addRoom = async (roomId: string, userName: string) => {
+  const createRoom = async (roomId: string, userName: string) => {
     try {
       const response = await fetch("/api/room/create", {
         method: "POST",
@@ -123,7 +123,7 @@ export const useRoom = (roomId?: string) => {
     roomInfo,
     roomUsers,
     fetchRoom,
-    addRoom,
+    createRoom,
     addUserToRoom,
     removeUserFromRoom,
     fetchRoomUsers,

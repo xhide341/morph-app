@@ -5,13 +5,11 @@ const ROOM_INACTIVITY_EXPIRY = 10 * 60; // 10 minutes in seconds
 
 const redisService = {
   // Room activities
-  async addActivity(roomId: string, activity: RoomActivity) {
+  async storeActivity(roomId: string, activity: RoomActivity) {
     const key = `room:${roomId}:activities`;
-    const activities = await this.getActivities(roomId);
-    activities.push(activity);
 
-    // Store activities (no need for expiry here, it's handled by userLeaveRoom)
-    await redis.set(key, JSON.stringify(activities));
+    await redis.lPush(key, JSON.stringify(activity));
+    await redis.lTrim(key, 0, 49); // Keep most recent 50 activities
 
     // Update room's last active timestamp
     await redis.hSet(`room:${roomId}`, "lastActive", Date.now());
@@ -21,9 +19,11 @@ const redisService = {
 
   async getActivities(roomId: string): Promise<RoomActivity[]> {
     const key = `room:${roomId}:activities`;
-    const activities = await redis.get(key);
-    return activities ? JSON.parse(activities) : [];
+    const activities = await redis.lRange(key, 0, -1);
+    return activities.map((activity) => JSON.parse(activity));
   },
+
+  // ------------------------------------------------------------
 
   // Room management
   async getRoomInfo(roomId: string): Promise<RoomInfo | null> {

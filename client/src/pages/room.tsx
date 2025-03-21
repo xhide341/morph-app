@@ -1,21 +1,18 @@
 import { useParams } from "react-router-dom";
 import { useActivityTracker } from "../hooks/use-activity-tracker";
 import { useUserInfo } from "../contexts/user-context";
-import { useRoom } from "../hooks/use-room";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { wsService } from "server/services/websocket-service";
 
 import { Clock } from "../components/clock";
 import { Header } from "../components/header";
 import { ThemeToggle } from "../components/theme-toggle";
 import { ActivityLog } from "../components/activity-log";
-import { useConnectionState } from "../hooks/use-connection-state";
 
 export const RoomPage = () => {
   const { roomId } = useParams<{ roomId: string }>();
   const { userName } = useUserInfo();
-  const { removeUserFromRoom } = useRoom();
   const { activities, addActivity } = useActivityTracker(roomId || "");
-  const [forceRender, setForceRender] = useState(0);
   const latestActivity = activities[activities.length - 1];
 
   useEffect(() => {
@@ -23,35 +20,22 @@ export const RoomPage = () => {
 
     let isActive = true;
 
-    // Normal join
+    // Remove WebSocket connection - it's handled by useWebSocket now
     const joinTimeout = setTimeout(() => {
-      if (isActive) {
+      if (isActive && wsService.getSocket()?.readyState === WebSocket.OPEN) {
         addActivity({
           type: "join",
           userName,
           roomId,
         });
       }
-    }, 100);
-
-    // Add window close handler
-    const handleWindowClose = () => {
-      addActivity({
-        type: "leave",
-        userName,
-        roomId,
-      });
-      removeUserFromRoom(roomId, userName);
-    };
-
-    window.addEventListener("beforeunload", handleWindowClose);
+    }, 300);
 
     return () => {
       isActive = false;
       clearTimeout(joinTimeout);
-      window.removeEventListener("beforeunload", handleWindowClose);
     };
-  }, [roomId, userName, forceRender]);
+  }, [roomId, userName]);
 
   return (
     <div className="font-roboto mx-auto flex h-dvh w-full max-w-2xl flex-col bg-[var(--color-background)] p-4 text-[var(--color-foreground)]">
@@ -62,9 +46,6 @@ export const RoomPage = () => {
       <div className="mx-auto flex w-full max-w-3xl flex-col">
         <Clock addActivity={addActivity} latestActivity={latestActivity} />
       </div>
-      <button onClick={() => setForceRender((prev) => prev + 1)}>
-        Trigger Effect
-      </button>
       {roomId && <ActivityLog activities={activities} />}
     </div>
   );

@@ -14,7 +14,7 @@ router.post("/room/:roomId", async (req, res) => {
       timeStamp: new Date().toISOString(),
     };
 
-    const result = await redisService.addActivity(roomId, activity);
+    const result = await redisService.storeActivity(roomId, activity);
     res.status(201).json(result);
   } catch (error) {
     res.status(500).json({ error: "Failed to add activity" });

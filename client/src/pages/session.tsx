@@ -9,7 +9,7 @@ import { ThemeToggle } from "../components/theme-toggle";
 
 export function SessionPage() {
   const navigate = useNavigate();
-  const { addRoom, addUserToRoom, fetchRoom } = useRoom();
+  const { createRoom, addUserToRoom, fetchRoom } = useRoom();
   const { setUserName } = useUserInfo();
   const [userName, setUserNameInput] = useState("");
   const [roomName, setRoomName] = useState("");
@@ -31,7 +31,7 @@ export function SessionPage() {
         const roomExists = await fetchRoom(roomId);
         // create room
         if (!roomExists) {
-          const newRoom = await addRoom(roomId, userId);
+          const newRoom = await createRoom(roomId, userId);
           if (!newRoom) return;
           return newRoom;
         }

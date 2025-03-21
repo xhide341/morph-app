@@ -6,6 +6,8 @@ import roomRouter from "./routes/room";
 import { connectRedis } from "./config/redis";
 import { createServer } from "http";
 import { WebSocketServer, WebSocket } from "ws";
+import redisService from "./services/redis-service";
+import crypto from "crypto";
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -27,42 +29,45 @@ app.use("/api/quotes", quotesRouter);
 app.use("/api/activity", activityRouter);
 app.use("/api/room", roomRouter);
 
-// Track clients and their rooms
-const clients = new Map<WebSocket, string>();
+// Track WebSocket client info for broadcasting and room management
+const clients = new Map<WebSocket, { roomId: string; userName: string }>();
 
-wss.on("connection", (ws: WebSocket) => {
-  // Handle incoming messages
-  ws.on("message", (message) => {
+wss.on("connection", (ws: WebSocket, req) => {
+  const url = new URL(req.url || "", `ws://${req.headers.host}`);
+  const roomId = url.pathname.split("/rooms/")[1];
+
+  ws.on("message", async (message) => {
     try {
       const data = JSON.parse(message.toString());
-      const roomId = data.roomId; // Get roomId from message
 
-      // Store client's room
-      clients.set(ws, roomId);
-
-      // Only send to clients in the same room
-      wss.clients.forEach((client) => {
-        if (
-          client.readyState === ws.OPEN &&
-          client !== ws &&
-          clients.get(client) === roomId
-        ) {
-          client.send(JSON.stringify(data));
+      if (data.type === "activity") {
+        if (data.payload.type === "join") {
+          // Just track the client, room already exists
+          clients.set(ws, {
+            roomId,
+            userName: data.payload.userName,
+          });
         }
-      });
+
+        await redisService.storeActivity(roomId, data.payload);
+
+        // Broadcast to room
+        wss.clients.forEach((client) => {
+          if (
+            client.readyState === WebSocket.OPEN &&
+            clients.get(client)?.roomId === roomId
+          ) {
+            client.send(JSON.stringify(data));
+          }
+        });
+      }
     } catch (error) {
       console.error("Error processing message:", error);
     }
   });
 
-  // Handle client disconnection
   ws.on("close", () => {
     clients.delete(ws);
-  });
-
-  // Handle errors
-  ws.on("error", (error) => {
-    console.error("WebSocket error:", error);
   });
 });
 
