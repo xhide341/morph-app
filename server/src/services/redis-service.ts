@@ -8,11 +8,16 @@ const redisService = {
   async storeActivity(roomId: string, activity: RoomActivity) {
     const key = `room:${roomId}:activities`;
 
-    await redis.lPush(key, JSON.stringify(activity));
-    await redis.lTrim(key, 0, 49); // Keep most recent 50 activities
+    const result = await redis
+      .multi()
+      .lPush(key, JSON.stringify(activity))
+      .lTrim(key, 0, 49)
+      .exec();
+    if (!result) return;
 
-    // Update room's last active timestamp
+    // update room's last active timestamp
     await redis.hSet(`room:${roomId}`, "lastActive", Date.now());
+    console.log("Activity stored:", activity);
 
     return activity;
   },
@@ -20,6 +25,7 @@ const redisService = {
   async getActivities(roomId: string): Promise<RoomActivity[]> {
     const key = `room:${roomId}:activities`;
     const activities = await redis.lRange(key, 0, -1);
+    if (!activities) return [];
     return activities.map((activity) => JSON.parse(activity));
   },
 
