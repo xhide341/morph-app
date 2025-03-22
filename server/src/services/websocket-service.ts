@@ -10,6 +10,9 @@ class WebSocketService {
   private socket: WebSocket | null = null;
   private subscribers: Map<string, Set<(data: any) => void>> = new Map();
   private shouldReconnect: boolean = true;
+  private reconnectAttempts: number = 0;
+  private maxReconnectAttempts: number = 5;
+  private currentRoomId: string | null = null;
 
   private constructor() {}
 
@@ -21,16 +24,30 @@ class WebSocketService {
   }
 
   connect(roomId: string) {
-    if (this.socket) return;
-    this.shouldReconnect = true;
+    this.currentRoomId = roomId;
 
+    if (
+      this.socket?.readyState === WebSocket.OPEN &&
+      this.currentRoomId === roomId
+    ) {
+      console.log("Already connected to room:", roomId);
+      return;
+    }
+
+    if (this.socket) {
+      this.disconnect();
+    }
+
+    this.shouldReconnect = true;
+    this.reconnectAttempts = 0;
     const WS_URL = "ws://localhost:3000";
 
     console.log("Connecting to:", `${WS_URL}/rooms/${roomId}`);
     this.socket = new WebSocket(`${WS_URL}/rooms/${roomId}`);
 
     this.socket.onopen = () => {
-      console.log("Connected to WebSocket");
+      console.log("Connected to WebSocket for room:", roomId);
+      this.reconnectAttempts = 0;
     };
 
     this.socket.onmessage = (event) => {
@@ -42,8 +59,20 @@ class WebSocketService {
 
     this.socket.onclose = () => {
       console.log("Disconnected from WebSocket");
-      if (this.shouldReconnect) {
-        setTimeout(() => this.connect(roomId), 1000);
+
+      if (
+        this.shouldReconnect &&
+        this.reconnectAttempts < this.maxReconnectAttempts
+      ) {
+        this.reconnectAttempts++;
+        const delay = Math.min(
+          1000 * Math.pow(2, this.reconnectAttempts),
+          10000
+        );
+        console.log(
+          `Reconnecting attempt ${this.reconnectAttempts} in ${delay}ms`
+        );
+        setTimeout(() => this.connect(roomId), delay);
       }
     };
 
@@ -79,8 +108,12 @@ class WebSocketService {
 
   disconnect() {
     this.shouldReconnect = false;
-    this.socket?.close();
-    this.socket = null;
+    this.currentRoomId = null;
+    if (this.socket) {
+      this.socket.close();
+      this.socket = null;
+    }
+    this.subscribers.clear();
   }
 
   getSocket() {

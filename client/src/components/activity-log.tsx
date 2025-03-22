@@ -1,6 +1,5 @@
 import { motion, AnimatePresence } from "motion/react";
 import { RoomActivity } from "server/types/room";
-
 import { format } from "date-fns";
 
 export const ActivityLog = ({ activities }: { activities: RoomActivity[] }) => {

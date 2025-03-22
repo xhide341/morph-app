@@ -42,7 +42,6 @@ wss.on("connection", (ws: WebSocket, req) => {
 
       if (data.type === "activity") {
         if (data.payload.type === "join") {
-          // Just track the client, room already exists
           clients.set(ws, {
             roomId,
             userName: data.payload.userName,

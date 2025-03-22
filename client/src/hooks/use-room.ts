@@ -1,9 +1,27 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { RoomInfo, RoomUser } from "server/types/room";
+import { useActivityTracker } from "./use-activity-tracker";
 
 export const useRoom = (roomId?: string) => {
   const [roomInfo, setRoomInfo] = useState<RoomInfo | null>(null);
   const [roomUsers, setRoomUsers] = useState<RoomUser[]>([]);
+  const { activities, addActivity } = useActivityTracker(roomId);
+
+  // this useEffect is specifically for:
+  // 1. fetching initial room info (name, settings, etc.)
+  // 2. fetching initial list of users in the room
+  useEffect(() => {
+    if (!roomId) return;
+
+    const initRoom = async () => {
+      // get room metadata
+      fetchRoom(roomId);
+      // get list of users in room
+      fetchRoomUsers(roomId);
+    };
+
+    initRoom();
+  }, [roomId]);
 
   const fetchRoom = async (roomId: string) => {
     try {
@@ -21,13 +39,6 @@ export const useRoom = (roomId?: string) => {
       console.error(error);
     }
   };
-
-  useEffect(() => {
-    if (!roomId) return;
-
-    fetchRoom(roomId);
-    fetchRoomUsers(roomId);
-  }, [roomId]);
 
   const createRoom = async (roomId: string, userName: string) => {
     try {
@@ -119,14 +130,32 @@ export const useRoom = (roomId?: string) => {
     }
   };
 
+  const fetchActivities = async (roomId: string) => {
+    try {
+      const response = await fetch(`/api/activity/room/${roomId}`);
+      if (!response.ok) {
+        console.error("Failed to fetch activities");
+        return [];
+      }
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error(error);
+      return [];
+    }
+  };
+
   return {
+    activities,
     roomInfo,
     roomUsers,
+    addActivity,
     fetchRoom,
     createRoom,
     addUserToRoom,
     removeUserFromRoom,
     fetchRoomUsers,
+    fetchActivities,
   };
 };
 

@@ -1,8 +1,7 @@
 import { useParams } from "react-router-dom";
-import { useActivityTracker } from "../hooks/use-activity-tracker";
 import { useUserInfo } from "../contexts/user-context";
 import { useEffect } from "react";
-import { wsService } from "server/services/websocket-service";
+import { useRoom } from "../hooks/use-room";
 
 import { Clock } from "../components/clock";
 import { Header } from "../components/header";
@@ -12,30 +11,37 @@ import { ActivityLog } from "../components/activity-log";
 export const RoomPage = () => {
   const { roomId } = useParams<{ roomId: string }>();
   const { userName } = useUserInfo();
-  const { activities, addActivity } = useActivityTracker(roomId || "");
+  const { activities, addActivity } = useRoom(roomId);
   const latestActivity = activities[activities.length - 1];
 
   useEffect(() => {
     if (!roomId || !userName) return;
 
-    let isActive = true;
+    let isInitialMount = true;
+    // add join activity when component mounts
+    addActivity({
+      type: "join",
+      userName,
+      roomId,
+      timeRemaining: "25:00",
+      timerMode: "work",
+    });
 
-    // Remove WebSocket connection - it's handled by useWebSocket now
-    const joinTimeout = setTimeout(() => {
-      if (isActive && wsService.getSocket()?.readyState === WebSocket.OPEN) {
-        addActivity({
-          type: "join",
-          userName,
-          roomId,
-        });
-      }
-    }, 300);
-
+    // cleanup - add leave activity when component unmounts
     return () => {
-      isActive = false;
-      clearTimeout(joinTimeout);
+      if (isInitialMount) {
+        isInitialMount = false;
+        return;
+      }
+      addActivity({
+        type: "leave",
+        userName,
+        roomId,
+        timeRemaining: "25:00",
+        timerMode: "work",
+      });
     };
-  }, [roomId, userName]);
+  }, [roomId, userName, addActivity]);
 
   return (
     <div className="font-roboto mx-auto flex h-dvh w-full max-w-2xl flex-col bg-[var(--color-background)] p-4 text-[var(--color-foreground)]">
