@@ -36,6 +36,22 @@ wss.on("connection", (ws: WebSocket, req) => {
   const url = new URL(req.url || "", `ws://${req.headers.host}`);
   const roomId = url.pathname.split("/rooms/")[1];
 
+  console.log("WebSocket connection attempt for room:", roomId);
+
+  if (!roomId) {
+    console.error("No room ID provided");
+    ws.close();
+    return;
+  }
+
+  // Add initial connection message
+  ws.send(
+    JSON.stringify({
+      type: "connection_status",
+      payload: { status: "connected", roomId },
+    })
+  );
+
   ws.on("message", async (message) => {
     try {
       const data = JSON.parse(message.toString());

@@ -26,13 +26,42 @@ export const useRoom = (roomId?: string) => {
   const fetchRoom = async (roomId: string) => {
     try {
       const response = await fetch(`/api/room/${roomId}/info`);
+
+      // if room doesn't exist, API should return 404
+      if (response.status === 404) {
+        console.log("[useRoom] Room not found");
+        return null;
+      }
+
       if (!response.ok) {
-        console.error("Failed to fetch room info");
+        console.error("[useRoom] Failed to fetch room info");
+        return null;
+      }
+
+      const data = await response.json();
+      console.log("[useRoom] fetchRoom response data:", data);
+
+      if (!data) return null;
+
+      // only set room info if we have valid data
+      setRoomInfo(data);
+      return data;
+    } catch (error) {
+      console.error("[useRoom] Error:", error);
+      return null;
+    }
+  };
+
+  const fetchRoomUsers = async (roomId: string) => {
+    try {
+      const response = await fetch(`/api/room/${roomId}/users`);
+      if (!response.ok) {
+        console.error("Failed to fetch room users");
         return;
       }
       const data = await response.json();
       if (!data) return;
-      setRoomInfo(data);
+      setRoomUsers(data);
 
       return data;
     } catch (error) {
@@ -68,22 +97,29 @@ export const useRoom = (roomId?: string) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userName }),
       });
-      if (!response.ok) {
-        console.error("Failed to join room");
-        return;
-      }
-      const data = await response.json();
-      if (!data || !roomInfo) return;
 
-      setRoomInfo({
-        ...roomInfo,
-        activeUsers: roomInfo.activeUsers,
-        lastActive: roomInfo.lastActive,
+      if (!response.ok) {
+        console.error("[useRoom] Failed to join room:", await response.text());
+        return null;
+      }
+
+      const data = await response.json();
+      if (!data) return null;
+
+      // Update room info with the new data
+      setRoomInfo((prevInfo) => {
+        if (!prevInfo) return null;
+        return {
+          ...prevInfo,
+          activeUsers: data.userCount || 1,
+          lastActive: data.lastActive || new Date().toISOString(),
+        };
       });
 
       return data;
     } catch (error) {
-      console.error(error);
+      console.error("[useRoom] Error joining room:", error);
+      return null;
     }
   };
 
@@ -106,23 +142,6 @@ export const useRoom = (roomId?: string) => {
         activeUsers: data.userCount,
         lastActive: data.lastActive,
       });
-
-      return data;
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const fetchRoomUsers = async (roomId: string) => {
-    try {
-      const response = await fetch(`/api/room/${roomId}/users`);
-      if (!response.ok) {
-        console.error("Failed to fetch room users");
-        return;
-      }
-      const data = await response.json();
-      if (!data) return;
-      setRoomUsers(data);
 
       return data;
     } catch (error) {

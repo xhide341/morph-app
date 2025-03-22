@@ -35,7 +35,13 @@ const redisService = {
   async getRoomInfo(roomId: string): Promise<RoomInfo | null> {
     const roomKey = `room:${roomId}`;
     const data = await redis.hGetAll(roomKey);
-    if (!data) return null;
+
+    console.log("[Redis] Room data:", JSON.stringify(data, null, 2));
+
+    // important: return null if empty object (no room found)
+    if (Object.keys(data).length === 0) {
+      return null;
+    }
 
     return {
       createdBy: data.createdBy,
@@ -70,6 +76,7 @@ const redisService = {
         .exec();
 
       if (!result) return null;
+      console.log("Redis room created:", result);
 
       return {
         createdBy: userName,

@@ -23,32 +23,53 @@ export function SessionPage() {
         roomName: roomName.trim().toLowerCase(),
       });
       if (!result) return;
+      console.log("[Session] Validation passed:", result);
 
       const roomId = result.roomName;
       const userId = result.userName;
 
-      const joinOrCreateRoom = async () => {
-        const roomExists = await fetchRoom(roomId);
-        // create room
-        if (!roomExists) {
-          const newRoom = await createRoom(roomId, userId);
-          if (!newRoom) return;
-          return newRoom;
-        }
-        // join room
-        const joinedRoom = await addUserToRoom(roomId, userId);
-        if (!joinedRoom) return;
-        return joinedRoom;
-      };
+      // First debug point
+      console.log("[Session] Attempting to check room:", roomId);
+      const roomExists = await fetchRoom(roomId);
+      console.log("[Session] Room exists check result:", roomExists);
 
-      const room = await joinOrCreateRoom();
-      if (!room) return;
+      if (!roomExists) {
+        // Second debug point
+        console.log("[Session] Creating new room with:", { roomId, userId });
+        const newRoom = await createRoom(roomId, userId);
+        console.log("[Session] Create room response:", newRoom);
+
+        if (!newRoom) {
+          console.error("[Session] Room creation failed");
+          alert("Failed to create room. Please try again.");
+          return;
+        }
+
+        setUserName(userId);
+        navigate(`/room/${roomId}`);
+        return;
+      }
+
+      // Third debug point
+      console.log("[Session] Joining existing room:", roomId);
+      const joinedRoom = await addUserToRoom(roomId, userId);
+      console.log("[Session] Join room response:", joinedRoom);
+
+      if (!joinedRoom) {
+        console.error("[Session] Room join failed");
+        alert("Failed to join room. Please try again.");
+        return;
+      }
 
       setUserName(userId);
       navigate(`/room/${roomId}`);
     } catch (error) {
+      // Better error handling
+      console.error("[Session] Error:", error);
       if (error instanceof z.ZodError) {
         alert(error.errors[0].message);
+      } else {
+        alert("An unexpected error occurred. Please try again.");
       }
     }
   };
