@@ -43,8 +43,6 @@ export const useRoom = (roomId?: string) => {
 
       if (!data) return null;
 
-      // only set room info if we have valid data
-      setRoomInfo(data);
       return data;
     } catch (error) {
       console.error("[useRoom] Error:", error);
@@ -83,6 +81,7 @@ export const useRoom = (roomId?: string) => {
       const data = await response.json();
       if (!data) return;
       setRoomInfo(data);
+      console.log("[useRoom] Room info:", roomInfo);
 
       return data;
     } catch (error) {
@@ -115,6 +114,7 @@ export const useRoom = (roomId?: string) => {
           lastActive: data.lastActive || new Date().toISOString(),
         };
       });
+      console.log("[useRoom] Room info:", roomInfo);
 
       return data;
     } catch (error) {
