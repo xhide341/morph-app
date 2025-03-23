@@ -30,7 +30,7 @@ class WebSocketService {
       this.socket?.readyState === WebSocket.OPEN &&
       this.currentRoomId === roomId
     ) {
-      console.log("Already connected to room:", roomId);
+      console.log("[WebSocket] Already connected to room:", roomId);
       return;
     }
 
@@ -42,23 +42,23 @@ class WebSocketService {
     this.reconnectAttempts = 0;
     const WS_URL = "ws://localhost:3000";
 
-    console.log("Connecting to:", `${WS_URL}/rooms/${roomId}`);
+    console.log("[WebSocket] Connecting to:", `${WS_URL}/rooms/${roomId}`);
     this.socket = new WebSocket(`${WS_URL}/rooms/${roomId}`);
 
     this.socket.onopen = () => {
-      console.log("Connected to WebSocket for room:", roomId);
+      console.log("[WebSocket] Connected to WebSocket for room:", roomId);
       this.reconnectAttempts = 0;
     };
 
     this.socket.onmessage = (event) => {
-      console.log("Raw message received:", event.data);
+      console.log("[WebSocket] Raw message received:", event.data);
       const message: WebSocketMessage = JSON.parse(event.data);
-      console.log("Parsed message:", message);
+      console.log("[WebSocket] Parsed message:", message);
       this.notifySubscribers(message.type, message);
     };
 
     this.socket.onclose = () => {
-      console.log("Disconnected from WebSocket");
+      console.log("[WebSocket] Disconnected from WebSocket");
 
       if (
         this.shouldReconnect &&
@@ -82,12 +82,12 @@ class WebSocketService {
   }
 
   subscribe(type: string, callback: (data: any) => void) {
-    console.log("Subscribing to:", type);
+    console.log("[WebSocket] Subscribing to:", type);
     if (!this.subscribers.has(type)) {
       this.subscribers.set(type, new Set());
     }
     this.subscribers.get(type)?.add(callback);
-    console.log("Current subscribers:", this.subscribers);
+    console.log("[WebSocket] Current subscribers:", this.subscribers);
   }
 
   unsubscribe(type: string, callback: (data: any) => void) {
@@ -95,12 +95,17 @@ class WebSocketService {
   }
 
   private notifySubscribers(type: string, data: any) {
-    console.log("Notifying subscribers for type:", type, "with data:", data);
+    console.log(
+      "[WebSocket] Notifying subscribers for type:",
+      type,
+      "with data:",
+      data
+    );
     this.subscribers.get(type)?.forEach((callback) => callback(data));
   }
 
   send(message: WebSocketMessage) {
-    console.log("Sending to server:", message);
+    console.log("[WebSocket] Sending to server:", message);
     if (this.socket?.readyState === WebSocket.OPEN) {
       this.socket.send(JSON.stringify(message));
     }

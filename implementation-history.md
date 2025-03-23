@@ -43,3 +43,40 @@
 - Create data models for timer history
 - Set up Redis for room activity tracking
 - Add data persistence layer for completed sessions
+
+## WebSocket Activity Tracking Flow
+
+### Client-Side (useActivityTracker.ts)
+1. Local Activity Creation
+   - Generate new activity with UUID
+   - Add to local state immediately
+   - Send to WebSocket server
+
+2. WebSocket Handler
+   - Receive broadcast activities
+   - Check for duplicates using activity.id
+   - Update state if not duplicate
+
+### Server-Side (index.ts)
+1. Connection Handler
+   - Parse room ID from URL
+   - Send connection confirmation
+   - Setup message handlers
+
+2. Message Processing
+   - Store client info on join activities
+   - Save activity to Redis
+   - Broadcast to all room clients
+
+### Activity Flow
+1. Client adds activity locally
+2. Activity sent to WebSocket server
+3. Server processes and broadcasts
+4. Client receives broadcast
+5. Duplicate check prevents double entries
+
+### Next Steps
+- Add activity type filtering
+- Implement activity persistence
+- Add error recovery for disconnections
+- Add activity batching for performance

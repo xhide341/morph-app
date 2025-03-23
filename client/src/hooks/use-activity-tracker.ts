@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { RoomActivity } from "server/types/room";
 import { wsService } from "server/services/websocket-service";
 
+// the only source of truth in the local state
 export const useActivityTracker = (roomId?: string) => {
   const [activities, setActivities] = useState<RoomActivity[]>([]);
 
@@ -13,15 +14,29 @@ export const useActivityTracker = (roomId?: string) => {
     const initActivities = async () => {
       // setup activity handler
       handleActivity = (data: any) => {
-        console.log("WebSocket received:", data);
+        console.log("[Activity] Received from WebSocket:", data.payload);
         const newActivity = data.payload as RoomActivity;
+        console.log(
+          `[Activity][${newActivity.type}] Received from WebSocket:`,
+          newActivity.userName,
+        );
+
+        // add to local state but skip duplicates (that comes from websocket)
         setActivities((prev) => {
+          if (prev.some((activity) => activity.id === newActivity.id)) {
+            console.log("[Activity] Skipping duplicate:", newActivity.id);
+            return prev; // skip duplicates
+          }
+          console.log(
+            `[Activity][${newActivity.type}] Adding to state:`,
+            newActivity.userName,
+          );
           return [...prev, newActivity];
         });
       };
 
       // subscribe to activities
-      console.log("Subscribing to activities...");
+      console.log("[useActivityTracker] Subscribing to activities...");
       wsService.subscribe("activity", handleActivity);
     };
 
@@ -29,7 +44,7 @@ export const useActivityTracker = (roomId?: string) => {
 
     return () => {
       if (handleActivity) {
-        console.log("Unsubscribing from activities...");
+        console.log("[useActivityTracker] Unsubscribing from activities...");
         wsService.unsubscribe("activity", handleActivity);
       }
     };
@@ -37,14 +52,14 @@ export const useActivityTracker = (roomId?: string) => {
 
   const addActivity = useCallback(
     (activity: Omit<RoomActivity, "timeStamp" | "id">) => {
-      console.log("Adding activity:", activity);
+      console.log("[Activity] Adding activity:", activity);
 
       // 1. ensure connection
       if (
         !wsService.getSocket() ||
         wsService.getSocket()?.readyState !== WebSocket.OPEN
       ) {
-        console.log("Reconnecting WebSocket...");
+        console.log("[Activity] Reconnecting WebSocket...");
         wsService.connect(roomId!);
       }
 
@@ -55,11 +70,11 @@ export const useActivityTracker = (roomId?: string) => {
         timeStamp: new Date().toISOString(),
       };
 
-      // 3. optimistically update local state
+      // 3. add to local state
       setActivities((prev) => [...prev, newActivity]);
 
-      // 4. send through websocket
-      console.log("Sending through WebSocket:", newActivity);
+      // 4. send through WebSocket
+      console.log("[Activity] Sending to WebSocket:", newActivity);
       wsService.send({
         type: "activity",
         payload: newActivity,

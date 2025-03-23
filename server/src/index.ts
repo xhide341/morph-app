@@ -30,6 +30,7 @@ app.use("/api/activity", activityRouter);
 app.use("/api/room", roomRouter);
 
 // Track WebSocket client info for broadcasting and room management
+// TODO: make this a separate controller for separation of concerns
 const clients = new Map<WebSocket, { roomId: string; userName: string }>();
 
 wss.on("connection", (ws: WebSocket, req) => {
@@ -56,6 +57,7 @@ wss.on("connection", (ws: WebSocket, req) => {
     try {
       const data = JSON.parse(message.toString());
 
+      // if a client joined, add them to the clients map
       if (data.type === "activity") {
         if (data.payload.type === "join") {
           clients.set(ws, {
@@ -64,9 +66,10 @@ wss.on("connection", (ws: WebSocket, req) => {
           });
         }
 
+        // store in redis for the purpose of persistence
         await redisService.storeActivity(roomId, data.payload);
 
-        // Broadcast to room
+        // broadcast to all clients in the room
         wss.clients.forEach((client) => {
           if (
             client.readyState === WebSocket.OPEN &&

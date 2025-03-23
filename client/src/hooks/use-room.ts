@@ -27,7 +27,6 @@ export const useRoom = (roomId?: string) => {
     try {
       const response = await fetch(`/api/room/${roomId}/info`);
 
-      // if room doesn't exist, API should return 404
       if (response.status === 404) {
         console.log("[useRoom] Room not found");
         return null;
@@ -131,7 +130,7 @@ export const useRoom = (roomId?: string) => {
         body: JSON.stringify({ userName }),
       });
       if (!response.ok) {
-        console.error("Failed to leave room");
+        console.error("[useRoom] Failed to leave room");
         return;
       }
       const data = await response.json();
@@ -153,7 +152,7 @@ export const useRoom = (roomId?: string) => {
     try {
       const response = await fetch(`/api/activity/room/${roomId}`);
       if (!response.ok) {
-        console.error("Failed to fetch activities");
+        console.error("[useRoom] Failed to fetch activities");
         return [];
       }
       const data = await response.json();

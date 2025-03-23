@@ -17,7 +17,7 @@ const redisService = {
 
     // update room's last active timestamp
     await redis.hSet(`room:${roomId}`, "lastActive", Date.now());
-    console.log("Activity stored:", activity);
+    console.log("[Redis] Activity stored:", activity);
 
     return activity;
   },
@@ -76,7 +76,7 @@ const redisService = {
         .exec();
 
       if (!result) return null;
-      console.log("Redis room created:", result);
+      console.log("[Redis] Room created:", result);
 
       return {
         createdBy: userName,
@@ -151,7 +151,7 @@ const redisService = {
           .expire(roomKey, ROOM_INACTIVITY_EXPIRY)
           .expire(`room:${roomId}:activities`, ROOM_INACTIVITY_EXPIRY)
           .exec();
-        console.log("Room expired:", result);
+        console.log("[Redis] Room expired:", result);
       }
 
       return {
@@ -171,7 +171,7 @@ const redisService = {
       if (!usersData) return [];
       return Object.values(usersData).map((data) => JSON.parse(data));
     } catch (error) {
-      console.error(error);
+      console.error("[Redis] Error getting room users:", error);
       return [];
     }
   },
