@@ -54,26 +54,17 @@ export const useActivityTracker = (roomId?: string) => {
     (activity: Omit<RoomActivity, "timeStamp" | "id">) => {
       console.log("[Activity] Adding activity:", activity);
 
-      // 1. ensure connection
-      if (
-        !wsService.getSocket() ||
-        wsService.getSocket()?.readyState !== WebSocket.OPEN
-      ) {
-        console.log("[Activity] Reconnecting WebSocket...");
-        wsService.connect(roomId!);
-      }
-
-      // 2. create new activity
+      // 1. create new activity
       const newActivity = {
         ...activity,
         id: crypto.randomUUID(),
         timeStamp: new Date().toISOString(),
       };
 
-      // 3. add to local state
+      // 2. add to local state
       setActivities((prev) => [...prev, newActivity]);
 
-      // 4. send through WebSocket
+      // 3. send through WebSocket
       console.log("[Activity] Sending to WebSocket:", newActivity);
       wsService.send({
         type: "activity",

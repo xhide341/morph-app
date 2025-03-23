@@ -1,7 +1,6 @@
 import express from "express";
 import cors from "cors";
 import quotesRouter from "./routes/quotes";
-import activityRouter from "./routes/activity";
 import roomRouter from "./routes/room";
 import { connectRedis } from "./config/redis";
 import { createServer } from "http";
@@ -26,7 +25,6 @@ app.use(
 );
 app.use(express.json());
 app.use("/api/quotes", quotesRouter);
-app.use("/api/activity", activityRouter);
 app.use("/api/room", roomRouter);
 
 // Track WebSocket client info for broadcasting and room management

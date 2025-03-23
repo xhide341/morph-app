@@ -37,7 +37,6 @@ const redisService = {
     const data = await redis.hGetAll(roomKey);
 
     console.log("[Redis] Room data:", JSON.stringify(data, null, 2));
-
     // important: return null if empty object (no room found)
     if (Object.keys(data).length === 0) {
       return null;

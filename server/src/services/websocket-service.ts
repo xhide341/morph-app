@@ -51,7 +51,6 @@ class WebSocketService {
     };
 
     this.socket.onmessage = (event) => {
-      console.log("[WebSocket] Raw message received:", event.data);
       const message: WebSocketMessage = JSON.parse(event.data);
       console.log("[WebSocket] Parsed message:", message);
       this.notifySubscribers(message.type, message);
@@ -70,14 +69,14 @@ class WebSocketService {
           10000
         );
         console.log(
-          `Reconnecting attempt ${this.reconnectAttempts} in ${delay}ms`
+          `[WebSocket] Reconnecting attempt ${this.reconnectAttempts} in ${delay}ms`
         );
         setTimeout(() => this.connect(roomId), delay);
       }
     };
 
     this.socket.onerror = (error) => {
-      console.error("WebSocket error:", error);
+      console.error("[WebSocket] WebSocket error:", error);
     };
   }
 
