@@ -2,7 +2,6 @@ import { useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { RoomActivity } from "server/types/room";
 import { wsService } from "server/services/websocket-service";
-import redisService from "server/services/redis-service";
 
 // fetch historical activities from redis via api
 const fetchActivities = async (roomId: string): Promise<RoomActivity[]> => {

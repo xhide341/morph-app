@@ -10,7 +10,7 @@ const redisService = {
 
     const result = await redis
       .multi()
-      .lPush(key, JSON.stringify(activity))
+      .rPush(key, JSON.stringify(activity))
       .lTrim(key, 0, 49)
       .exec();
     if (!result) return;
