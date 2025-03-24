@@ -3,11 +3,16 @@ import { RoomActivity } from "server/types/room";
 import { format } from "date-fns";
 
 export const ActivityLog = ({ activities }: { activities: RoomActivity[] }) => {
+  // reverse the array to show newest first
+  const sortedActivities = [...activities].sort(
+    (a, b) => new Date(b.timeStamp).getTime() - new Date(a.timeStamp).getTime(),
+  );
+
   return (
     <div className="max-h-[400px] overflow-y-auto p-4">
       <div className="relative">
         <AnimatePresence initial={false}>
-          {activities?.map((activity) => {
+          {sortedActivities.map((activity) => {
             return (
               <motion.div
                 key={activity.id}

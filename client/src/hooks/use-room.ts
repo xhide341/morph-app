@@ -81,6 +81,17 @@ export const useRoom = (roomId?: string) => {
       }
       const data = await response.json();
       if (!data) return;
+
+      // add join activity
+      addActivity({
+        type: "join",
+        userName,
+        roomId,
+        timeRemaining: "25:00",
+        timerMode: "work",
+      });
+      console.log("[useRoom] Added join activity");
+
       setRoomInfo(data);
       console.log("[useRoom] Room info:", roomInfo);
 
@@ -114,6 +125,7 @@ export const useRoom = (roomId?: string) => {
         timeRemaining: "25:00",
         timerMode: "work",
       });
+      console.log("[useRoom] Added join activity");
 
       // Update room info with the new data
       setRoomInfo((prevInfo) => {

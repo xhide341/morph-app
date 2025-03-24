@@ -33,9 +33,9 @@ const clients = new Map<WebSocket, { roomId: string; userName: string }>();
 
 wss.on("connection", (ws: WebSocket, req) => {
   const url = new URL(req.url || "", `ws://${req.headers.host}`);
-  const roomId = url.pathname.split("/rooms/")[1];
+  const roomId = url.pathname.split("/room/")[1];
 
-  console.log("WebSocket connection attempt for room:", roomId);
+  console.log("[WS Server] Connection attempt for room:", roomId);
 
   if (!roomId) {
     console.error("No room ID provided");
@@ -54,20 +54,39 @@ wss.on("connection", (ws: WebSocket, req) => {
   ws.on("message", async (message) => {
     try {
       const data = JSON.parse(message.toString());
+      console.log("[WS Server] Received message:", data);
 
-      // if a client joined, add them to the clients map
       if (data.type === "activity") {
         if (data.payload.type === "join") {
           clients.set(ws, {
             roomId,
             userName: data.payload.userName,
           });
+          console.log("[WS Server] Client joined room:", roomId);
         }
 
-        // store in redis for the purpose of persistence
-        await redisService.storeActivity(roomId, data.payload);
+        // Add duplicate check before storing
+        const isDuplicate = await redisService.isDuplicate(
+          roomId,
+          data.payload
+        );
 
-        // broadcast to all clients in the room
+        if (isDuplicate) {
+          console.log("[WS Server] Duplicate activity detected, skipping");
+          return;
+        }
+
+        await redisService.storeActivity(roomId, data.payload);
+        console.log("[WS Server] Activity stored in Redis");
+
+        // Log broadcast
+        const clientsInRoom = Array.from(wss.clients).filter(
+          (client) => clients.get(client)?.roomId === roomId
+        );
+        console.log(
+          `[WS Server] Broadcasting to ${clientsInRoom.length} clients in room ${roomId}`
+        );
+
         wss.clients.forEach((client) => {
           if (
             client.readyState === WebSocket.OPEN &&
@@ -78,11 +97,16 @@ wss.on("connection", (ws: WebSocket, req) => {
         });
       }
     } catch (error) {
-      console.error("Error processing message:", error);
+      console.error("[WS Server] Error processing message:", error);
     }
   });
 
   ws.on("close", () => {
+    const clientInfo = clients.get(ws);
+    console.log(
+      "[WS Server] Client disconnected from room:",
+      clientInfo?.roomId
+    );
     clients.delete(ws);
   });
 });

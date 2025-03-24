@@ -174,6 +174,11 @@ const redisService = {
       return [];
     }
   },
+
+  async isDuplicate(roomId: string, activity: RoomActivity): Promise<boolean> {
+    const activities = await this.getActivities(roomId);
+    return activities.some((a) => a.id === activity.id);
+  },
 };
 
 export default redisService;

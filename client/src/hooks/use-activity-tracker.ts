@@ -40,12 +40,26 @@ export const useActivityTracker = (roomId?: string) => {
     enabled: !!roomId,
   });
 
-  // WebSocket handler
+  // Connect to WebSocket when room ID is available
+  useEffect(() => {
+    if (!roomId) return;
+    console.log(
+      "[ActivityTracker] Initializing WebSocket connection for room:",
+      roomId,
+    );
+    wsService.connect(roomId);
+    return () => {
+      console.log("[ActivityTracker] Cleaning up WebSocket connection");
+      wsService.disconnect();
+    };
+  }, [roomId]);
+
+  // Separate effect for activity subscription
   useEffect(() => {
     if (!roomId) return;
 
     const handleActivity = (data: any) => {
-      console.log("[WS] Received activity:", data); // debug
+      console.log("[ActivityTracker] Received WebSocket activity:", data);
       const newActivity = data.payload as RoomActivity;
 
       // immediately update cache with new activity

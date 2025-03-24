@@ -1,8 +1,13 @@
 import { RoomActivity } from "../types/room";
 
 type WebSocketMessage = {
-  type: "activity" | "recent_activities" | "timer_update" | "test";
-  payload: RoomActivity;
+  type:
+    | "activity"
+    | "connection_status"
+    | "recent_activities"
+    | "timer_update"
+    | "test";
+  payload: RoomActivity | { status: string; roomId: string };
 };
 
 class WebSocketService {
@@ -42,8 +47,8 @@ class WebSocketService {
     this.reconnectAttempts = 0;
     const WS_URL = "ws://localhost:3000";
 
-    console.log("[WebSocket] Connecting to:", `${WS_URL}/rooms/${roomId}`);
-    this.socket = new WebSocket(`${WS_URL}/rooms/${roomId}`);
+    console.log("[WebSocket] Connecting to:", `${WS_URL}/room/${roomId}`);
+    this.socket = new WebSocket(`${WS_URL}/room/${roomId}`);
 
     this.socket.onopen = () => {
       console.log("[WebSocket] Connected to WebSocket for room:", roomId);
