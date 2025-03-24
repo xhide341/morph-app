@@ -90,7 +90,7 @@ export const useRoom = (roomId?: string) => {
 
   const addUserToRoom = async (roomId: string, userName: string) => {
     try {
-      const response = await fetch(`/api/room/${roomId}/join`, {
+      const response = await fetch(`/api/room/${roomId}/users`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userName }),
@@ -124,8 +124,8 @@ export const useRoom = (roomId?: string) => {
 
   const removeUserFromRoom = async (roomId: string, userName: string) => {
     try {
-      const response = await fetch(`/api/room/${roomId}/leave`, {
-        method: "POST",
+      const response = await fetch(`/api/room/${roomId}/users`, {
+        method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userName }),
       });
@@ -150,7 +150,7 @@ export const useRoom = (roomId?: string) => {
 
   const fetchActivities = async (roomId: string) => {
     try {
-      const response = await fetch(`/api/activity/room/${roomId}`);
+      const response = await fetch(`/api/room/${roomId}/activities`);
       if (!response.ok) {
         console.error("[useRoom] Failed to fetch activities");
         return [];
