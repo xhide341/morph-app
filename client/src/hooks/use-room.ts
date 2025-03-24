@@ -148,21 +148,6 @@ export const useRoom = (roomId?: string) => {
     }
   };
 
-  const fetchActivities = async (roomId: string) => {
-    try {
-      const response = await fetch(`/api/room/${roomId}/activities`);
-      if (!response.ok) {
-        console.error("[useRoom] Failed to fetch activities");
-        return [];
-      }
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error(error);
-      return [];
-    }
-  };
-
   return {
     activities,
     roomInfo,
@@ -173,7 +158,6 @@ export const useRoom = (roomId?: string) => {
     addUserToRoom,
     removeUserFromRoom,
     fetchRoomUsers,
-    fetchActivities,
   };
 };
 

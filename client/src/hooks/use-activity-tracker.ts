@@ -1,82 +1,110 @@
-import { useEffect, useCallback } from "react";
+import { useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { RoomActivity } from "server/types/room";
 import { wsService } from "server/services/websocket-service";
 
-// the only source of truth in the local state
+// fetch historical activities from redis via api
+const fetchActivities = async (roomId: string): Promise<RoomActivity[]> => {
+  const response = await fetch(`/api/room/${roomId}/activities`);
+  if (!response.ok) {
+    console.error("[Activity] Failed to fetch activities");
+    return [];
+  }
+  return response.json();
+};
+
+// store new activity in redis via api
+const storeActivity = async (roomId: string, activity: RoomActivity) => {
+  const response = await fetch(`/api/room/${roomId}/activities`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(activity),
+  });
+  if (!response.ok) {
+    console.error("[Activity] Failed to store activity");
+    return;
+  }
+  return response.json();
+};
+
+// hook used by useRoom to track all room activities
 export const useActivityTracker = (roomId?: string) => {
   const queryClient = useQueryClient();
+  // unique key for react query cache
   const activitiesKey = ["activities", roomId];
 
-  // replace useState with useQuery
+  // fetch initial activities from redis when room is loaded
+  // this gives new users the history of what happened
   const { data: activities = [] } = useQuery({
     queryKey: activitiesKey,
-    queryFn: () => [], // initial empty array
+    queryFn: () => (roomId ? fetchActivities(roomId) : []),
     enabled: !!roomId,
   });
 
+  // listen for real-time activities via websocket
   useEffect(() => {
     if (!roomId) return;
 
+    // handle incoming activities from other users
     const handleActivity = (data: any) => {
-      console.log("[Activity] Received from WebSocket:", data.payload);
       const newActivity = data.payload as RoomActivity;
-      console.log(
-        `[Activity][${newActivity.type}] Received from WebSocket:`,
-        newActivity.userName,
-      );
-
-      // update react query cache instead of useState
+      // update react query cache with new activity
       queryClient.setQueryData(activitiesKey, (prev: RoomActivity[] = []) => {
-        if (prev.some((activity) => activity.id === newActivity.id)) {
-          console.log("[Activity] Skipping duplicate:", newActivity.id);
+        // prevent duplicate activities
+        if (prev.some((activity) => activity.id === newActivity.id))
           return prev;
-        }
-        console.log(
-          `[Activity][${newActivity.type}] Adding to state:`,
-          newActivity.userName,
-        );
+        // add new activity to cache
         return [...prev, newActivity];
       });
     };
 
-    // subscribe to activities
+    // subscribe to websocket activities
     console.log("[useActivityTracker] Subscribing to activities...");
     wsService.subscribe("activity", handleActivity);
 
+    // cleanup websocket subscription
     return () => {
       console.log("[useActivityTracker] Unsubscribing from activities...");
       wsService.unsubscribe("activity", handleActivity);
     };
   }, [roomId, queryClient, activitiesKey]);
 
-  // convert addActivity to use mutation
+  // mutation for adding new activities
+  // used by useRoom to log join/leave/timer activities
   const { mutate: addActivity } = useMutation({
     mutationFn: async (activity: Omit<RoomActivity, "timeStamp" | "id">) => {
-      console.log("[Activity] Adding activity:", activity);
-
+      // create new activity
       const newActivity = {
         ...activity,
         id: crypto.randomUUID(),
         timeStamp: new Date().toISOString(),
       };
 
-      console.log("[Activity] Sending to WebSocket:", newActivity);
+      // store in redis first
+      const storedActivity = await storeActivity(activity.roomId, newActivity);
+
+      // broadcast via websocket after successful storage
       wsService.send({
         type: "activity",
-        payload: newActivity,
+        payload: storedActivity,
       });
 
-      return Promise.resolve(newActivity);
+      return storedActivity;
     },
     onSuccess: (newActivity) => {
-      // update cache on successful mutation
-      queryClient.setQueryData(activitiesKey, (prev: RoomActivity[] = []) => [
-        ...prev,
-        newActivity,
-      ]);
+      queryClient.setQueryData(activitiesKey, (prev: RoomActivity[] = []) => {
+        if (prev.some((activity) => activity.id === newActivity.id))
+          return prev;
+        return [...prev, newActivity];
+      });
+    },
+    onError: (error) => {
+      console.error("[Activity] Failed to add activity:", error);
     },
   });
 
-  return { activities, addActivity };
+  return {
+    activities, // historical + real-time activities
+    addActivity, // function to add new activities
+  };
 };
