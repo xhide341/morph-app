@@ -5,8 +5,6 @@ import roomRouter from "./routes/room";
 import { connectRedis } from "./config/redis";
 import { createServer } from "http";
 import { WebSocketServer, WebSocket } from "ws";
-import redisService from "./services/redis-service";
-import crypto from "crypto";
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -65,21 +63,6 @@ wss.on("connection", (ws: WebSocket, req) => {
           console.log("[WS Server] Client joined room:", roomId);
         }
 
-        // Add duplicate check before storing
-        const isDuplicate = await redisService.isDuplicate(
-          roomId,
-          data.payload
-        );
-
-        if (isDuplicate) {
-          console.log("[WS Server] Duplicate activity detected, skipping");
-          return;
-        }
-
-        await redisService.storeActivity(roomId, data.payload);
-        console.log("[WS Server] Activity stored in Redis");
-
-        // Log broadcast
         const clientsInRoom = Array.from(wss.clients).filter(
           (client) => clients.get(client)?.roomId === roomId
         );

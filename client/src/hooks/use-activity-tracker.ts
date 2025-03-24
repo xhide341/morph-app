@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { RoomActivity } from "server/types/room";
 import { wsService } from "server/services/websocket-service";
+import redisService from "server/services/redis-service";
 
 // fetch historical activities from redis via api
 const fetchActivities = async (roomId: string): Promise<RoomActivity[]> => {
@@ -84,6 +85,23 @@ export const useActivityTracker = (roomId?: string) => {
         id: crypto.randomUUID(),
         timeStamp: new Date().toISOString(),
       };
+
+      // check if activity is duplicate by comparing relevant properties
+      const isDuplicate = activities.some(
+        (existingActivity) =>
+          existingActivity.type === activity.type &&
+          existingActivity.userName === activity.userName &&
+          // if the timestamps are within 2 seconds of each other
+          Math.abs(
+            new Date(existingActivity.timeStamp).getTime() -
+              new Date(newActivity.timeStamp).getTime(),
+          ) < 2000,
+      );
+
+      if (isDuplicate) {
+        console.log("[ActivityTracker] Duplicate activity detected, skipping");
+        return;
+      }
 
       // store in redis first
       const storedActivity = await storeActivity(activity.roomId, newActivity);
