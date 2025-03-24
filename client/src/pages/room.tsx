@@ -15,33 +15,8 @@ export const RoomPage = () => {
   const latestActivity = activities[activities.length - 1];
 
   useEffect(() => {
-    if (!roomId || !userName) return;
-
-    let isInitialMount = true;
-    // add join activity when component mounts
-    addActivity({
-      type: "join",
-      userName,
-      roomId,
-      timeRemaining: "25:00",
-      timerMode: "work",
-    });
-
-    // cleanup - add leave activity when component unmounts
-    return () => {
-      if (isInitialMount) {
-        isInitialMount = false;
-        return;
-      }
-      addActivity({
-        type: "leave",
-        userName,
-        roomId,
-        timeRemaining: "25:00",
-        timerMode: "work",
-      });
-    };
-  }, [roomId, userName, addActivity]);
+    console.log("[Room] Activities updated:", activities);
+  }, [activities]);
 
   return (
     <div className="font-roboto mx-auto flex h-dvh w-full max-w-2xl flex-col bg-[var(--color-background)] p-4 text-[var(--color-foreground)]">

@@ -33,40 +33,31 @@ export const useActivityTracker = (roomId?: string) => {
   // unique key for react query cache
   const activitiesKey = ["activities", roomId];
 
-  // fetch initial activities from redis when room is loaded
-  // this gives new users the history of what happened
+  // fetch from redis for historical data
   const { data: activities = [] } = useQuery({
     queryKey: activitiesKey,
     queryFn: () => (roomId ? fetchActivities(roomId) : []),
     enabled: !!roomId,
   });
 
-  // listen for real-time activities via websocket
+  // WebSocket handler
   useEffect(() => {
     if (!roomId) return;
 
-    // handle incoming activities from other users
     const handleActivity = (data: any) => {
+      console.log("[WS] Received activity:", data); // debug
       const newActivity = data.payload as RoomActivity;
-      // update react query cache with new activity
+
+      // immediately update cache with new activity
       queryClient.setQueryData(activitiesKey, (prev: RoomActivity[] = []) => {
-        // prevent duplicate activities
         if (prev.some((activity) => activity.id === newActivity.id))
           return prev;
-        // add new activity to cache
         return [...prev, newActivity];
       });
     };
 
-    // subscribe to websocket activities
-    console.log("[useActivityTracker] Subscribing to activities...");
     wsService.subscribe("activity", handleActivity);
-
-    // cleanup websocket subscription
-    return () => {
-      console.log("[useActivityTracker] Unsubscribing from activities...");
-      wsService.unsubscribe("activity", handleActivity);
-    };
+    return () => wsService.unsubscribe("activity", handleActivity);
   }, [roomId, queryClient, activitiesKey]);
 
   // mutation for adding new activities
@@ -104,7 +95,7 @@ export const useActivityTracker = (roomId?: string) => {
   });
 
   return {
-    activities, // historical + real-time activities
-    addActivity, // function to add new activities
+    activities, // will update when WebSocket receives new activities
+    addActivity,
   };
 };

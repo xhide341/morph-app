@@ -1,23 +1,25 @@
 import { useState, useEffect } from "react";
-import { RoomInfo, RoomUser } from "server/types/room";
+import { RoomInfo, RoomUser, RoomActivity } from "server/types/room";
 import { useActivityTracker } from "./use-activity-tracker";
 
 export const useRoom = (roomId?: string) => {
   const [roomInfo, setRoomInfo] = useState<RoomInfo | null>(null);
   const [roomUsers, setRoomUsers] = useState<RoomUser[]>([]);
+
+  // get activities from activity tracker
   const { activities, addActivity } = useActivityTracker(roomId);
 
-  // this useEffect is specifically for:
-  // 1. fetching initial room info (name, settings, etc.)
-  // 2. fetching initial list of users in the room
   useEffect(() => {
     if (!roomId) return;
 
     const initRoom = async () => {
       // get room metadata
-      fetchRoom(roomId);
+      const room = await fetchRoom(roomId);
+      if (room) setRoomInfo(room);
+
       // get list of users in room
-      fetchRoomUsers(roomId);
+      const users = await fetchRoomUsers(roomId);
+      if (users) setRoomUsers(users);
     };
 
     initRoom();
@@ -104,6 +106,15 @@ export const useRoom = (roomId?: string) => {
       const data = await response.json();
       if (!data) return null;
 
+      // add join activity
+      addActivity({
+        type: "join",
+        userName,
+        roomId,
+        timeRemaining: "25:00",
+        timerMode: "work",
+      });
+
       // Update room info with the new data
       setRoomInfo((prevInfo) => {
         if (!prevInfo) return null;
@@ -136,6 +147,15 @@ export const useRoom = (roomId?: string) => {
       const data = await response.json();
       if (!data || !roomInfo) return;
 
+      // add leave activity
+      addActivity({
+        type: "leave",
+        userName,
+        roomId,
+        timeRemaining: "25:00",
+        timerMode: "work",
+      });
+
       setRoomInfo({
         ...roomInfo,
         activeUsers: data.userCount,
@@ -149,9 +169,9 @@ export const useRoom = (roomId?: string) => {
   };
 
   return {
-    activities,
     roomInfo,
     roomUsers,
+    activities,
     addActivity,
     fetchRoom,
     createRoom,
