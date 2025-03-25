@@ -89,23 +89,38 @@ export const Clock = ({
   const handleStart = (isSync: boolean = false) => {
     if (timerInterval) return;
 
-    const startTime = Date.now();
-    const [min, sec] = timerState.time.split(":").map(Number);
-    const totalSeconds = min * 60 + sec;
+    if (isSync && latestActivity) {
+      // Calculate precise elapsed time since activity was created
+      const activityTime = new Date(latestActivity.timeStamp).getTime();
+      const [min, sec] = (latestActivity.timeRemaining || "00:00")
+        .split(":")
+        .map(Number);
+      const originalSeconds = min * 60 + sec;
+      const elapsedMs = Date.now() - activityTime;
+      const elapsedSeconds = Math.floor(elapsedMs / 1000);
+      const remainingSeconds = Math.max(0, originalSeconds - elapsedSeconds);
 
-    if (totalSeconds <= 0) {
-      const resetTime =
-        timerState.mode === "work" ? lastWorkTime : lastBreakTime;
-      setTimerState((prev) => ({ ...prev, time: resetTime }));
-      return;
+      setTimerState((prev) => ({
+        ...prev,
+        time: latestActivity.timeRemaining || prev.time,
+        mode: latestActivity.timerMode || prev.mode,
+        isRunning: remainingSeconds > 0,
+        startTime: activityTime,
+        totalSeconds: originalSeconds,
+      }));
+    } else {
+      // Normal start for initiating client
+      const startTime = Date.now();
+      const [min, sec] = timerState.time.split(":").map(Number);
+      const totalSeconds = min * 60 + sec;
+
+      setTimerState((prev) => ({
+        ...prev,
+        isRunning: true,
+        startTime,
+        totalSeconds,
+      }));
     }
-
-    setTimerState((prev) => ({
-      ...prev,
-      isRunning: true,
-      startTime,
-      totalSeconds,
-    }));
 
     if (!isSync) {
       addActivity({
@@ -140,29 +155,31 @@ export const Clock = ({
     if (timerInterval && timerState.isRunning) {
       clearInterval(timerInterval);
       setTimerInterval(null);
-    }
 
-    const resetTime = timerState.mode === "work" ? lastWorkTime : lastBreakTime;
-    setTimerState((prev) => ({
-      ...prev,
-      time: resetTime,
-      isRunning: false,
-    }));
+      const resetTime =
+        timerState.mode === "work" ? lastWorkTime : lastBreakTime;
+      setTimerState((prev) => ({
+        ...prev,
+        time: resetTime,
+        isRunning: false,
+      }));
 
-    if (!isSync) {
-      addActivity({
-        type: "reset_timer",
-        userName,
-        roomId,
-        timeRemaining: resetTime,
-        timerMode: timerState.mode,
-      });
+      if (!isSync) {
+        addActivity({
+          type: "reset_timer",
+          userName,
+          roomId,
+          timeRemaining: resetTime,
+          timerMode: timerState.mode,
+        });
+      }
     }
   };
 
   // sync effect
   useEffect(() => {
     if (!roomId || !latestActivity) return;
+
     console.log("[Clock] Syncing with activity:", latestActivity);
 
     switch (latestActivity.type) {
