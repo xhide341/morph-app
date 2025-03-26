@@ -82,4 +82,26 @@ roomRouter
     }
   });
 
+roomRouter
+  .route("/:roomId/url")
+  .post(async (req, res) => {
+    try {
+      const { roomId } = req.params;
+      const { url } = req.body;
+      const result = await redisService.storeShareableUrl(roomId, url);
+      res.json({ url: result });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to store URL" });
+    }
+  })
+  .get(async (req, res) => {
+    try {
+      const { roomId } = req.params;
+      const url = await redisService.getShareableUrl(roomId);
+      res.json({ url });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to get URL" });
+    }
+  });
+
 export default roomRouter;

@@ -9,6 +9,7 @@ import { Header } from "../components/header";
 import { ThemeToggle } from "../components/theme-toggle";
 import { ActivityLog } from "../components/activity-log";
 import { UserDisplay } from "../components/user-display";
+import { ShareButton } from "../components/share-button";
 
 export const RoomPage = () => {
   const { roomId } = useParams<{ roomId: string }>();
@@ -38,7 +39,8 @@ export const RoomPage = () => {
   return (
     <div className="font-roboto mx-auto flex h-dvh max-h-dvh w-full max-w-2xl flex-col bg-[var(--color-background)] p-4 text-[var(--color-foreground)]">
       <Header />
-      <div className="absolute top-4 right-4">
+      <div className="absolute top-4 right-4 flex items-center gap-2">
+        <ShareButton roomId={roomId || ""} />
         <ThemeToggle />
       </div>
       <div className="mx-auto flex w-full max-w-3xl flex-col">

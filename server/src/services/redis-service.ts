@@ -174,6 +174,31 @@ const redisService = {
       return [];
     }
   },
+
+  async storeShareableUrl(roomId: string, url: string) {
+    const urlKey = `room:${roomId}:url`;
+    try {
+      await redis.set(urlKey, url);
+      // use the same expiry as room
+      if (await redis.ttl(`room:${roomId}`) > 0) {
+        await redis.expire(urlKey, ROOM_INACTIVITY_EXPIRY);
+      }
+      return url;
+    } catch (error) {
+      console.error("[Redis] Error storing URL:", error);
+      return null;
+    }
+  },
+
+  async getShareableUrl(roomId: string) {
+    const urlKey = `room:${roomId}:url`;
+    try {
+      return await redis.get(urlKey);
+    } catch (error) {
+      console.error("[Redis] Error getting URL:", error);
+      return null;
+    }
+  }
 };
 
 export default redisService;

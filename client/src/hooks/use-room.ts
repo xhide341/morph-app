@@ -180,6 +180,46 @@ export const useRoom = (roomId?: string) => {
     }
   };
 
+  const shareRoom = async (roomId: string) => {
+    try {
+      const url = window.location.href;
+
+      // store url in redis
+      const response = await fetch(`/api/room/${roomId}/url`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url }),
+      });
+
+      if (!response.ok) {
+        console.error("[useRoom] Failed to store shareable URL");
+        return null;
+      }
+
+      // copy to clipboard
+      await navigator.clipboard.writeText(url);
+      return url;
+    } catch (error) {
+      console.error("[useRoom] Error sharing room:", error);
+      return null;
+    }
+  };
+
+  const getRoomUrl = async (roomId: string) => {
+    try {
+      const response = await fetch(`/api/room/${roomId}/url`);
+      if (!response.ok) {
+        console.error("[useRoom] Failed to get shareable URL");
+        return null;
+      }
+      const data = await response.json();
+      return data.url;
+    } catch (error) {
+      console.error("[useRoom] Error getting room URL:", error);
+      return null;
+    }
+  };
+
   return {
     roomInfo,
     roomUsers,
@@ -190,6 +230,8 @@ export const useRoom = (roomId?: string) => {
     addUserToRoom,
     removeUserFromRoom,
     fetchRoomUsers,
+    shareRoom,
+    getRoomUrl,
   };
 };
 

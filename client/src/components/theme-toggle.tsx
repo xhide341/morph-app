@@ -6,7 +6,7 @@ export const ThemeToggle = () => {
   const themes = ["coffee", "forest", "ocean"];
 
   return (
-    <div className="mt-4 flex">
+    <div className="flex">
       <Menu>
         <MenuButton className="inline-flex items-center gap-2 rounded-md bg-[var(--color-primary)] px-3 py-1.5 text-sm/6 font-semibold text-[var(--color-foreground)] shadow-[var(--color-foreground)]/10 shadow-inner focus:outline-none data-[focus]:outline-1 data-[focus]:outline-[var(--color-foreground)] data-[hover]:bg-[var(--color-secondary)] data-[open]:bg-[var(--color-secondary)]">
           Theme
