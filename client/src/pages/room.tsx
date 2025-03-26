@@ -36,7 +36,7 @@ export const RoomPage = () => {
   }, [latestTimerActivity]);
 
   return (
-    <div className="font-roboto mx-auto flex h-dvh w-full max-w-2xl flex-col bg-[var(--color-background)] p-4 text-[var(--color-foreground)]">
+    <div className="font-roboto mx-auto flex h-dvh max-h-dvh w-full max-w-2xl flex-col bg-[var(--color-background)] p-4 text-[var(--color-foreground)]">
       <Header />
       <div className="absolute top-4 right-4">
         <ThemeToggle />
@@ -44,7 +44,9 @@ export const RoomPage = () => {
       <div className="mx-auto flex w-full max-w-3xl flex-col">
         <Clock addActivity={addActivity} latestActivity={latestTimerActivity} />
       </div>
-      {roomId && <ActivityLog activities={activities} />}
+      <div className="mt-4">
+        {roomId && <ActivityLog activities={activities} />}
+      </div>
     </div>
   );
 };

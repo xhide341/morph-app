@@ -114,6 +114,22 @@ export const Clock = ({
       const [min, sec] = timerState.time.split(":").map(Number);
       const totalSeconds = min * 60 + sec;
 
+      if (totalSeconds <= 0) {
+        const resetTime =
+          timerState.mode === "work" ? lastWorkTime : lastBreakTime;
+        const [min, sec] = resetTime.split(":").map(Number);
+        const resetSeconds = min * 60 + sec;
+
+        setTimerState((prev) => ({
+          ...prev,
+          time: resetTime,
+          mode: latestActivity?.timerMode || prev.mode,
+          totalSeconds: resetSeconds,
+          isRunning: false,
+        }));
+        return;
+      }
+
       setTimerState((prev) => ({
         ...prev,
         isRunning: true,

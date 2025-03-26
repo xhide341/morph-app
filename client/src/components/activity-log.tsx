@@ -4,8 +4,8 @@ import { format } from "date-fns";
 
 export const ActivityLog = ({ activities }: { activities: RoomActivity[] }) => {
   return (
-    <div className="max-h-[400px] overflow-y-auto p-4">
-      <div className="relative">
+    <div className="scrollbar-hide max-h-[200px] overflow-y-auto p-2">
+      <div className="relative py-2">
         <AnimatePresence initial={false}>
           {activities?.map((activity) => {
             return (
