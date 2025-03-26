@@ -14,7 +14,7 @@ export const RoomPage = () => {
   const { userName } = useUserInfo();
   const { activities, addActivity } = useRoom(roomId);
 
-  // get latest timer-related activity
+  // get latest timer-related activity and sort by timestamp
   const latestTimerActivity = activities.length
     ? activities
         .filter((activity: RoomActivity) =>
@@ -25,7 +25,10 @@ export const RoomPage = () => {
             "reset_timer",
           ].includes(activity.type),
         )
-        .pop()
+        .sort(
+          (a, b) =>
+            new Date(b.timeStamp).getTime() - new Date(a.timeStamp).getTime(),
+        )[0]
     : null;
 
   useEffect(() => {
@@ -39,10 +42,7 @@ export const RoomPage = () => {
         <ThemeToggle />
       </div>
       <div className="mx-auto flex w-full max-w-3xl flex-col">
-        <Clock
-          addActivity={addActivity}
-          latestActivity={latestTimerActivity || null}
-        />
+        <Clock addActivity={addActivity} latestActivity={latestTimerActivity} />
       </div>
       {roomId && <ActivityLog activities={activities} />}
     </div>
