@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useUserInfo } from "../contexts/user-context";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRoom } from "../hooks/use-room";
 import { RoomActivity } from "server/types/room";
 
@@ -8,10 +8,10 @@ import { Clock } from "../components/clock";
 import { Header } from "../components/header";
 import { ThemeToggle } from "../components/theme-toggle";
 import { ActivityLog } from "../components/activity-log";
+import { UserDisplay } from "../components/user-display";
 
 export const RoomPage = () => {
   const { roomId } = useParams<{ roomId: string }>();
-  const { userName } = useUserInfo();
   const { activities, addActivity } = useRoom(roomId);
 
   // get latest timer-related activity and sort by timestamp
@@ -46,6 +46,9 @@ export const RoomPage = () => {
       </div>
       <div className="mt-4">
         {roomId && <ActivityLog activities={activities} />}
+      </div>
+      <div className="mx-auto mt-4">
+        <UserDisplay activities={activities} />
       </div>
     </div>
   );
