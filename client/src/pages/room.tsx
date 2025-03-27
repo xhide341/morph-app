@@ -18,7 +18,6 @@ export const RoomPage = () => {
   // const { sessionData } = useSession();
   const { roomId } = useParams<{ roomId: string }>();
   const { activities, addActivity, joinRoom } = useRoom(roomId);
-  const navigate = useNavigate();
   const [showModal, setShowModal] = useState(true);
 
   // get latest timer-related activity and sort by timestamp

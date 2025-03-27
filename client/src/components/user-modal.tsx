@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X } from "react-feather";
+import { z } from "zod";
 
 interface UserModalProps {
   isOpen: boolean;
@@ -7,29 +7,25 @@ interface UserModalProps {
   onSkip: () => void;
 }
 
+const userNameSchema = z.string().min(1).max(50);
+
 export const UserModal = ({ isOpen, onJoin, onSkip }: UserModalProps) => {
   const [userName, setUserName] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  //   add proper ui validator
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const processedName = userName.trim();
     onJoin(processedName || "user");
-  };
+  }
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="relative w-full max-w-md rounded-lg bg-[var(--color-background)] p-6 shadow-xl">
-        <button
-          onClick={onSkip}
-          className="absolute top-4 right-4 text-[var(--color-foreground)]/50 hover:text-[var(--color-foreground)]"
-        >
-          <X size={20} />
-        </button>
-
-        <h2 className="mb-4 text-xl font-semibold text-[var(--color-foreground)]">
-          Join Room
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+      <div className="bg-background relative w-full max-w-md rounded-lg p-6 shadow-xl">
+        <h2 className="text-foreground mb-4 text-xl font-semibold tracking-wide">
+          What's your name?
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -38,15 +34,15 @@ export const UserModal = ({ isOpen, onJoin, onSkip }: UserModalProps) => {
               htmlFor="userName"
               className="mb-2 block text-sm text-[var(--color-foreground)]/70"
             >
-              enter your name (optional)
+              Enter your name (optional):
             </label>
             <input
               type="text"
               id="userName"
               value={userName}
               onChange={(e) => setUserName(e.target.value)}
-              placeholder="your name"
-              className="w-full rounded-md bg-[var(--color-secondary)] p-2 text-[var(--color-foreground)] placeholder:text-[var(--color-foreground)]/50"
+              placeholder="hide handsome"
+              className="bg-secondary text-foreground placeholder:text-foreground/50 w-full rounded-md p-2 outline-none"
               maxLength={50}
             />
           </div>
@@ -54,16 +50,16 @@ export const UserModal = ({ isOpen, onJoin, onSkip }: UserModalProps) => {
           <div className="flex gap-2">
             <button
               type="submit"
-              className="flex-1 rounded-md bg-[var(--color-accent)] px-4 py-2 text-[var(--color-foreground)]"
+              className="bg-primary text-foreground hover:bg-primary/90 flex-1 cursor-pointer rounded-md px-4 py-2 text-sm"
             >
-              join
+              Join
             </button>
             <button
               type="button"
               onClick={onSkip}
-              className="rounded-md bg-[var(--color-secondary)] px-4 py-2 text-[var(--color-foreground)]"
+              className="bg-primary text-foreground hover:bg-primary/90 cursor-pointer rounded-md px-4 py-2 text-sm"
             >
-              skip
+              Skip
             </button>
           </div>
         </form>
