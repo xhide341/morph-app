@@ -43,48 +43,41 @@ const redisService = {
     }
 
     return {
-      createdBy: data.createdBy,
+      roomId: roomId,
+      createdBy: null,
       createdAt: data.createdAt,
       lastActive: data.lastActive,
       activeUsers: Number(data.activeUsers),
     };
   },
 
-  async createRoom(roomId: string, userName: string): Promise<RoomInfo | null> {
+  async createRoom(roomId: string): Promise<RoomInfo | null> {
     const roomKey = `room:${roomId}`;
-    const userHashKey = `room:${roomId}:users`;
     const timestamp = Date.now().toString();
 
     try {
-      const result = await redis
-        .multi()
-        .hSet(roomKey, {
-          createdBy: userName,
-          createdAt: timestamp,
-          lastActive: timestamp,
-          activeUsers: "1",
-        })
-        .hSet(
-          userHashKey,
-          userName,
-          JSON.stringify({
-            userName,
-            joinedAt: timestamp,
-          })
-        )
-        .exec();
-
-      if (!result) return null;
-      console.log("[Redis] Room created:", result);
-
-      return {
-        createdBy: userName,
+      // use hSet for atomic operation
+      await redis.hSet(roomKey, {
+        roomId,
         createdAt: timestamp,
         lastActive: timestamp,
-        activeUsers: 1,
+        activeUsers: "0",
+      });
+
+      // set initial expiry
+      await redis.expire(roomKey, ROOM_INACTIVITY_EXPIRY);
+
+      console.log("[Redis] Room created:", roomId);
+
+      return {
+        roomId,
+        createdBy: null,
+        createdAt: timestamp,
+        lastActive: timestamp,
+        activeUsers: 0,
       };
     } catch (error) {
-      console.error(error);
+      console.error("[Redis] Error creating room:", error);
       return null;
     }
   },
@@ -180,7 +173,7 @@ const redisService = {
     try {
       await redis.set(urlKey, url);
       // use the same expiry as room
-      if (await redis.ttl(`room:${roomId}`) > 0) {
+      if ((await redis.ttl(`room:${roomId}`)) > 0) {
         await redis.expire(urlKey, ROOM_INACTIVITY_EXPIRY);
       }
       return url;
@@ -198,7 +191,7 @@ const redisService = {
       console.error("[Redis] Error getting URL:", error);
       return null;
     }
-  }
+  },
 };
 
 export default redisService;

@@ -16,12 +16,13 @@ export type RoomActivity = {
   timerMode?: "work" | "break";
 };
 
-export type RoomInfo = {
-  createdBy: string;
+export interface RoomInfo {
+  roomId: string;
+  createdBy?: string | null;
   createdAt: string;
   lastActive: string;
   activeUsers: number;
-};
+}
 
 export type RoomUser = {
   userName: string;

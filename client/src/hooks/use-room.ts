@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { RoomInfo, RoomUser, RoomActivity } from "server/types/room";
+import { RoomInfo, RoomUser } from "server/types/room";
 import { useActivityTracker } from "./use-activity-tracker";
 
 export const useRoom = (roomId?: string) => {
@@ -25,25 +25,11 @@ export const useRoom = (roomId?: string) => {
     initRoom();
   }, [roomId]);
 
-  const fetchRoom = async (roomId: string) => {
+  const fetchRoom = async (roomId: string): Promise<RoomInfo | null> => {
     try {
       const response = await fetch(`/api/room/${roomId}/info`);
-
-      if (response.status === 404) {
-        console.log("[useRoom] Room not found");
-        return null;
-      }
-
-      if (!response.ok) {
-        console.error("[useRoom] Failed to fetch room info");
-        return null;
-      }
-
+      if (response.status === 404) return null;
       const data = await response.json();
-      console.log("[useRoom] fetchRoom response data:", data);
-
-      if (!data) return null;
-
       return data;
     } catch (error) {
       console.error("[useRoom] Error:", error);
@@ -60,6 +46,7 @@ export const useRoom = (roomId?: string) => {
       }
       const data = await response.json();
       if (!data) return;
+      console.log("[useRoom] Fetched room users:", data);
       setRoomUsers(data);
 
       return data;
@@ -68,40 +55,30 @@ export const useRoom = (roomId?: string) => {
     }
   };
 
-  const createRoom = async (roomId: string, userName: string) => {
+  const createRoom = async (roomId: string) => {
     try {
       const response = await fetch("/api/room/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ roomId, userName }),
+        body: JSON.stringify({ roomId }),
       });
+
       if (!response.ok) {
-        console.error("Failed to create room");
-        return;
+        console.error("[useRoom] Failed to create room");
+        return null;
       }
+
       const data = await response.json();
-      if (!data) return;
-
-      // add join activity
-      addActivity({
-        type: "join",
-        userName,
-        roomId,
-        timeRemaining: "25:00",
-        timerMode: "work",
-      });
-      console.log("[useRoom] Added join activity");
-
+      console.log("[useRoom] Created room:", data);
       setRoomInfo(data);
-      console.log("[useRoom] Room info:", roomInfo);
-
       return data;
     } catch (error) {
-      console.error(error);
+      console.error("[useRoom] Error creating room:", error);
+      return null;
     }
   };
 
-  const addUserToRoom = async (roomId: string, userName: string) => {
+  const joinRoom = async (roomId: string, userName: string = "user") => {
     try {
       const response = await fetch(`/api/room/${roomId}/users`, {
         method: "POST",
@@ -109,15 +86,12 @@ export const useRoom = (roomId?: string) => {
         body: JSON.stringify({ userName }),
       });
 
-      if (!response.ok) {
-        console.error("[useRoom] Failed to join room:", await response.text());
-        return null;
-      }
+      if (!response.ok) return null;
 
       const data = await response.json();
       if (!data) return null;
 
-      // add join activity
+      // always add join activity regardless of modal skip
       addActivity({
         type: "join",
         userName,
@@ -127,16 +101,11 @@ export const useRoom = (roomId?: string) => {
       });
       console.log("[useRoom] Added join activity");
 
-      // Update room info with the new data
-      setRoomInfo((prevInfo) => {
-        if (!prevInfo) return null;
-        return {
-          ...prevInfo,
-          activeUsers: data.userCount || 1,
-          lastActive: data.lastActive || new Date().toISOString(),
-        };
-      });
-      console.log("[useRoom] Room info:", roomInfo);
+      setRoomInfo((prev) => ({
+        ...prev!,
+        activeUsers: data.userCount,
+        lastActive: data.lastActive,
+      }));
 
       return data;
     } catch (error) {
@@ -227,7 +196,7 @@ export const useRoom = (roomId?: string) => {
     addActivity,
     fetchRoom,
     createRoom,
-    addUserToRoom,
+    joinRoom,
     removeUserFromRoom,
     fetchRoomUsers,
     shareRoom,

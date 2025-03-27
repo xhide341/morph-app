@@ -26,9 +26,9 @@ app.use("/api/quotes", quotesRouter);
 app.use("/api/room", roomRouter);
 
 // Track WebSocket client info for broadcasting and room management
-// TODO: make this a separate controller for separation of concerns
-const clients = new Map<WebSocket, { roomId: string; userName: string }>();
+const clients = new Map<WebSocket, { roomId: string; userName?: string }>();
 
+//TODO: FIX WEBSOCKET CONNECTION
 wss.on("connection", (ws: WebSocket, req) => {
   const url = new URL(req.url || "", `ws://${req.headers.host}`);
   const roomId = url.pathname.split("/room/")[1];
@@ -56,13 +56,15 @@ wss.on("connection", (ws: WebSocket, req) => {
 
       if (data.type === "activity") {
         if (data.payload.type === "join") {
+          // Store user info when they join
           clients.set(ws, {
             roomId,
-            userName: data.payload.userName,
+            userName: data.payload.userName || "user",
           });
           console.log("[WS Server] Client joined room:", roomId);
         }
 
+        // Broadcast to all clients in the room
         const clientsInRoom = Array.from(wss.clients).filter(
           (client) => clients.get(client)?.roomId === roomId
         );
@@ -88,7 +90,9 @@ wss.on("connection", (ws: WebSocket, req) => {
     const clientInfo = clients.get(ws);
     console.log(
       "[WS Server] Client disconnected from room:",
-      clientInfo?.roomId
+      clientInfo?.roomId,
+      "User:",
+      clientInfo?.userName
     );
     clients.delete(ws);
   });

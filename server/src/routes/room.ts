@@ -7,8 +7,11 @@ const roomRouter = Router();
 // create a new room
 roomRouter.post("/create", async (req, res) => {
   try {
-    const { roomId, userName } = req.body;
-    const room = await redisService.createRoom(roomId, userName);
+    const { roomId } = req.body;
+    const room = await redisService.createRoom(roomId);
+    if (!room) {
+      res.status(400).json({ error: "Failed to create room" });
+    }
     res.json(room);
   } catch (error) {
     res.status(500).json({ error: "Failed to create room" });

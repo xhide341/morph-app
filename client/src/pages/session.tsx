@@ -1,75 +1,62 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRoom } from "../hooks/use-room";
-import { useUserInfo } from "../contexts/user-context";
 import { z } from "zod";
-import { roomSchema } from "../schemas/room-schema";
-
 import { ThemeToggle } from "../components/theme-toggle";
 
+// inline room schema
+const roomSchema = z.object({
+  roomName: z
+    .string()
+    .min(1, "room name is required")
+    .max(50, "room name too long"),
+});
+
+// TODO: add custom UI validation
 export function SessionPage() {
   const navigate = useNavigate();
-  const { createRoom, addUserToRoom, fetchRoom } = useRoom();
-  const { setUserName } = useUserInfo();
-  const [userName, setUserNameInput] = useState("");
+  const { createRoom, fetchRoom } = useRoom();
   const [roomName, setRoomName] = useState("");
 
   const handleRoom = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
-      const result = roomSchema.parse({
-        userName: userName.trim().toLowerCase(),
-        roomName: roomName.trim().toLowerCase(),
+      const roomId = roomName.trim().toLowerCase();
+
+      // validate with zod schema
+      const { roomName: validatedRoom } = roomSchema.parse({
+        roomName: roomId,
       });
-      if (!result) return;
-      console.log("[Session] Validation passed:", result);
 
-      const roomId = result.roomName;
-      const userId = result.userName;
+      console.log("[Session] Validated room:", validatedRoom);
 
-      // First debug point
-      console.log("[Session] Attempting to check room:", roomId);
-      const roomExists = await fetchRoom(roomId);
-      console.log("[Session] Room exists check result:", roomExists);
-
-      if (!roomExists) {
-        // Second debug point
-        console.log("[Session] Creating new room with:", { roomId, userId });
-        const newRoom = await createRoom(roomId, userId);
-        console.log("[Session] Create room response:", newRoom);
-
-        if (!newRoom) {
-          console.error("[Session] Room creation failed");
-          alert("Failed to create room. Please try again.");
-          return;
-        }
-
-        setUserName(userId);
-        navigate(`/room/${roomId}`);
+      // check if room exists
+      const roomExists = await fetchRoom(validatedRoom);
+      if (roomExists) {
+        console.log("[Session] Room exists:", roomExists);
+        navigate(`/room/${validatedRoom}`);
         return;
       }
 
-      // Third debug point
-      console.log("[Session] Joining existing room:", roomId);
-      const joinedRoom = await addUserToRoom(roomId, userId);
-      console.log("[Session] Join room response:", joinedRoom);
-
-      if (!joinedRoom) {
-        console.error("[Session] Room join failed");
-        alert("Failed to join room. Please try again.");
+      // create new room if doesn't exist
+      const createdRoom = await createRoom(validatedRoom);
+      if (!createdRoom) {
+        console.error("[Session] Failed to create room");
+        alert("failed to create room. please try again.");
         return;
       }
 
-      setUserName(userId);
-      navigate(`/room/${roomId}`);
+      console.log("[Session] Created room:", createdRoom);
+      console.log("[Session] Navigating to new room:", validatedRoom);
+      navigate(`/room/${validatedRoom}`);
+      return;
     } catch (error) {
-      // Better error handling
       console.error("[Session] Error:", error);
       if (error instanceof z.ZodError) {
         alert(error.errors[0].message);
       } else {
-        alert("An unexpected error occurred. Please try again.");
+        alert("an unexpected error occurred. please try again.");
       }
     }
   };
@@ -85,19 +72,11 @@ export function SessionPage() {
           <div className="text-center">
             <h1 className="mb-2 text-4xl font-bold">Welcome</h1>
             <p className="text-[var(--color-foreground)]/70">
-              Enter your details to get started
+              Enter room name to get started
             </p>
           </div>
 
           <form onSubmit={handleRoom} className="space-y-4">
-            <input
-              type="text"
-              value={userName}
-              onChange={(e) => setUserNameInput(e.target.value)}
-              placeholder="Enter your name"
-              className="w-full rounded-md bg-[var(--color-secondary)] p-3 text-[var(--color-foreground)] placeholder:text-[var(--color-foreground)]/50 focus:ring-2 focus:ring-[var(--color-accent)] focus:outline-none"
-            />
-
             <input
               type="text"
               value={roomName}
@@ -106,7 +85,10 @@ export function SessionPage() {
               className="w-full rounded-md bg-[var(--color-secondary)] p-3 text-[var(--color-foreground)] placeholder:text-[var(--color-foreground)]/50 focus:ring-2 focus:ring-[var(--color-accent)] focus:outline-none"
             />
 
-            <button type="submit" className="css-button-3d w-full max-w-full">
+            <button
+              type="submit"
+              className="w-full max-w-full rounded-md bg-[var(--color-accent)] p-3 text-[var(--color-foreground)]"
+            >
               Continue
             </button>
           </form>

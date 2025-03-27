@@ -47,7 +47,9 @@
 ## WebSocket Activity Tracking Flow
 
 ### Client-Side (useActivityTracker.ts)
+
 1. Local Activity Creation
+
    - Generate new activity with UUID
    - Add to local state immediately
    - Send to WebSocket server
@@ -58,7 +60,9 @@
    - Update state if not duplicate
 
 ### Server-Side (index.ts)
+
 1. Connection Handler
+
    - Parse room ID from URL
    - Send connection confirmation
    - Setup message handlers
@@ -69,6 +73,7 @@
    - Broadcast to all room clients
 
 ### Activity Flow
+
 1. Client adds activity locally
 2. Activity sent to WebSocket server
 3. Server processes and broadcasts
@@ -76,7 +81,14 @@
 5. Duplicate check prevents double entries
 
 ### Next Steps
+
 - Add activity type filtering
 - Implement activity persistence
 - Add error recovery for disconnections
 - Add activity batching for performance
+
+## Room Creation
+
+1. Create room only in session page
+2. redirect to room page
+3. room page has username modal that will be responsible for user join activity

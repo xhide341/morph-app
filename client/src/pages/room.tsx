@@ -3,6 +3,8 @@ import { useUserInfo } from "../contexts/user-context";
 import { useEffect, useState } from "react";
 import { useRoom } from "../hooks/use-room";
 import { RoomActivity } from "server/types/room";
+// import { useSession } from "../hooks/use-session";
+import { useNavigate } from "react-router-dom";
 
 import { Clock } from "../components/clock";
 import { Header } from "../components/header";
@@ -10,10 +12,14 @@ import { ThemeToggle } from "../components/theme-toggle";
 import { ActivityLog } from "../components/activity-log";
 import { UserDisplay } from "../components/user-display";
 import { ShareButton } from "../components/share-button";
+import { UserModal } from "../components/user-modal";
 
 export const RoomPage = () => {
+  // const { sessionData } = useSession();
   const { roomId } = useParams<{ roomId: string }>();
-  const { activities, addActivity } = useRoom(roomId);
+  const { activities, addActivity, joinRoom } = useRoom(roomId);
+  const navigate = useNavigate();
+  const [showModal, setShowModal] = useState(true);
 
   // get latest timer-related activity and sort by timestamp
   const latestTimerActivity = activities.length
@@ -36,10 +42,23 @@ export const RoomPage = () => {
     console.log("[Room] Latest timer activity:", latestTimerActivity);
   }, [latestTimerActivity]);
 
+  const handleJoin = async (userName: string) => {
+    if (!roomId) return;
+    await joinRoom(roomId, userName);
+    setShowModal(false);
+  };
+
+  const handleSkip = async () => {
+    if (!roomId) return;
+    await joinRoom(roomId, "user");
+    setShowModal(false);
+  };
+
   return (
-    <div className="font-roboto mx-auto flex h-dvh max-h-dvh w-full max-w-2xl flex-col bg-[var(--color-background)] p-4 text-[var(--color-foreground)]">
+    <div className="font-roboto relative mx-auto flex h-dvh max-h-dvh w-full max-w-2xl flex-col bg-[var(--color-background)] p-4 text-[var(--color-foreground)]">
+      <UserModal isOpen={showModal} onJoin={handleJoin} onSkip={handleSkip} />
       <Header />
-      <div className="absolute top-4 right-4 flex items-center gap-2">
+      <div className="fixed top-4 right-4 flex items-center gap-2">
         <ShareButton roomId={roomId || ""} />
         <ThemeToggle />
       </div>
@@ -49,7 +68,7 @@ export const RoomPage = () => {
       <div className="mt-4">
         {roomId && <ActivityLog activities={activities} />}
       </div>
-      <div className="mx-auto mt-4">
+      <div className="fixed bottom-4 left-1/2 -translate-x-1/2">
         <UserDisplay activities={activities} />
       </div>
     </div>
