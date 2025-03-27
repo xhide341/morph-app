@@ -18,7 +18,8 @@ export const RoomPage = () => {
   // const { sessionData } = useSession();
   const { roomId } = useParams<{ roomId: string }>();
   const { activities, addActivity, joinRoom } = useRoom(roomId);
-  const [showModal, setShowModal] = useState(true);
+  const { userName, setUserName } = useUserInfo();
+  const [showModal, setShowModal] = useState(!userName);
 
   // get latest timer-related activity and sort by timestamp
   const latestTimerActivity = activities.length
@@ -41,14 +42,16 @@ export const RoomPage = () => {
     console.log("[Room] Latest timer activity:", latestTimerActivity);
   }, [latestTimerActivity]);
 
-  const handleJoin = async (userName: string) => {
+  const handleJoin = async (name: string) => {
     if (!roomId) return;
-    await joinRoom(roomId, userName);
+    setUserName(name);
+    await joinRoom(roomId, name);
     setShowModal(false);
   };
 
   const handleSkip = async () => {
     if (!roomId) return;
+    setUserName("user");
     await joinRoom(roomId, "user");
     setShowModal(false);
   };

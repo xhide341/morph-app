@@ -7,7 +7,7 @@ interface UserModalProps {
   onSkip: () => void;
 }
 
-const userNameSchema = z.string().min(1).max(50);
+const userNameSchema = z.string().min(1).max(10);
 
 export const UserModal = ({ isOpen, onJoin, onSkip }: UserModalProps) => {
   const [userName, setUserName] = useState("");
@@ -15,8 +15,19 @@ export const UserModal = ({ isOpen, onJoin, onSkip }: UserModalProps) => {
   //   add proper ui validator
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const processedName = userName.trim();
-    onJoin(processedName || "user");
+    try {
+      const validatedName = userNameSchema.safeParse(userName.trim());
+      if (!validatedName.success) {
+        throw new Error(validatedName.error.message);
+      }
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        throw new Error(error.errors[0].message);
+      } else {
+        throw new Error("An unexpected error occurred. Please try again.");
+      }
+    }
+    onJoin(userName || "user");
   }
 
   if (!isOpen) return null;
@@ -43,7 +54,7 @@ export const UserModal = ({ isOpen, onJoin, onSkip }: UserModalProps) => {
               onChange={(e) => setUserName(e.target.value)}
               placeholder="hide handsome"
               className="bg-secondary text-foreground placeholder:text-foreground/50 w-full rounded-md p-2 outline-none"
-              maxLength={50}
+              maxLength={10}
             />
           </div>
 
