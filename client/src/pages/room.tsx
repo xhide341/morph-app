@@ -6,16 +6,14 @@ import { RoomActivity } from "server/types/room";
 
 import { Clock } from "../components/clock";
 import { Header } from "../components/header";
-import { ThemeToggle } from "../components/theme-toggle";
 import { ActivityLog } from "../components/activity-log";
 import { UserDisplay } from "../components/user-display";
-import { ShareButton } from "../components/share-button";
 import { UserModal } from "../components/user-modal";
 
 export const RoomPage = () => {
   const { roomId } = useParams<{ roomId: string }>();
   const { activities, addActivity, joinRoom, leaveRoom } = useRoom(roomId);
-  const { userName, setUserName, clearUserName } = useUserInfo();
+  const { userName, setUserName } = useUserInfo();
   const [showModal, setShowModal] = useState(!userName);
 
   // get latest timer-related activity and sort by timestamp
