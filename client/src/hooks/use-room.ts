@@ -5,7 +5,6 @@ import { useActivityTracker } from "./use-activity-tracker";
 export const useRoom = (roomId?: string) => {
   const [roomInfo, setRoomInfo] = useState<RoomInfo | null>(null);
   const [roomUsers, setRoomUsers] = useState<RoomUser[]>([]);
-
   // get activities from activity tracker
   const { activities, addActivity } = useActivityTracker(roomId);
 
@@ -114,7 +113,7 @@ export const useRoom = (roomId?: string) => {
     }
   };
 
-  const removeUserFromRoom = async (roomId: string, userName: string) => {
+  const leaveRoom = async (roomId: string, userName: string) => {
     try {
       const response = await fetch(`/api/room/${roomId}/users`, {
         method: "DELETE",
@@ -132,9 +131,7 @@ export const useRoom = (roomId?: string) => {
       addActivity({
         type: "leave",
         userName,
-        roomId,
-        timeRemaining: "25:00",
-        timerMode: "work",
+        roomId,        
       });
 
       setRoomInfo({
@@ -197,7 +194,7 @@ export const useRoom = (roomId?: string) => {
     fetchRoom,
     createRoom,
     joinRoom,
-    removeUserFromRoom,
+    leaveRoom,
     fetchRoomUsers,
     shareRoom,
     getRoomUrl,

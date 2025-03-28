@@ -3,7 +3,7 @@ import { RoomActivity, RoomInfo, RoomUser } from "../types/room";
 
 const ROOM_INACTIVITY_EXPIRY = 10 * 60; // 10 minutes in seconds
 
-const redisService = {
+export const redisService = {
   // Room activities
   async storeActivity(roomId: string, activity: RoomActivity) {
     const key = `room:${roomId}:activities`;
@@ -193,5 +193,3 @@ const redisService = {
     }
   },
 };
-
-export default redisService;

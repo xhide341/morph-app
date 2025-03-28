@@ -32,9 +32,8 @@ export default function App() {
         <Router>
           <div className="min-h-dvh bg-[var(--color-background)]">
             <Routes>
-              <Route path="/session" element={<SessionPage />} />
+              <Route path="/" element={<SessionPage />} />
               <Route path="/room/:roomId" element={<RoomPage />} />
-              <Route path="/" element={<Navigate to="/session" replace />} />
             </Routes>
           </div>
         </Router>

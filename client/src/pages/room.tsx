@@ -18,7 +18,7 @@ export const RoomPage = () => {
   // const { sessionData } = useSession();
   const { roomId } = useParams<{ roomId: string }>();
   const { activities, addActivity, joinRoom } = useRoom(roomId);
-  const { userName, setUserName } = useUserInfo();
+  const { userName, setUserName, clearUserName } = useUserInfo();
   const [showModal, setShowModal] = useState(!userName);
 
   // get latest timer-related activity and sort by timestamp
@@ -41,6 +41,15 @@ export const RoomPage = () => {
   useEffect(() => {
     console.log("[Room] Latest timer activity:", latestTimerActivity);
   }, [latestTimerActivity]);
+
+  useEffect(() => {
+    return () => {
+      // Cleanup when component unmounts
+      if (userName) {
+        clearUserName();
+      }
+    };
+  }, [userName]);
 
   const handleJoin = async (name: string) => {
     if (!roomId) return;
