@@ -21,10 +21,10 @@ export const ShareButton = ({ roomId }: { roomId: string }) => {
   return (
     <button
       onClick={handleShare}
-      className="css-button-3d flex items-center gap-2 p-2"
+      className="bg-primary hover:bg-primary/80 flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm tracking-wide"
       aria-label="Share room link"
     >
-      <Share2 size={16} />
+      <Share2 size={12} />
       <span>{copied ? "Copied!" : "Share"}</span>
     </button>
   );

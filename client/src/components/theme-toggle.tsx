@@ -8,7 +8,7 @@ export const ThemeToggle = () => {
   return (
     <div className="flex">
       <Menu>
-        <MenuButton className="inline-flex items-center gap-2 rounded-md bg-[var(--color-primary)] px-3 py-1.5 text-sm/6 font-semibold text-[var(--color-foreground)] shadow-[var(--color-foreground)]/10 shadow-inner focus:outline-none data-[focus]:outline-1 data-[focus]:outline-[var(--color-foreground)] data-[hover]:bg-[var(--color-secondary)] data-[open]:bg-[var(--color-secondary)]">
+        <MenuButton className="bg-primary hover:bg-primary/80 text-foreground inline-flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm focus:outline-none data-[focus]:outline-1 data-[focus]:outline-[var(--color-foreground)] data-[hover]:bg-[var(--color-secondary)] data-[open]:bg-[var(--color-secondary)]">
           Theme
           <ChevronDownIcon className="size-4 fill-[var(--color-foreground)]/60" />
         </MenuButton>
