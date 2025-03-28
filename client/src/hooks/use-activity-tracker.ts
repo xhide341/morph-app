@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { RoomActivity } from "server/types/room";
 import { wsService } from "server/services/websocket-service";
+import { useUserInfo } from "../contexts/user-context";
 
 // fetch historical activities from redis via api
 const fetchActivities = async (roomId: string): Promise<RoomActivity[]> => {
@@ -30,7 +31,7 @@ const storeActivity = async (roomId: string, activity: RoomActivity) => {
 // hook used by useRoom to track all room activities
 export const useActivityTracker = (roomId?: string) => {
   const queryClient = useQueryClient();
-  // unique key for react query cache
+  const { userName } = useUserInfo();
   const activitiesKey = ["activities", roomId];
 
   // fetch from redis for historical data
@@ -42,19 +43,19 @@ export const useActivityTracker = (roomId?: string) => {
 
   // Connect to WebSocket when room ID is available
   useEffect(() => {
-    if (!roomId) return;
+    if (!roomId || !userName) return;
 
-    const userName = localStorage.getItem("userName") || ""; // Provide empty string fallback
     console.log("[ActivityTracker] Initializing WebSocket connection:", {
       roomId,
       userName,
     });
     wsService.connect(roomId, userName);
+
     return () => {
       console.log("[ActivityTracker] Cleaning up WebSocket connection");
       wsService.disconnect();
     };
-  }, [roomId]);
+  }, [roomId, userName]);
 
   // Separate effect for activity subscription
   useEffect(() => {

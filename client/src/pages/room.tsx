@@ -36,10 +36,10 @@ export const RoomPage = () => {
     : null;
 
   useEffect(() => {
-    console.log("[Room] Latest timer activity:", latestTimerActivity);
-  }, [latestTimerActivity]);
-
-  useEffect(() => {
+    if (!roomId) return;
+    if (!userName) {
+      setShowModal(true);
+    }
     return () => {
       const handleLeave = async () => {
         if (userName && roomId) {
