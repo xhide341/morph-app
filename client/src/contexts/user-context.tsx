@@ -12,7 +12,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   // initialize from localStorage if exists
   const [userName, setUserNameState] = useState(() => {
     const saved = localStorage.getItem("userName");
-    return saved || "";
+    return saved ? saved : "";
   });
 
   // update localStorage when userName changes
@@ -24,6 +24,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   const clearUserName = () => {
     setUserNameState("");
     localStorage.removeItem("userName");
+    localStorage.clear();
   };
 
   return (
