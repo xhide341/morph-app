@@ -105,7 +105,7 @@ export class WebSocketServerService {
               clientInfo.userName
             );
 
-            // Add leave activity
+            // add leave activity
             const activity = {
               type: "activity",
               payload: {
@@ -120,7 +120,7 @@ export class WebSocketServerService {
           }
         }
 
-        // Remove this specific connection
+        // remove connection
         clients.delete(ws);
         console.log(
           "[WS Server] Client disconnected. Remaining connections:",

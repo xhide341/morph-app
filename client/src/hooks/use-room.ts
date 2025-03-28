@@ -95,8 +95,6 @@ export const useRoom = (roomId?: string) => {
         type: "join",
         userName,
         roomId,
-        timeRemaining: "25:00",
-        timerMode: "work",
       });
       console.log("[useRoom] Added join activity");
 
@@ -131,7 +129,7 @@ export const useRoom = (roomId?: string) => {
       addActivity({
         type: "leave",
         userName,
-        roomId,        
+        roomId,
       });
 
       setRoomInfo({

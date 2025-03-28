@@ -4,8 +4,6 @@ import quotesRouter from "./routes/quotes";
 import roomRouter from "./routes/room";
 import { connectRedis } from "./config/redis";
 import { createServer } from "http";
-import { WebSocketServer, WebSocket } from "ws";
-import { redisService } from "./services/redis-service";
 import { WebSocketServerService } from "./services/websocket-server-service";
 
 const app = express();

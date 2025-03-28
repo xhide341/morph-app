@@ -44,7 +44,6 @@ export const RoomPage = () => {
 
   useEffect(() => {
     return () => {
-      // Cleanup when component unmounts
       if (userName) {
         clearUserName();
       }
