@@ -68,10 +68,6 @@ export const RoomPage = () => {
     <div className="font-roboto relative mx-auto flex h-dvh max-h-dvh w-full max-w-2xl flex-col bg-[var(--color-background)] p-4 text-[var(--color-foreground)]">
       <UserModal isOpen={showModal} onJoin={handleJoin} onSkip={handleSkip} />
       <Header />
-      <div className="fixed top-4 right-6 flex items-center gap-2">
-        <ShareButton roomId={roomId || ""} />
-        <ThemeToggle />
-      </div>
       <div className="mx-auto flex w-full max-w-3xl flex-col">
         <Clock addActivity={addActivity} latestActivity={latestTimerActivity} />
       </div>

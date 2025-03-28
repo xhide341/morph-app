@@ -3,27 +3,39 @@ import { ChevronDownIcon } from "@heroicons/react/16/solid";
 import { switchTheme } from "../utils/theme-switch.ts";
 
 export const ThemeToggle = () => {
-  const themes = ["coffee", "forest", "ocean"];
+  const themes = [
+    "coffee",
+    "forest",
+    "ocean",
+    "sunset",
+    "mint",
+    "lavender",
+    "arctic",
+    "desert",
+  ];
 
   return (
     <div className="flex">
       <Menu>
-        <MenuButton className="bg-primary hover:bg-primary/80 text-foreground inline-flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm focus:outline-none data-[focus]:outline-1 data-[focus]:outline-[var(--color-foreground)] data-[hover]:bg-[var(--color-secondary)] data-[open]:bg-[var(--color-secondary)]">
+        <MenuButton className="bg-primary hover:bg-primary/80 text-foreground data-[focus]:outline-foreground data-[open]:bg-secondary inline-flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm tracking-wide focus:outline-none data-[focus]:outline-1">
           Theme
-          <ChevronDownIcon className="size-4 fill-[var(--color-foreground)]/60" />
+          <ChevronDownIcon className="size-4 fill-[var(--color-foreground)]" />
         </MenuButton>
 
         <MenuItems
           transition
           anchor="bottom"
-          className="w-52 origin-top-right rounded-xl border border-[var(--color-secondary)] bg-[var(--color-primary)] p-1 text-sm/6 transition duration-100 ease-out [--anchor-gap:var(--spacing-1)] focus:outline-none data-[closed]:scale-95 data-[closed]:opacity-0"
+          className="border-secondary bg-primary/50 max-h-[300px] w-32 origin-top-right overflow-y-auto rounded-lg border p-1 text-sm/6 backdrop-blur-lg transition duration-100 ease-out [--anchor-gap:var(--spacing-1)] focus:outline-none data-[closed]:scale-95 data-[closed]:opacity-0"
         >
           {themes.map((theme) => (
             <MenuItem key={theme}>
               <button
                 onClick={() => switchTheme(theme)}
-                className="group flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-[var(--color-foreground)] data-[focus]:bg-[var(--color-secondary)]"
+                className={`group text-foreground data-[focus]:bg-secondary hover:bg-secondary/50 flex w-full items-center gap-2 rounded-md px-3 py-1.5 text-sm tracking-wide capitalize peer-hover:data-[focus]:bg-transparent`}
               >
+                <div
+                  className={`bg-primary-hint size-3 rounded-full theme-${theme}-hint`}
+                />
                 {theme}
               </button>
             </MenuItem>
