@@ -28,7 +28,7 @@ class WebSocketService {
     return WebSocketService.instance;
   }
 
-  connect(roomId: string) {
+  connect(roomId: string, userName: string) {
     this.currentRoomId = roomId;
 
     if (
@@ -46,9 +46,10 @@ class WebSocketService {
     this.shouldReconnect = true;
     this.reconnectAttempts = 0;
     const WS_URL = "ws://localhost:3000";
+    const url = `${WS_URL}/room/${roomId}?userName=${userName}`;
 
     console.log("[WebSocket] Connecting to:", `${WS_URL}/room/${roomId}`);
-    this.socket = new WebSocket(`${WS_URL}/room/${roomId}`);
+    this.socket = new WebSocket(url);
 
     this.socket.onopen = () => {
       console.log("[WebSocket] Connected to WebSocket for room:", roomId);
@@ -76,7 +77,7 @@ class WebSocketService {
         console.log(
           `[WebSocket] Reconnecting attempt ${this.reconnectAttempts} in ${delay}ms`
         );
-        setTimeout(() => this.connect(roomId), delay);
+        setTimeout(() => this.connect(roomId, userName), delay);
       }
     };
 

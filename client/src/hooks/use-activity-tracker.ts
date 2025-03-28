@@ -43,11 +43,13 @@ export const useActivityTracker = (roomId?: string) => {
   // Connect to WebSocket when room ID is available
   useEffect(() => {
     if (!roomId) return;
-    console.log(
-      "[ActivityTracker] Initializing WebSocket connection for room:",
+
+    const userName = localStorage.getItem("userName") || ""; // Provide empty string fallback
+    console.log("[ActivityTracker] Initializing WebSocket connection:", {
       roomId,
-    );
-    wsService.connect(roomId);
+      userName,
+    });
+    wsService.connect(roomId, userName);
     return () => {
       console.log("[ActivityTracker] Cleaning up WebSocket connection");
       wsService.disconnect();

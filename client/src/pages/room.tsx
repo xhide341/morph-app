@@ -3,8 +3,6 @@ import { useUserInfo } from "../contexts/user-context";
 import { useEffect, useState } from "react";
 import { useRoom } from "../hooks/use-room";
 import { RoomActivity } from "server/types/room";
-// import { useSession } from "../hooks/use-session";
-import { useNavigate } from "react-router-dom";
 
 import { Clock } from "../components/clock";
 import { Header } from "../components/header";
@@ -15,9 +13,8 @@ import { ShareButton } from "../components/share-button";
 import { UserModal } from "../components/user-modal";
 
 export const RoomPage = () => {
-  // const { sessionData } = useSession();
   const { roomId } = useParams<{ roomId: string }>();
-  const { activities, addActivity, joinRoom } = useRoom(roomId);
+  const { activities, addActivity, joinRoom, leaveRoom } = useRoom(roomId);
   const { userName, setUserName, clearUserName } = useUserInfo();
   const [showModal, setShowModal] = useState(!userName);
 
@@ -44,11 +41,14 @@ export const RoomPage = () => {
 
   useEffect(() => {
     return () => {
-      if (userName) {
-        clearUserName();
-      }
+      const handleLeave = async () => {
+        if (userName && roomId) {
+          await leaveRoom(roomId, userName);
+        }
+      };
+      handleLeave();
     };
-  }, [userName]);
+  }, [userName, roomId]);
 
   const handleJoin = async (name: string) => {
     if (!roomId) return;

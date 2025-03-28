@@ -82,7 +82,7 @@ export class WebSocketServerService {
       ws.on("close", async () => {
         const clientInfo = clients.get(ws);
         if (clientInfo?.userName) {
-          // Check if user exists in other connections
+          // check if user exists in other connections
           const userExistsInOtherConnections = Array.from(
             clients.entries()
           ).some(
@@ -92,7 +92,7 @@ export class WebSocketServerService {
               info.userName === clientInfo.userName
           );
 
-          // Log connection status
+          //  connection status
           console.log("[WS Server] Connection closing:", {
             userName: clientInfo.userName,
             roomId: clientInfo.roomId,
