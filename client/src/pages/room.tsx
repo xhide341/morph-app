@@ -35,9 +35,6 @@ export const RoomPage = () => {
 
   useEffect(() => {
     if (!roomId) return;
-    if (!userName) {
-      setShowModal(true);
-    }
     return () => {
       const handleLeave = async () => {
         if (userName && roomId) {
@@ -50,15 +47,15 @@ export const RoomPage = () => {
 
   const handleJoin = async (name: string) => {
     if (!roomId) return;
-    setUserName(name);
+    // setUserName(name);
     await joinRoom(roomId, name);
     setShowModal(false);
   };
 
-  const handleSkip = async () => {
+  const handleSkip = async (name: string) => {
     if (!roomId) return;
-    setUserName("user");
-    await joinRoom(roomId, "user");
+    // setUserName("user");
+    await joinRoom(roomId, name);
     setShowModal(false);
   };
 

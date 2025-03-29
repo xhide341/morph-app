@@ -1,9 +1,8 @@
 import { WebSocketServer, WebSocket } from "ws";
 import { Server } from "http";
-import { redisService } from "./redis-service";
 
-// Track WebSocket client info for broadcasting and room management
-const clients = new Map<WebSocket, { roomId: string; userName?: string }>();
+// track websocket client info for broadcasting and room management
+const clients = new Map<WebSocket, { roomId: string }>();
 
 export class WebSocketServerService {
   private static instance: WebSocketServerService;
@@ -25,24 +24,23 @@ export class WebSocketServerService {
     this.wss.on("connection", (ws: WebSocket, req) => {
       const url = new URL(req.url || "", `ws://${req.headers.host}`);
       const roomId = url.pathname.split("/room/")[1];
-      const userName = url.searchParams.get("userName") || undefined;
 
       console.log(
         "[WS Server] Total active connections:",
         this.wss.clients.size
       );
-      console.log("[WS Server] Connection attempt:", { roomId, userName });
+      console.log("[WS Server] Connection attempt:", { roomId });
 
       if (!roomId) {
-        console.error("No room ID provided");
+        console.error("[WS Server] No room ID provided");
         ws.close();
         return;
       }
 
-      // Store client info immediately on connection
-      clients.set(ws, { roomId, userName });
+      // store client info immediately on connection
+      clients.set(ws, { roomId });
 
-      // Log room-specific connections
+      // log room-specific connections
       const clientsInRoom = Array.from(clients.entries()).filter(
         ([_, info]) => info.roomId === roomId
       );
@@ -57,21 +55,7 @@ export class WebSocketServerService {
           console.log("[WS Server] Received message:", data);
 
           if (data.type === "activity") {
-            if (data.payload.type === "join") {
-              const clientInfo = clients.get(ws);
-              if (clientInfo) {
-                clients.set(ws, {
-                  ...clientInfo,
-                  userName: data.payload.userName,
-                });
-                console.log(
-                  "[WS Server] Updated user info:",
-                  data.payload.userName
-                );
-              }
-            }
-
-            // Broadcast to all clients in the room
+            // broadcast to all clients in the room
             this.broadcastToRoom(roomId, data);
           }
         } catch (error) {
@@ -79,47 +63,7 @@ export class WebSocketServerService {
         }
       });
 
-      ws.on("close", async () => {
-        const clientInfo = clients.get(ws);
-        if (clientInfo?.userName) {
-          // check if user exists in other connections
-          const userExistsInOtherConnections = Array.from(
-            clients.entries()
-          ).some(
-            ([socket, info]) =>
-              socket !== ws &&
-              info.roomId === clientInfo.roomId &&
-              info.userName === clientInfo.userName
-          );
-
-          //  connection status
-          console.log("[WS Server] Connection closing:", {
-            userName: clientInfo.userName,
-            roomId: clientInfo.roomId,
-            hasOtherConnections: userExistsInOtherConnections,
-          });
-
-          if (!userExistsInOtherConnections) {
-            await redisService.userLeaveRoom(
-              clientInfo.roomId,
-              clientInfo.userName
-            );
-
-            // add leave activity
-            const activity = {
-              type: "activity",
-              payload: {
-                type: "leave",
-                userName: clientInfo.userName,
-                roomId: clientInfo.roomId,
-                timeStamp: new Date().toISOString(),
-              },
-            };
-
-            this.broadcastToRoom(clientInfo.roomId, activity);
-          }
-        }
-
+      ws.on("close", () => {
         // remove connection
         clients.delete(ws);
         console.log(

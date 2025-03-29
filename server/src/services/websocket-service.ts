@@ -28,8 +28,16 @@ class WebSocketService {
     return WebSocketService.instance;
   }
 
-  connect(roomId: string, userName: string) {
+  connect(roomId: string) {
     this.currentRoomId = roomId;
+
+    if (this.socket?.readyState === WebSocket.CONNECTING) {
+      console.log(
+        "[WebSocket] Connection already in progress for room:",
+        roomId
+      );
+      return;
+    }
 
     if (
       this.socket?.readyState === WebSocket.OPEN &&
@@ -46,13 +54,20 @@ class WebSocketService {
     this.shouldReconnect = true;
     this.reconnectAttempts = 0;
     const WS_URL = "ws://localhost:3000";
-    const url = `${WS_URL}/room/${roomId}?userName=${userName}`;
+    const url = `${WS_URL}/rooms/${roomId}`;
 
-    console.log("[WebSocket] Connecting to:", `${WS_URL}/room/${roomId}`);
+    console.log("[WebSocket] Connecting to:", url);
     this.socket = new WebSocket(url);
 
     this.socket.onopen = () => {
       console.log("[WebSocket] Connected to WebSocket for room:", roomId);
+      this.send({
+        type: "connection_status",
+        payload: {
+          status: "connected",
+          roomId,
+        },
+      });
       this.reconnectAttempts = 0;
     };
 
@@ -77,7 +92,7 @@ class WebSocketService {
         console.log(
           `[WebSocket] Reconnecting attempt ${this.reconnectAttempts} in ${delay}ms`
         );
-        setTimeout(() => this.connect(roomId, userName), delay);
+        setTimeout(() => this.connect(roomId), delay);
       }
     };
 
