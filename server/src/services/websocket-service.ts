@@ -32,10 +32,7 @@ class WebSocketService {
     this.currentRoomId = roomId;
 
     if (this.socket?.readyState === WebSocket.CONNECTING) {
-      console.log(
-        "[WebSocket] Connection already in progress for room:",
-        roomId
-      );
+      console.log("[WebSocket] Connection in progress:", roomId);
       return;
     }
 
@@ -43,7 +40,7 @@ class WebSocketService {
       this.socket?.readyState === WebSocket.OPEN &&
       this.currentRoomId === roomId
     ) {
-      console.log("[WebSocket] Already connected to room:", roomId);
+      console.log("[WebSocket] Already connected:", roomId);
       return;
     }
 
@@ -60,26 +57,22 @@ class WebSocketService {
     this.socket = new WebSocket(url);
 
     this.socket.onopen = () => {
-      console.log("[WebSocket] Connected to WebSocket for room:", roomId);
+      console.log("[WebSocket] Connected to room:", roomId);
       this.send({
         type: "connection_status",
-        payload: {
-          status: "connected",
-          roomId,
-        },
+        payload: { status: "connected", roomId },
       });
       this.reconnectAttempts = 0;
     };
 
     this.socket.onmessage = (event) => {
       const message: WebSocketMessage = JSON.parse(event.data);
-      console.log("[WebSocket] Parsed message:", message);
+      console.log("[WebSocket] Received:", message);
       this.notifySubscribers(message.type, message);
     };
 
     this.socket.onclose = () => {
-      console.log("[WebSocket] Disconnected from WebSocket");
-
+      console.log("[WebSocket] Disconnected");
       if (
         this.shouldReconnect &&
         this.reconnectAttempts < this.maxReconnectAttempts
@@ -131,6 +124,7 @@ class WebSocketService {
     }
   }
 
+  // explicitly disconnect from websocket
   disconnect() {
     this.shouldReconnect = false;
     this.currentRoomId = null;

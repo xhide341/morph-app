@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { RoomInfo, RoomUser } from "server/types/room";
 import { useActivityTracker } from "./use-activity-tracker";
+import { wsService } from "server/services/websocket-service";
 
 export const useRoom = (roomId?: string) => {
   const [roomInfo, setRoomInfo] = useState<RoomInfo | null>(null);
@@ -8,20 +9,42 @@ export const useRoom = (roomId?: string) => {
   // get activities from activity tracker
   const { activities, addActivity } = useActivityTracker(roomId);
 
+  // Separate WebSocket connection effect
+  useEffect(() => {
+    if (!roomId) return;
+
+    // Only connect if room exists in state
+    if (roomInfo) {
+      wsService.connect(roomId);
+
+      return () => {
+        wsService.disconnect();
+      };
+    }
+  }, [roomId, roomInfo]);
+
+  // Room initialization effect
   useEffect(() => {
     if (!roomId) return;
 
     const initRoom = async () => {
-      // get room metadata
-      const room = await fetchRoom(roomId);
-      if (room) setRoomInfo(room);
+      try {
+        // get room metadata first
+        const room = await fetchRoom(roomId);
 
-      // get list of users in room
-      const users = await fetchRoomUsers(roomId);
-      if (users) setRoomUsers(users);
+        if (room) {
+          setRoomInfo(room);
+          // get list of users in room
+          const users = await fetchRoomUsers(roomId);
+          if (users) setRoomUsers(users);
+        }
+      } catch (error) {
+        console.error("[useRoom] Error initializing room:", error);
+      }
     };
 
     initRoom();
+    return () => wsService.disconnect();
   }, [roomId]);
 
   const fetchRoom = async (roomId: string): Promise<RoomInfo | null> => {

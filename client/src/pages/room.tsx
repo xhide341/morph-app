@@ -54,7 +54,7 @@ export const RoomPage = () => {
 
   const handleSkip = async (name: string) => {
     if (!roomId) return;
-    // setUserName("user");
+    // do not set localstorage username for skipped
     await joinRoom(roomId, name);
     setShowModal(false);
   };

@@ -10,7 +10,7 @@ interface UserModalProps {
 const userNameSchema = z.string().min(1).max(10);
 
 export const UserModal = ({ isOpen, onJoin, onSkip }: UserModalProps) => {
-  const [userName, setUserName] = useState("user");
+  const [userName, setUserName] = useState("");
 
   //   add proper ui validator
   function handleSubmit(e: React.FormEvent) {
@@ -67,7 +67,7 @@ export const UserModal = ({ isOpen, onJoin, onSkip }: UserModalProps) => {
             </button>
             <button
               type="button"
-              onClick={() => onSkip(userName)}
+              onClick={() => onSkip("user")}
               className="bg-primary text-foreground hover:bg-primary/90 cursor-pointer rounded-md px-4 py-2 text-sm"
             >
               Skip

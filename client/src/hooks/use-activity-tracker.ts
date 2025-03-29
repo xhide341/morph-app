@@ -44,6 +44,7 @@ export const useActivityTracker = (roomId?: string) => {
   // Connect to WebSocket when room ID is available
   useEffect(() => {
     if (!roomId || !userName) return;
+
     console.log("[ActivityTracker] Initializing WebSocket connection:", {
       roomId,
       userName,
