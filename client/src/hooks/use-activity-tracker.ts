@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { RoomActivity } from "server/types/room";
-import { wsService } from "server/services/websocket-service";
+import { ws } from "../services/websocket-client";
 import { useUserInfo } from "../contexts/user-context";
 
 // fetch historical activities from redis via api
@@ -34,6 +34,21 @@ export const useActivityTracker = (roomId?: string) => {
   const { userName } = useUserInfo();
   const activitiesKey = ["activities", roomId];
 
+  // handle websocket connection
+  useEffect(() => {
+    if (!roomId) return;
+
+    // connect to websocket directly
+    console.log("[ActivityTracker] Connecting to room:", roomId);
+    ws.connect(roomId);
+
+    // cleanup on unmount
+    return () => {
+      console.log("[ActivityTracker] Disconnecting from room:", roomId);
+      ws.disconnect();
+    };
+  }, [roomId]);
+
   // fetch from redis for historical data
   const { data: activities = [] } = useQuery({
     queryKey: activitiesKey,
@@ -41,23 +56,7 @@ export const useActivityTracker = (roomId?: string) => {
     enabled: !!roomId,
   });
 
-  // Connect to WebSocket when room ID is available
-  useEffect(() => {
-    if (!roomId || !userName) return;
-
-    console.log("[ActivityTracker] Initializing WebSocket connection:", {
-      roomId,
-      userName,
-    });
-    wsService.connect(roomId);
-
-    return () => {
-      console.log("[ActivityTracker] Cleaning up WebSocket connection");
-      wsService.disconnect();
-    };
-  }, [roomId, userName]);
-
-  // Separate effect for activity subscription
+  // More simplified activity subscription
   useEffect(() => {
     if (!roomId) return;
 
@@ -73,9 +72,15 @@ export const useActivityTracker = (roomId?: string) => {
       });
     };
 
-    wsService.subscribe("activity", handleActivity);
-    return () => wsService.unsubscribe("activity", handleActivity);
-  }, [roomId, queryClient, activitiesKey]);
+    // subscribe directly to the websocket client
+    ws.subscribe("activity", handleActivity);
+
+    // cleanup subscription
+    return () => {
+      console.log("[ActivityTracker] Unsubscribing from activity events");
+      ws.unsubscribe("activity", handleActivity);
+    };
+  }, [roomId, queryClient]);
 
   // mutation for adding new activities
   // used by useRoom to log join/leave/timer activities
@@ -88,7 +93,7 @@ export const useActivityTracker = (roomId?: string) => {
         timeStamp: new Date().toISOString(),
       };
 
-      // check if activity is duplicate by comparing relevant properties
+      // check for duplicates using the existing activities
       const isDuplicate = activities.some(
         (existingActivity) =>
           existingActivity.type === activity.type &&
@@ -102,23 +107,31 @@ export const useActivityTracker = (roomId?: string) => {
 
       if (isDuplicate) {
         console.log("[ActivityTracker] Duplicate activity detected, skipping");
-        return;
+        return null; // Return null instead of undefined
       }
+
+      console.log("[ActivityTracker] Storing new activity:", newActivity);
 
       // store in redis first
       const storedActivity = await storeActivity(activity.roomId, newActivity);
 
-      // broadcast via websocket after successful storage
-      wsService.send({
-        type: "activity",
-        payload: storedActivity,
-      });
+      // Only broadcast if we have a valid stored activity
+      if (storedActivity) {
+        console.log("[ActivityTracker] Broadcasting via WebSocket");
+        ws.send({
+          type: "activity",
+          payload: storedActivity,
+        });
+      }
 
       return storedActivity;
     },
     onSuccess: (newActivity) => {
       queryClient.setQueryData(activitiesKey, (prev: RoomActivity[] = []) => {
-        if (prev.some((activity) => activity.id === newActivity.id))
+        if (
+          !newActivity ||
+          prev.some((activity) => activity.id === newActivity.id)
+        )
           return prev;
         return [...prev, newActivity];
       });

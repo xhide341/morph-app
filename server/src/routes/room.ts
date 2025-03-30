@@ -1,6 +1,5 @@
 import { Router } from "express";
 import { redisService } from "../services/redis-service";
-import { RoomActivity } from "../types/room";
 
 const roomRouter = Router();
 

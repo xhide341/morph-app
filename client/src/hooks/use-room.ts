@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { RoomInfo, RoomUser } from "server/types/room";
 import { useActivityTracker } from "./use-activity-tracker";
-import { wsService } from "server/services/websocket-service";
 
 export const useRoom = (roomId?: string) => {
   const [roomInfo, setRoomInfo] = useState<RoomInfo | null>(null);
@@ -9,44 +8,29 @@ export const useRoom = (roomId?: string) => {
   // get activities from activity tracker
   const { activities, addActivity } = useActivityTracker(roomId);
 
-  // Separate WebSocket connection effect
+  // combined room initialization effect
   useEffect(() => {
     if (!roomId) return;
 
-    // Only connect if room exists in state
-    if (roomInfo) {
-      wsService.connect(roomId);
-
-      return () => {
-        wsService.disconnect();
-      };
-    }
-  }, [roomId, roomInfo]);
-
-  // Room initialization effect
-  useEffect(() => {
-    if (!roomId) return;
-
+    console.log("[useRoom] Initializing room:", roomId);
     const initRoom = async () => {
       try {
-        // get room metadata first
+        // get room metadata
         const room = await fetchRoom(roomId);
-
         if (room) {
           setRoomInfo(room);
-          // get list of users in room
-          const users = await fetchRoomUsers(roomId);
-          if (users) setRoomUsers(users);
         }
+        const users = await fetchRoomUsers(roomId);
+        if (users) setRoomUsers(users);
       } catch (error) {
         console.error("[useRoom] Error initializing room:", error);
       }
     };
 
     initRoom();
-    return () => wsService.disconnect();
   }, [roomId]);
 
+  // room functions
   const fetchRoom = async (roomId: string): Promise<RoomInfo | null> => {
     try {
       const response = await fetch(`/api/room/${roomId}/info`);
@@ -210,8 +194,8 @@ export const useRoom = (roomId?: string) => {
   return {
     roomInfo,
     roomUsers,
-    activities,
-    addActivity,
+    activities, // just pass through
+    addActivity, // used in join/leave activities here
     fetchRoom,
     createRoom,
     joinRoom,

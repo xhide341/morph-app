@@ -4,6 +4,13 @@ import { useRoom } from "../hooks/use-room";
 import { z } from "zod";
 import { ThemeToggle } from "../components/theme-toggle";
 
+// Add this at the top of your file
+declare global {
+  interface Window {
+    isNavigating?: boolean;
+  }
+}
+
 // inline room schema
 const roomSchema = z.object({
   roomName: z

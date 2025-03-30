@@ -34,16 +34,17 @@ export const RoomPage = () => {
     : null;
 
   useEffect(() => {
-    if (!roomId) return;
+    if (!roomId || !userName) return;
+
+    // No async cleanup needed - we'll handle this when the component unmounts
     return () => {
-      const handleLeave = async () => {
-        if (userName && roomId) {
-          await leaveRoom(roomId, userName);
-        }
-      };
-      handleLeave();
+      console.log("[RoomPage] Component unmounting, handling leave");
+      // Don't use async in cleanup directly
+      leaveRoom(roomId, userName).catch((err) =>
+        console.error("[RoomPage] Error leaving room:", err),
+      );
     };
-  }, [userName, roomId]);
+  }, [userName, roomId, leaveRoom]); // Add leaveRoom to dependencies
 
   const handleJoin = async (name: string) => {
     if (!roomId) return;

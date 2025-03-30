@@ -1,4 +1,4 @@
-import { RoomActivity } from "../types/room";
+import { RoomActivity } from "../../../server/src/types/room";
 
 type WebSocketMessage = {
   type:
@@ -10,8 +10,8 @@ type WebSocketMessage = {
   payload: RoomActivity | { status: string; roomId: string };
 };
 
-class WebSocketService {
-  private static instance: WebSocketService;
+class WebSocketClient {
+  private static instance: WebSocketClient;
   private socket: WebSocket | null = null;
   private subscribers: Map<string, Set<(data: any) => void>> = new Map();
   private shouldReconnect: boolean = true;
@@ -21,11 +21,11 @@ class WebSocketService {
 
   private constructor() {}
 
-  static getInstance(): WebSocketService {
-    if (!WebSocketService.instance) {
-      WebSocketService.instance = new WebSocketService();
+  static getInstance(): WebSocketClient {
+    if (!WebSocketClient.instance) {
+      WebSocketClient.instance = new WebSocketClient();
     }
-    return WebSocketService.instance;
+    return WebSocketClient.instance;
   }
 
   connect(roomId: string) {
@@ -50,8 +50,7 @@ class WebSocketService {
 
     this.shouldReconnect = true;
     this.reconnectAttempts = 0;
-    const WS_URL = "ws://localhost:3000";
-    const url = `${WS_URL}/rooms/${roomId}`;
+    const url = `/room/${roomId}`;
 
     console.log("[WebSocket] Connecting to:", url);
     this.socket = new WebSocket(url);
@@ -80,10 +79,10 @@ class WebSocketService {
         this.reconnectAttempts++;
         const delay = Math.min(
           1000 * Math.pow(2, this.reconnectAttempts),
-          10000
+          10000,
         );
         console.log(
-          `[WebSocket] Reconnecting attempt ${this.reconnectAttempts} in ${delay}ms`
+          `[WebSocket] Reconnecting attempt ${this.reconnectAttempts} in ${delay}ms`,
         );
         setTimeout(() => this.connect(roomId), delay);
       }
@@ -95,12 +94,25 @@ class WebSocketService {
   }
 
   subscribe(type: string, callback: (data: any) => void) {
-    console.log("[WebSocket] Subscribing to:", type);
     if (!this.subscribers.has(type)) {
       this.subscribers.set(type, new Set());
     }
-    this.subscribers.get(type)?.add(callback);
-    console.log("[WebSocket] Current subscribers:", this.subscribers);
+
+    const typeSubscribers = this.subscribers.get(type)!;
+    const callbacksAsStrings = Array.from(typeSubscribers).map((fn) =>
+      fn.toString(),
+    );
+
+    if (!callbacksAsStrings.includes(callback.toString())) {
+      typeSubscribers.add(callback);
+      console.log("[WebSocket] Subscribing to:", type);
+      console.log("[WebSocket] Current subscribers:", this.subscribers);
+    } else {
+      console.log(
+        "[WebSocket] Duplicate subscription detected, ignoring:",
+        type,
+      );
+    }
   }
 
   unsubscribe(type: string, callback: (data: any) => void) {
@@ -112,7 +124,7 @@ class WebSocketService {
       "[WebSocket] Notifying subscribers for type:",
       type,
       "with data:",
-      data
+      data,
     );
     this.subscribers.get(type)?.forEach((callback) => callback(data));
   }
@@ -140,4 +152,4 @@ class WebSocketService {
   }
 }
 
-export const wsService = WebSocketService.getInstance();
+export const ws = WebSocketClient.getInstance();
