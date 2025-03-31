@@ -31,6 +31,7 @@ class WebSocketClient {
 
   connect(roomId: string) {
     this.currentRoomId = roomId;
+    console.log("[WebSocket Client] Starting connection to room:", roomId);
 
     // Add timestamp tracking to prevent rapid reconnections during development
     const now = Date.now();
@@ -41,7 +42,10 @@ class WebSocketClient {
     this.connectionAttemptTimestamp = now;
 
     if (this.socket?.readyState === WebSocket.CONNECTING) {
-      console.log("[WebSocket Client] Connection in progress:", roomId);
+      console.log(
+        "[WebSocket Client] Connection already in progress for:",
+        roomId,
+      );
       return;
     }
 
@@ -49,11 +53,12 @@ class WebSocketClient {
       this.socket?.readyState === WebSocket.OPEN &&
       this.currentRoomId === roomId
     ) {
-      console.log("[WebSocket Client] Already connected:", roomId);
+      console.log("[WebSocket Client] Already connected to room:", roomId);
       return;
     }
 
     if (this.socket) {
+      console.log("[WebSocket Client] Closing existing connection");
       this.disconnect();
     }
 
@@ -61,11 +66,22 @@ class WebSocketClient {
     this.reconnectAttempts = 0;
 
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    const host = window.location.hostname + (location.port ? `:${location.port}` : '');
-    const url = `${protocol}//${host}/room/${roomId}`;
+    const host =
+      window.location.hostname + (location.port ? `:${location.port}` : "");
+    const url = `${protocol}//${host}/ws/${roomId}`;
 
     console.log("[WebSocket Client] Connecting to:", url);
+    console.log(
+      "[WebSocket Client] Browser location:",
+      window.location.toString(),
+    );
+    console.log("[WebSocket Client] Protocol, Host:", { protocol, host });
+
     this.socket = new WebSocket(url);
+    console.log(
+      "[WebSocket Client] WebSocket object created, readyState:",
+      this.socket.readyState,
+    );
 
     this.socket.onopen = () => {
       console.log("[WebSocket Client] Connected to room:", roomId);
@@ -110,21 +126,7 @@ class WebSocketClient {
       this.subscribers.set(type, new Set());
     }
 
-    const typeSubscribers = this.subscribers.get(type)!;
-    const callbacksAsStrings = Array.from(typeSubscribers).map((fn) =>
-      fn.toString(),
-    );
-
-    if (!callbacksAsStrings.includes(callback.toString())) {
-      typeSubscribers.add(callback);
-      console.log("[WebSocket Client] Subscribing to:", type);
-      console.log("[WebSocket Client] Current subscribers:", this.subscribers);
-    } else {
-      console.log(
-        "[WebSocket Client] Duplicate subscription detected, ignoring:",
-        type,
-      );
-    }
+    console.log("[WebSocket Client] Subscribing to:", type);
   }
 
   unsubscribe(type: string, callback: (data: any) => void) {

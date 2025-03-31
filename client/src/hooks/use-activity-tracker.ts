@@ -58,6 +58,7 @@ export const useActivityTracker = (roomId?: string) => {
     };
 
     // subscribe directly to the websocket client
+    console.log("[ActivityTracker] Subscribing to activity events");
     ws.subscribe("activity", handleActivity);
 
     // cleanup subscription
@@ -66,6 +67,16 @@ export const useActivityTracker = (roomId?: string) => {
       ws.unsubscribe("activity", handleActivity);
     };
   }, [roomId, queryClient]);
+
+  useEffect(() => {
+    if (!roomId) return;
+    console.log("[ActivityTracker] Connecting to WebSocket");
+    ws.connect(roomId);
+    return () => {
+      console.log("[ActivityTracker] Disconnecting from WebSocket");
+      ws.disconnect();
+    };
+  }, [roomId]);
 
   // mutation for adding new activities
   // used by useRoom to log join/leave/timer activities

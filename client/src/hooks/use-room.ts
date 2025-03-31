@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { RoomInfo, RoomUser } from "server/types/room";
 import { useActivityTracker } from "./use-activity-tracker";
-import { ws } from "../services/websocket-client";
 
 export const useRoom = (roomId?: string) => {
   const [roomInfo, setRoomInfo] = useState<RoomInfo | null>(null);
@@ -12,7 +11,6 @@ export const useRoom = (roomId?: string) => {
   // combined room initialization effect
   useEffect(() => {
     if (!roomId) return;
-    ws.connect(roomId);
 
     console.log("[useRoom] Initializing room:", roomId);
     const initRoom = async () => {
@@ -30,9 +28,6 @@ export const useRoom = (roomId?: string) => {
     };
 
     initRoom();
-    return () => {
-      ws.disconnect();
-    };
   }, [roomId]);
 
   // room functions

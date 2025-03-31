@@ -23,9 +23,21 @@ export class WebSocketServerService {
 
   private initialize() {
     this.wss.on("connection", (ws: WebSocket, req) => {
+      console.log("[Websocket Server] Raw request URL:", req.url);
+      console.log("[Websocket Server] Headers:", req.headers);
+
       const url = new URL(req.url || "", `ws://${req.headers.host}`);
-      const roomId = url.pathname.split("/room/")[1];
+      console.log("[Websocket Server] Parsed URL:", {
+        fullUrl: url.toString(),
+        pathname: url.pathname,
+        search: url.search,
+        host: url.host,
+      });
+
+      const roomId = url.pathname.split("/ws/")[1];
+      console.log("[Websocket Server] Extracted roomId:", roomId);
       const userName = url.searchParams.get("userName") || undefined;
+      console.log("[Websocket Server] Extracted userName:", userName);
 
       console.log(
         "[Websocket Server] Total active connections:",
@@ -37,7 +49,9 @@ export class WebSocketServerService {
       });
 
       if (!roomId) {
-        console.error("No room ID provided");
+        console.error(
+          "[Websocket Server] No room ID provided, closing connection"
+        );
         ws.close();
         return;
       }
@@ -75,7 +89,7 @@ export class WebSocketServerService {
             }
 
             // Broadcast to all clients in the room
-            this.broadcastToRoom(roomId, data);
+            this.broadcastToRoom(roomId, data, ws);
           }
         } catch (error) {
           console.error("[Websocket Server] Error processing message:", error);
@@ -119,7 +133,7 @@ export class WebSocketServerService {
               },
             };
 
-            this.broadcastToRoom(clientInfo.roomId, activity);
+            this.broadcastToRoom(clientInfo.roomId, activity, ws);
           }
         }
 
@@ -133,16 +147,23 @@ export class WebSocketServerService {
     });
   }
 
-  private broadcastToRoom(roomId: string, data: any) {
+  private broadcastToRoom(roomId: string, data: any, sender: WebSocket) {
     const clientsInRoom = Array.from(clients.entries()).filter(
       ([_, info]) => info.roomId === roomId
     );
 
     console.log(
-      `[Websocket Server] Broadcasting to ${clientsInRoom.length} clients in room ${roomId}`
+      `[Websocket Server] Broadcasting to ${
+        clientsInRoom.length - 1
+      } clients in room ${roomId} (excluding sender)`
     );
 
     clientsInRoom.forEach(([client]) => {
+      // always skip the sender
+      if (sender === client) {
+        return;
+      }
+
       if (client.readyState === WebSocket.OPEN) {
         client.send(JSON.stringify(data));
       }
