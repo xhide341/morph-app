@@ -61,7 +61,7 @@ class WebSocketClient {
     this.reconnectAttempts = 0;
 
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    const host = window.location.host;
+    const host = window.location.hostname + (location.port ? `:${location.port}` : '');
     const url = `${protocol}//${host}/room/${roomId}`;
 
     console.log("[WebSocket Client] Connecting to:", url);
