@@ -34,21 +34,6 @@ export const useActivityTracker = (roomId?: string) => {
   const { userName } = useUserInfo();
   const activitiesKey = ["activities", roomId];
 
-  // handle websocket connection
-  useEffect(() => {
-    if (!roomId) return;
-
-    // connect to websocket directly
-    console.log("[ActivityTracker] Connecting to room:", roomId);
-    ws.connect(roomId);
-
-    // cleanup on unmount
-    return () => {
-      console.log("[ActivityTracker] Disconnecting from room:", roomId);
-      ws.disconnect();
-    };
-  }, [roomId]);
-
   // fetch from redis for historical data
   const { data: activities = [] } = useQuery({
     queryKey: activitiesKey,

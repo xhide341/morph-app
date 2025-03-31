@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { RoomInfo, RoomUser } from "server/types/room";
 import { useActivityTracker } from "./use-activity-tracker";
+import { ws } from "../services/websocket-client";
 
 export const useRoom = (roomId?: string) => {
   const [roomInfo, setRoomInfo] = useState<RoomInfo | null>(null);
@@ -11,6 +12,7 @@ export const useRoom = (roomId?: string) => {
   // combined room initialization effect
   useEffect(() => {
     if (!roomId) return;
+    ws.connect(roomId);
 
     console.log("[useRoom] Initializing room:", roomId);
     const initRoom = async () => {
@@ -28,17 +30,33 @@ export const useRoom = (roomId?: string) => {
     };
 
     initRoom();
+    return () => {
+      ws.disconnect();
+    };
   }, [roomId]);
 
   // room functions
   const fetchRoom = async (roomId: string): Promise<RoomInfo | null> => {
     try {
       const response = await fetch(`/api/room/${roomId}/info`);
-      if (response.status === 404) return null;
-      const data = await response.json();
-      return data;
+
+      if (!response.ok) {
+        // handle non-200 responses properly
+        if (response.status === 404) return null;
+        console.error(`[useRoom] Server error: ${response.status}`);
+        return null;
+      }
+
+      // check for empty response
+      const text = await response.text();
+      if (!text || text.trim() === "") {
+        console.error("[useRoom] Empty response from server");
+        return null;
+      }
+
+      return JSON.parse(text);
     } catch (error) {
-      console.error("[useRoom] Error:", error);
+      console.error("[useRoom] Error fetching room:", error);
       return null;
     }
   };
@@ -69,12 +87,20 @@ export const useRoom = (roomId?: string) => {
         body: JSON.stringify({ roomId }),
       });
 
+      // better error handling
       if (!response.ok) {
-        console.error("[useRoom] Failed to create room");
+        console.error(`[useRoom] Failed to create room: ${response.status}`);
         return null;
       }
 
-      const data = await response.json();
+      // check for empty response
+      const text = await response.text();
+      if (!text || text.trim() === "") {
+        console.error("[useRoom] Empty response from create room");
+        return null;
+      }
+
+      const data = JSON.parse(text);
       console.log("[useRoom] Created room:", data);
       setRoomInfo(data);
       return data;

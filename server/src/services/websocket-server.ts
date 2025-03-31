@@ -28,10 +28,13 @@ export class WebSocketServerService {
       const userName = url.searchParams.get("userName") || undefined;
 
       console.log(
-        "[WS Server] Total active connections:",
+        "[Websocket Server] Total active connections:",
         this.wss.clients.size
       );
-      console.log("[WS Server] Connection attempt:", { roomId, userName });
+      console.log("[Websocket Server] Connection attempt:", {
+        roomId,
+        userName,
+      });
 
       if (!roomId) {
         console.error("No room ID provided");
@@ -47,14 +50,14 @@ export class WebSocketServerService {
         ([_, info]) => info.roomId === roomId
       );
       console.log(
-        `[WS Server] Clients in room ${roomId}:`,
+        `[Websocket Server] Clients in room ${roomId}:`,
         clientsInRoom.length
       );
 
       ws.on("message", async (message) => {
         try {
           const data = JSON.parse(message.toString());
-          console.log("[WS Server] Received message:", data);
+          console.log("[Websocket Server] Received message:", data);
 
           if (data.type === "activity") {
             if (data.payload.type === "join") {
@@ -65,7 +68,7 @@ export class WebSocketServerService {
                   userName: data.payload.userName,
                 });
                 console.log(
-                  "[WS Server] Updated user info:",
+                  "[Websocket Server] Updated user info:",
                   data.payload.userName
                 );
               }
@@ -75,7 +78,7 @@ export class WebSocketServerService {
             this.broadcastToRoom(roomId, data);
           }
         } catch (error) {
-          console.error("[WS Server] Error processing message:", error);
+          console.error("[Websocket Server] Error processing message:", error);
         }
       });
 
@@ -93,7 +96,7 @@ export class WebSocketServerService {
           );
 
           //  connection status
-          console.log("[WS Server] Connection closing:", {
+          console.log("[Websocket Server] Connection closing:", {
             userName: clientInfo.userName,
             roomId: clientInfo.roomId,
             hasOtherConnections: userExistsInOtherConnections,
@@ -123,7 +126,7 @@ export class WebSocketServerService {
         // remove connection
         clients.delete(ws);
         console.log(
-          "[WS Server] Client disconnected. Remaining connections:",
+          "[Websocket Server] Client disconnected. Remaining connections:",
           this.wss.clients.size
         );
       });
@@ -136,7 +139,7 @@ export class WebSocketServerService {
     );
 
     console.log(
-      `[WS Server] Broadcasting to ${clientsInRoom.length} clients in room ${roomId}`
+      `[Websocket Server] Broadcasting to ${clientsInRoom.length} clients in room ${roomId}`
     );
 
     clientsInRoom.forEach(([client]) => {

@@ -18,6 +18,7 @@ class WebSocketClient {
   private reconnectAttempts: number = 0;
   private maxReconnectAttempts: number = 5;
   private currentRoomId: string | null = null;
+  private connectionAttemptTimestamp: number = 0;
 
   private constructor() {}
 
@@ -31,8 +32,16 @@ class WebSocketClient {
   connect(roomId: string) {
     this.currentRoomId = roomId;
 
+    // Add timestamp tracking to prevent rapid reconnections during development
+    const now = Date.now();
+    if (now - this.connectionAttemptTimestamp < 2000) {
+      console.log("[WebSocket Client] Throttling connection attempts");
+      return;
+    }
+    this.connectionAttemptTimestamp = now;
+
     if (this.socket?.readyState === WebSocket.CONNECTING) {
-      console.log("[WebSocket] Connection in progress:", roomId);
+      console.log("[WebSocket Client] Connection in progress:", roomId);
       return;
     }
 
@@ -40,7 +49,7 @@ class WebSocketClient {
       this.socket?.readyState === WebSocket.OPEN &&
       this.currentRoomId === roomId
     ) {
-      console.log("[WebSocket] Already connected:", roomId);
+      console.log("[WebSocket Client] Already connected:", roomId);
       return;
     }
 
@@ -50,13 +59,16 @@ class WebSocketClient {
 
     this.shouldReconnect = true;
     this.reconnectAttempts = 0;
-    const url = `/room/${roomId}`;
 
-    console.log("[WebSocket] Connecting to:", url);
+    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const host = window.location.host;
+    const url = `${protocol}//${host}/room/${roomId}`;
+
+    console.log("[WebSocket Client] Connecting to:", url);
     this.socket = new WebSocket(url);
 
     this.socket.onopen = () => {
-      console.log("[WebSocket] Connected to room:", roomId);
+      console.log("[WebSocket Client] Connected to room:", roomId);
       this.send({
         type: "connection_status",
         payload: { status: "connected", roomId },
@@ -66,12 +78,12 @@ class WebSocketClient {
 
     this.socket.onmessage = (event) => {
       const message: WebSocketMessage = JSON.parse(event.data);
-      console.log("[WebSocket] Received:", message);
+      console.log("[WebSocket Client] Received:", message);
       this.notifySubscribers(message.type, message);
     };
 
     this.socket.onclose = () => {
-      console.log("[WebSocket] Disconnected");
+      console.log("[WebSocket Client] Disconnected");
       if (
         this.shouldReconnect &&
         this.reconnectAttempts < this.maxReconnectAttempts
@@ -82,14 +94,14 @@ class WebSocketClient {
           10000,
         );
         console.log(
-          `[WebSocket] Reconnecting attempt ${this.reconnectAttempts} in ${delay}ms`,
+          `[WebSocket Client] Reconnecting attempt ${this.reconnectAttempts} in ${delay}ms`,
         );
         setTimeout(() => this.connect(roomId), delay);
       }
     };
 
     this.socket.onerror = (error) => {
-      console.error("[WebSocket] WebSocket error:", error);
+      console.error("[WebSocket Client] WebSocket error:", error);
     };
   }
 
@@ -105,11 +117,11 @@ class WebSocketClient {
 
     if (!callbacksAsStrings.includes(callback.toString())) {
       typeSubscribers.add(callback);
-      console.log("[WebSocket] Subscribing to:", type);
-      console.log("[WebSocket] Current subscribers:", this.subscribers);
+      console.log("[WebSocket Client] Subscribing to:", type);
+      console.log("[WebSocket Client] Current subscribers:", this.subscribers);
     } else {
       console.log(
-        "[WebSocket] Duplicate subscription detected, ignoring:",
+        "[WebSocket Client] Duplicate subscription detected, ignoring:",
         type,
       );
     }
@@ -121,7 +133,7 @@ class WebSocketClient {
 
   private notifySubscribers(type: string, data: any) {
     console.log(
-      "[WebSocket] Notifying subscribers for type:",
+      "[WebSocket Client] Notifying subscribers for type:",
       type,
       "with data:",
       data,
@@ -130,7 +142,7 @@ class WebSocketClient {
   }
 
   send(message: WebSocketMessage) {
-    console.log("[WebSocket] Sending to server:", message);
+    console.log("[WebSocket Client] Sending to server:", message);
     if (this.socket?.readyState === WebSocket.OPEN) {
       this.socket.send(JSON.stringify(message));
     }
@@ -149,6 +161,14 @@ class WebSocketClient {
 
   getSocket() {
     return this.socket;
+  }
+
+  isConnected() {
+    return this.socket?.readyState === WebSocket.OPEN;
+  }
+
+  isConnecting() {
+    return this.socket?.readyState === WebSocket.CONNECTING;
   }
 }
 

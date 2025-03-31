@@ -29,4 +29,7 @@ app.use("/api/room", roomRouter);
 
 server.listen(port, () => {
   console.log(`Server running on port ${port} with WebSocket support`);
+  console.log(
+    `WebSocket server accepting connections at ws://localhost:${port}/room/<roomId>`
+  );
 });
