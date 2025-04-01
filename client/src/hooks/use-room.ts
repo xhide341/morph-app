@@ -6,7 +6,16 @@ export const useRoom = (roomId?: string) => {
   const [roomInfo, setRoomInfo] = useState<RoomInfo | null>(null);
   const [roomUsers, setRoomUsers] = useState<RoomUser[]>([]);
   // get activities from activity tracker
-  const { activities, addActivity } = useActivityTracker(roomId);
+  const { activities: trackerActivities, addActivity } =
+    useActivityTracker(roomId);
+
+  // Debug the incoming activities from tracker
+  useEffect(() => {
+    console.log(
+      "[useRoom] Received activities from tracker:",
+      trackerActivities,
+    );
+  }, [trackerActivities]);
 
   // combined room initialization effect
   useEffect(() => {
@@ -215,8 +224,8 @@ export const useRoom = (roomId?: string) => {
   return {
     roomInfo,
     roomUsers,
-    activities, // just pass through
-    addActivity, // used in join/leave activities here
+    activities: trackerActivities,
+    addActivity,
     fetchRoom,
     createRoom,
     joinRoom,

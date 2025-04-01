@@ -4,14 +4,14 @@ import quotesRouter from "./routes/quotes";
 import roomRouter from "./routes/room";
 import { connectRedis } from "./config/redis";
 import { createServer } from "http";
-import { WebSocketServerService } from "./services/websocket-server";
+import { SocketIOService } from "./services/socket-io-service";
 
 const app = express();
 const port = process.env.PORT || 3000;
 const server = createServer(app);
 
-// wss server imported
-WebSocketServerService.getInstance(server);
+// Initialize Socket.IO
+SocketIOService.getInstance(server);
 
 // redis connection
 connectRedis().catch(console.error);
@@ -28,8 +28,5 @@ app.use("/api/quotes", quotesRouter);
 app.use("/api/room", roomRouter);
 
 server.listen(port, () => {
-  console.log(`Server running on port ${port} with WebSocket support`);
-  console.log(
-    `WebSocket server accepting connections at ws://localhost:${port}/room/<roomId>`
-  );
+  console.log(`Server running on port ${port} with Socket.IO support`);
 });

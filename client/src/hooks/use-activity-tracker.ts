@@ -1,144 +1,124 @@
-import { useEffect } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useRef, useState } from "react";
 import { RoomActivity } from "server/types/room";
-import { ws } from "../services/websocket-client";
-import { useUserInfo } from "../contexts/user-context";
-
-// fetch historical activities from redis via api
-const fetchActivities = async (roomId: string): Promise<RoomActivity[]> => {
-  const response = await fetch(`/api/room/${roomId}/activities`);
-  if (!response.ok) {
-    console.error("[Activity] Failed to fetch activities");
-    return [];
-  }
-  return response.json();
-};
-
-// store new activity in redis via api
-const storeActivity = async (roomId: string, activity: RoomActivity) => {
-  const response = await fetch(`/api/room/${roomId}/activities`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(activity),
-  });
-  if (!response.ok) {
-    console.error("[Activity] Failed to store activity");
-    return;
-  }
-  return response.json();
-};
+import { socketService } from "../services/socket-service";
 
 // hook used by useRoom to track all room activities
-export const useActivityTracker = (roomId?: string) => {
-  const queryClient = useQueryClient();
-  const { userName } = useUserInfo();
-  const activitiesKey = ["activities", roomId];
+export function useActivityTracker(roomId?: string, userName?: string) {
+  const [activities, setActivities] = useState<RoomActivity[]>([]);
+  const initialized = useRef(false);
 
-  // fetch from redis for historical data
-  const { data: activities = [] } = useQuery({
-    queryKey: activitiesKey,
-    queryFn: () => (roomId ? fetchActivities(roomId) : []),
-    enabled: !!roomId,
-  });
-
-  // More simplified activity subscription
   useEffect(() => {
     if (!roomId) return;
 
-    const handleActivity = (data: any) => {
-      console.log("[ActivityTracker] Received WebSocket activity:", data);
-      const newActivity = data.payload as RoomActivity;
+    if (!initialized.current) {
+      console.log("[ActivityTracker] Initializing");
+      initialized.current = true;
+    }
 
-      // immediately update cache with new activity
-      queryClient.setQueryData(activitiesKey, (prev: RoomActivity[] = []) => {
-        if (prev.some((activity) => activity.id === newActivity.id))
-          return prev;
-        return [...prev, newActivity];
-      });
+    // fetch historical activities
+    const fetchHistoricalActivities = async () => {
+      try {
+        console.log("[ActivityTracker] Fetching historical activities");
+        const response = await fetch(`/api/room/${roomId}/activities`);
+        if (!response.ok) {
+          console.error("[ActivityTracker] Failed to fetch activities");
+          return;
+        }
+        const historicalActivities = await response.json();
+        console.log(
+          "[ActivityTracker] Received historical activities:",
+          historicalActivities.length,
+        );
+        setActivities(historicalActivities);
+      } catch (error) {
+        console.error("[ActivityTracker] Error fetching activities:", error);
+      }
     };
 
-    // subscribe directly to the websocket client
+    fetchHistoricalActivities();
+
+    console.log("[ActivityTracker] Connecting to room:", roomId);
+    socketService.connect(roomId, userName);
+
     console.log("[ActivityTracker] Subscribing to activity events");
-    ws.subscribe("activity", handleActivity);
+    const unsubscribe = socketService.subscribe(
+      "activity",
+      (data: RoomActivity) => {
+        console.log("[ActivityTracker] Received activity:", data);
 
-    // cleanup subscription
-    return () => {
-      console.log("[ActivityTracker] Unsubscribing from activity events");
-      ws.unsubscribe("activity", handleActivity);
-    };
-  }, [roomId, queryClient]);
+        // check for duplicates
+        setActivities((prev) => {
+          const isDuplicate = prev.some(
+            (existingActivity) =>
+              existingActivity.type === data.type &&
+              existingActivity.userName === data.userName &&
+              // if the timestamps are within 2 seconds of each other
+              Math.abs(
+                new Date(existingActivity.timeStamp).getTime() -
+                  new Date(data.timeStamp).getTime(),
+              ) < 2000,
+          );
 
-  useEffect(() => {
-    if (!roomId) return;
-    console.log("[ActivityTracker] Connecting to WebSocket");
-    ws.connect(roomId);
-    return () => {
-      console.log("[ActivityTracker] Disconnecting from WebSocket");
-      ws.disconnect();
-    };
-  }, [roomId]);
+          if (isDuplicate) {
+            console.log(
+              "[ActivityTracker] Duplicate activity detected, skipping",
+            );
+            return prev;
+          }
 
-  // mutation for adding new activities
-  // used by useRoom to log join/leave/timer activities
-  const { mutate: addActivity } = useMutation({
-    mutationFn: async (activity: Omit<RoomActivity, "timeStamp" | "id">) => {
-      // create new activity
-      const newActivity = {
-        ...activity,
-        id: crypto.randomUUID(),
-        timeStamp: new Date().toISOString(),
-      };
-
-      // check for duplicates using the existing activities
-      const isDuplicate = activities.some(
-        (existingActivity) =>
-          existingActivity.type === activity.type &&
-          existingActivity.userName === activity.userName &&
-          // if the timestamps are within 2 seconds of each other
-          Math.abs(
-            new Date(existingActivity.timeStamp).getTime() -
-              new Date(newActivity.timeStamp).getTime(),
-          ) < 2000,
-      );
-
-      if (isDuplicate) {
-        console.log("[ActivityTracker] Duplicate activity detected, skipping");
-        return null; // Return null instead of undefined
-      }
-
-      console.log("[ActivityTracker] Storing new activity:", newActivity);
-
-      // store in redis first
-      const storedActivity = await storeActivity(activity.roomId, newActivity);
-
-      // Only broadcast if we have a valid stored activity
-      if (storedActivity) {
-        console.log("[ActivityTracker] Broadcasting via WebSocket");
-        ws.send({
-          type: "activity",
-          payload: storedActivity,
+          return [...prev, data];
         });
+      },
+    );
+
+    return () => {
+      console.log("[ActivityTracker] Cleaning up");
+      unsubscribe();
+    };
+  }, [roomId, userName]);
+
+  const addActivity = async (
+    activityData: Omit<RoomActivity, "timeStamp" | "id">,
+  ) => {
+    if (!roomId) return null;
+
+    // create new activity
+    const newActivity = {
+      ...activityData,
+      id: crypto.randomUUID(),
+      timeStamp: new Date().toISOString(),
+    };
+
+    console.log("[ActivityTracker] Storing new activity:", newActivity);
+
+    // store in redis for persistence
+    try {
+      const response = await fetch(`/api/room/${roomId}/activities`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newActivity),
+      });
+
+      if (!response.ok) {
+        console.error("[ActivityTracker] Failed to store activity");
+        return null;
       }
 
-      return storedActivity;
-    },
-    onSuccess: (newActivity) => {
-      queryClient.setQueryData(activitiesKey, (prev: RoomActivity[] = []) => {
-        if (
-          !newActivity ||
-          prev.some((activity) => activity.id === newActivity.id)
-        )
-          return prev;
-        return [...prev, newActivity];
-      });
-    },
-    onError: (error) => {
-      console.error("[Activity] Failed to add activity:", error);
-    },
-  });
+      console.log("[ActivityTracker] Broadcasting via WebSocket");
+      socketService.emit("activity", newActivity);
+
+      // optimistic update
+      setActivities((prev) => [...prev, newActivity]);
+
+      return newActivity;
+    } catch (error) {
+      console.error("[ActivityTracker] Error storing activity:", error);
+      return null;
+    }
+  };
 
   return {
-    activities, // will update when WebSocket receives new activities
+    activities,
     addActivity,
   };
-};
+}
