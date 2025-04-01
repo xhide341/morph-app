@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { RoomInfo, RoomUser } from "server/types/room";
 import { useActivityTracker } from "./use-activity-tracker";
 import { useUserInfo } from "../contexts/user-context";
@@ -48,31 +48,18 @@ export const useRoom = (roomId?: string) => {
   useEffect(() => {
     if (!roomId || !trackerActivities.length) return;
 
-    // reference to track the last processed activity
-    const lastProcessedRef = useRef<string | null>(null);
-
     // find the most recent join/leave activity
-    const joinLeaveActivities = trackerActivities.filter(
-      (a) => a.type === "join" || a.type === "leave",
-    );
-
-    if (joinLeaveActivities.length === 0) return;
-
-    // create a unique identifier for the latest activity
-    const latestActivity = joinLeaveActivities[joinLeaveActivities.length - 1];
-    const activityKey = `${latestActivity.type}-${latestActivity.userName}-${latestActivity.timeStamp}`;
-
-    // only refetch if this is a new activity
-    if (activityKey !== lastProcessedRef.current) {
-      console.log(
-        "[useRoom] New join/leave activity detected, refreshing users",
+    const joinLeaveActivities = trackerActivities
+      .filter((a) => a.type === "join" || a.type === "leave")
+      .sort(
+        (a, b) =>
+          new Date(b.timeStamp).getTime() - new Date(a.timeStamp).getTime(),
       );
-      // update reference
-      lastProcessedRef.current = activityKey;
 
+    if (joinLeaveActivities.length > 0) {
       // refetch users
       fetchRoomUsers(roomId).then((users) => {
-        if (users) setRoomUsers(users);
+        if (users) setRoomUsers(users); // this is crucial pls dont forget new self!!!
       });
     }
   }, [trackerActivities, roomId]);
