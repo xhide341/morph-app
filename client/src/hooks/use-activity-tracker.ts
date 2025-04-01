@@ -53,7 +53,6 @@ export function useActivityTracker(roomId?: string, userName?: string) {
     socketService.connect(roomId, userName);
 
     // subscribe to activity events
-    console.log("[ActivityTracker] Subscribing to activity events");
     const unsubscribe = socketService.subscribe(
       "activity",
       (data: RoomActivity) => {
@@ -101,8 +100,6 @@ export function useActivityTracker(roomId?: string, userName?: string) {
       id: crypto.randomUUID(),
       timeStamp: new Date().toISOString(),
     };
-
-    console.log("[ActivityTracker] Storing new activity:", newActivity);
 
     // store in redis for persistence
     try {

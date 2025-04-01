@@ -13,7 +13,8 @@ export const useRoom = (roomId?: string) => {
     userName,
   );
 
-  // combined room initialization effect
+  // tracker for room initialization
+  // will trigger on roomId and userName changes
   useEffect(() => {
     if (!roomId) return;
 
@@ -40,7 +41,28 @@ export const useRoom = (roomId?: string) => {
     };
 
     initRoom();
-  }, [roomId, userName]);
+  }, [roomId, userName]); //retrigger on these changes
+
+  // tracker for join/leave activities
+  // this will update the user list in real time
+  useEffect(() => {
+    if (!roomId || !trackerActivities.length) return;
+
+    // Find the most recent join/leave activity
+    const joinLeaveActivities = trackerActivities
+      .filter((a) => a.type === "join" || a.type === "leave")
+      .sort(
+        (a, b) =>
+          new Date(b.timeStamp).getTime() - new Date(a.timeStamp).getTime(),
+      );
+
+    if (joinLeaveActivities.length > 0) {
+      // refetch users
+      fetchRoomUsers(roomId).then((users) => {
+        if (users) setRoomUsers(users); // this is crucial pls dont forget new self!!!
+      });
+    }
+  }, [trackerActivities, roomId]);
 
   // room functions
   const fetchRoom = async (roomId: string): Promise<RoomInfo | null> => {
