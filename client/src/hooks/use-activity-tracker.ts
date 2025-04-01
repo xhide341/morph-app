@@ -15,10 +15,6 @@ export function useActivityTracker(roomId?: string, userName?: string) {
       return;
     }
 
-    console.log(
-      `[ActivityTracker] Initializing with room: ${roomId}, user: ${userName}`,
-    );
-
     // fetch historical activities
     const fetchHistoricalActivities = async () => {
       try {
@@ -49,7 +45,7 @@ export function useActivityTracker(roomId?: string, userName?: string) {
 
     fetchHistoricalActivities();
 
-    // connect to socket with username
+    // connect to socket if username is set
     console.log(
       "[ActivityTracker] Connecting to room with username:",
       userName,

@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { RoomInfo, RoomUser } from "server/types/room";
 import { useActivityTracker } from "./use-activity-tracker";
 import { useUserInfo } from "../contexts/user-context";
-import { socketService } from "src/services/socket-service";
 
 export const useRoom = (roomId?: string) => {
   const { userName } = useUserInfo();
@@ -13,15 +12,6 @@ export const useRoom = (roomId?: string) => {
     roomId,
     userName,
   );
-
-  // Debug the incoming activities from tracker
-  useEffect(() => {
-    console.log(
-      "[useRoom] Received activities from tracker:",
-      trackerActivities,
-    );
-    console.log("[useRoom] Current username:", userName);
-  }, [trackerActivities, userName]);
 
   // combined room initialization effect
   useEffect(() => {
@@ -80,7 +70,6 @@ export const useRoom = (roomId?: string) => {
 
   const fetchRoomUsers = async (roomId: string) => {
     try {
-      console.log(`[useRoom] Fetching users for room: ${roomId}`);
       const response = await fetch(`/api/room/${roomId}/users`);
       if (!response.ok) {
         console.error(
@@ -89,7 +78,6 @@ export const useRoom = (roomId?: string) => {
         return null;
       }
       const usersData = await response.json();
-      console.log("[useRoom] API response for users:", usersData);
       return usersData;
     } catch (error) {
       console.error("[useRoom] Error fetching room users:", error);
@@ -147,7 +135,6 @@ export const useRoom = (roomId?: string) => {
         userName,
         roomId,
       });
-      console.log("[useRoom] Added join activity");
 
       setRoomInfo((prev) => ({
         ...prev!,
@@ -182,7 +169,6 @@ export const useRoom = (roomId?: string) => {
         userName,
         roomId,
       });
-
       setRoomInfo({
         ...roomInfo,
         activeUsers: data.userCount,

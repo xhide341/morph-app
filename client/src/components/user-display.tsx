@@ -2,17 +2,12 @@ import { useState } from "react";
 import { RoomUser } from "server/types/room";
 import { Plus } from "react-feather";
 
-// TODO: Add a modal to add a new user, the modal contains the url of the room
+// TODO: when the add button is clicked, open a modal with the url of the room
 
 export const UserDisplay = ({ users }: { users: RoomUser[] }) => {
   const [tooltips, setTooltips] = useState<Record<string, boolean>>({});
-
   // No need for useMemo calculation based on activities anymore
   const activeUsers = users || []; // Directly use the passed users array
-
-  // Add debugging
-  console.log("[UserDisplay] Received users prop:", users);
-
   return (
     <div className="flex flex-col items-center gap-4">
       <div className="flex items-center gap-2">
