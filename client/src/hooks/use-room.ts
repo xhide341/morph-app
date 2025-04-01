@@ -1,13 +1,18 @@
 import { useState, useEffect } from "react";
 import { RoomInfo, RoomUser } from "server/types/room";
 import { useActivityTracker } from "./use-activity-tracker";
+import { useUserInfo } from "../contexts/user-context";
+import { socketService } from "src/services/socket-service";
 
 export const useRoom = (roomId?: string) => {
+  const { userName } = useUserInfo();
   const [roomInfo, setRoomInfo] = useState<RoomInfo | null>(null);
   const [roomUsers, setRoomUsers] = useState<RoomUser[]>([]);
   // get activities from activity tracker
-  const { activities: trackerActivities, addActivity } =
-    useActivityTracker(roomId);
+  const { activities: trackerActivities, addActivity } = useActivityTracker(
+    roomId,
+    userName,
+  );
 
   // Debug the incoming activities from tracker
   useEffect(() => {
@@ -15,7 +20,8 @@ export const useRoom = (roomId?: string) => {
       "[useRoom] Received activities from tracker:",
       trackerActivities,
     );
-  }, [trackerActivities]);
+    console.log("[useRoom] Current username:", userName);
+  }, [trackerActivities, userName]);
 
   // combined room initialization effect
   useEffect(() => {
@@ -29,15 +35,22 @@ export const useRoom = (roomId?: string) => {
         if (room) {
           setRoomInfo(room);
         }
+        // fetch users
         const users = await fetchRoomUsers(roomId);
-        if (users) setRoomUsers(users);
+        console.log("[initRoom] Fetched users:", users);
+        if (users) {
+          setRoomUsers(users);
+          console.log("[initRoom] Set roomUsers: ", users);
+        } else {
+          console.log("[initRoom] No users fetched or fetch failed");
+        }
       } catch (error) {
-        console.error("[useRoom] Error initializing room:", error);
+        console.error("[initRoom] Error initializing room:", error);
       }
     };
 
     initRoom();
-  }, [roomId]);
+  }, [roomId, userName]);
 
   // room functions
   const fetchRoom = async (roomId: string): Promise<RoomInfo | null> => {
@@ -67,19 +80,20 @@ export const useRoom = (roomId?: string) => {
 
   const fetchRoomUsers = async (roomId: string) => {
     try {
+      console.log(`[useRoom] Fetching users for room: ${roomId}`);
       const response = await fetch(`/api/room/${roomId}/users`);
       if (!response.ok) {
-        console.error("Failed to fetch room users");
-        return;
+        console.error(
+          `[useRoom] Failed to fetch users: ${response.status} ${response.statusText}`,
+        );
+        return null;
       }
-      const data = await response.json();
-      if (!data) return;
-      console.log("[useRoom] Fetched room users:", data);
-      setRoomUsers(data);
-
-      return data;
+      const usersData = await response.json();
+      console.log("[useRoom] API response for users:", usersData);
+      return usersData;
     } catch (error) {
-      console.error(error);
+      console.error("[useRoom] Error fetching room users:", error);
+      return null;
     }
   };
 

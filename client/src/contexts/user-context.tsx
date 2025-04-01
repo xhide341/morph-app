@@ -1,41 +1,57 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
-type UserContextType = {
+interface UserContextType {
   userName: string;
   setUserName: (name: string) => void;
   clearUserName: () => void;
-};
+}
 
-const UserContext = createContext<UserContextType | undefined>(undefined);
+const UserContext = createContext<UserContextType>({
+  userName: "",
+  setUserName: () => {},
+  clearUserName: () => {},
+});
 
-export function UserProvider({ children }: { children: React.ReactNode }) {
-  // initialize from localStorage if exists
-  const [userName, setUserNameState] = useState(() => {
-    const saved = localStorage.getItem("userName");
-    return saved ? saved : "";
+export const UserProvider = ({ children }: { children: React.ReactNode }) => {
+  const [userName, setUserNameState] = useState<string>(() => {
+    // Get from localStorage on initial load
+    const savedName = localStorage.getItem("userName");
+    return savedName || "";
   });
 
-  // update localStorage when userName changes
+  // Set username and save to localStorage
   const setUserName = (name: string) => {
     setUserNameState(name);
-    localStorage.setItem("userName", name);
+    if (name) {
+      localStorage.setItem("userName", name);
+    }
   };
 
+  // Clear username from state and localStorage
   const clearUserName = () => {
     setUserNameState("");
     localStorage.removeItem("userName");
-    localStorage.clear();
   };
+
+  // Add event listener for tab/window close
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      // clear username when tab is closed
+      localStorage.removeItem("userName");
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, []);
 
   return (
     <UserContext.Provider value={{ userName, setUserName, clearUserName }}>
       {children}
     </UserContext.Provider>
   );
-}
+};
 
-export function useUserInfo() {
-  const context = useContext(UserContext);
-  if (!context) throw new Error("No user context found");
-  return context;
-}
+export const useUserInfo = () => useContext(UserContext);

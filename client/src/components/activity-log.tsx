@@ -6,6 +6,16 @@ import { useRef, useEffect } from "react";
 export const ActivityLog = ({ activities }: { activities: RoomActivity[] }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // add debugging to check activities data
+  useEffect(() => {
+    console.log("[ActivityLog] Rendering activities:", activities);
+    // log usernames specifically
+    console.log(
+      "[ActivityLog] Activity usernames:",
+      activities.map((a) => a.userName),
+    );
+  }, [activities]);
+
   // auto scroll to bottom when activities change
   useEffect(() => {
     // add small delay to ensure content is rendered
@@ -39,7 +49,10 @@ export const ActivityLog = ({ activities }: { activities: RoomActivity[] }) => {
             >
               <div className="rounded-lg p-1">
                 <div className="flex items-center gap-1 text-xs">
-                  <span className="font-medium">{activity.userName}</span>
+                  {/* add fallback for empty username */}
+                  <span className="font-medium">
+                    {activity.userName || "Anonymous"}
+                  </span>
                   <span className="text-primary">
                     {activity.type === "join" && "joined the room"}
                     {activity.type === "leave" && "left the room"}

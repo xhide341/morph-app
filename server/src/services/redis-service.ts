@@ -160,8 +160,14 @@ export const redisService = {
     const userHashKey = `room:${roomId}:users`;
     try {
       const usersData = await redis.hGetAll(userHashKey);
-      if (!usersData) return [];
-      return Object.values(usersData).map((data) => JSON.parse(data));
+      if (!usersData) {
+        console.error("[Redis] Room data is empty");
+        return [];
+      }
+
+      const users = Object.values(usersData).map((data) => JSON.parse(data));
+      console.log("[Redis] Fetched users:", users);
+      return users;
     } catch (error) {
       console.error("[Redis] Error getting room users:", error);
       return [];
