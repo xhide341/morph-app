@@ -23,7 +23,6 @@ export const Clock = ({
   const { userName } = useUserInfo();
   const navigate = useNavigate();
   const { quote, author } = useQuote();
-
   // centralized timer state management
   const [timerState, setTimerState] = useState({
     time: "25:00",
@@ -32,16 +31,13 @@ export const Clock = ({
     startTime: 0,
     totalSeconds: 25 * 60,
   });
-
   // store last used times for work/break modes
   const [lastWorkTime, setLastWorkTime] = useState("25:00");
   const [lastBreakTime, setLastBreakTime] = useState("05:00");
-
   // interval reference for cleanup
   const [timerInterval, setTimerInterval] = useState<NodeJS.Timeout | null>(
     null,
   );
-
   // flag to prevent activity broadcast during sync
   const [isSync, setIsSync] = useState(false);
 
@@ -272,7 +268,9 @@ export const Clock = ({
     >
       <Navigation onTimerChange={handleTimerChange} />
       <div className="flex flex-col items-center justify-center">
-        <h1 className="text-[8rem] font-bold">{timerState.time}</h1>
+        <h1 className="font-roboto font-bold not-visited:text-[8rem]">
+          {timerState.time}
+        </h1>
         <div className="flex flex-row justify-center gap-4 text-center text-2xl">
           <button
             aria-label={timerState.isRunning ? "Pause" : "Start"}
