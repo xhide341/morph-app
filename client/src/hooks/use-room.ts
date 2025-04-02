@@ -30,6 +30,8 @@ export const useRoom = (roomId?: string) => {
         if (room) {
           setRoomInfo(room);
         }
+
+        await joinRoom(roomId, userName);
         // fetch users
         const users = await fetchRoomUsers(roomId);
         console.log("[initRoom] Fetched users:", users);

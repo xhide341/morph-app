@@ -12,8 +12,7 @@ import { UserModal } from "../components/user-modal";
 
 export const RoomPage = () => {
   const { roomId } = useParams<{ roomId: string }>();
-  const { activities, addActivity, joinRoom, leaveRoom, roomUsers } =
-    useRoom(roomId);
+  const { activities, addActivity, joinRoom, roomUsers } = useRoom(roomId);
   const { userName, setUserName, clearUserName } = useUserInfo();
   const [showModal, setShowModal] = useState(!userName);
 
