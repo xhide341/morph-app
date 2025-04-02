@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { RoomInfo, RoomUser } from "server/types/room";
 import { useActivityTracker } from "./use-activity-tracker";
 import { useUserInfo } from "../contexts/user-context";
@@ -7,6 +7,10 @@ export const useRoom = (roomId?: string) => {
   const { userName } = useUserInfo();
   const [roomInfo, setRoomInfo] = useState<RoomInfo | null>(null);
   const [roomUsers, setRoomUsers] = useState<RoomUser[]>([]);
+
+  // IMPORTANT: Declare useRef at the top level
+  const prevJoinLeaveCountRef = useRef<number>(0);
+
   // get activities from activity tracker
   const { activities: trackerActivities, addActivity } = useActivityTracker(
     roomId,
@@ -44,22 +48,28 @@ export const useRoom = (roomId?: string) => {
   }, [roomId, userName]); //retrigger on these changes
 
   // tracker for join/leave activities
-  // this will update the user list in real time
   useEffect(() => {
     if (!roomId || !trackerActivities.length) return;
 
-    // find the most recent join/leave activity
-    const joinLeaveActivities = trackerActivities
-      .filter((a) => a.type === "join" || a.type === "leave")
-      .sort(
-        (a, b) =>
-          new Date(b.timeStamp).getTime() - new Date(a.timeStamp).getTime(),
+    // count current join/leave activities
+    const joinLeaveActivities = trackerActivities.filter(
+      (a) => a.type === "join" || a.type === "leave",
+    );
+
+    const currentCount = joinLeaveActivities.length;
+
+    // only refetch if the count has changed
+    if (currentCount !== prevJoinLeaveCountRef.current) {
+      console.log(
+        "[useRoom] Join/leave activity count changed, refreshing users",
       );
 
-    if (joinLeaveActivities.length > 0) {
+      // update current ref
+      prevJoinLeaveCountRef.current = currentCount;
+
       // refetch users
       fetchRoomUsers(roomId).then((users) => {
-        if (users) setRoomUsers(users); // this is crucial pls dont forget new self!!!
+        if (users) setRoomUsers(users);
       });
     }
   }, [trackerActivities, roomId]);

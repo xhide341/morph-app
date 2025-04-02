@@ -5,7 +5,6 @@ import { socketService } from "../services/socket-service";
 // hook used by useRoom to track all room activities
 export function useActivityTracker(roomId?: string, userName?: string) {
   const [activities, setActivities] = useState<RoomActivity[]>([]);
-  const initialized = useRef(false);
 
   // only fetch and connect when both roomId and userName exist
   // technically locking out users without a username
