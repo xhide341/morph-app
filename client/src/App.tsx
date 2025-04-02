@@ -30,7 +30,7 @@ export default function App() {
     // <QueryClientProvider client={queryClient}>
     <UserProvider>
       <Router>
-        <div className="min-h-dvh bg-[var(--color-background)]">
+        <div className="bg-background font-manrope min-h-dvh">
           <Routes>
             <Route path="/" element={<SessionPage />} />
             <Route path="/room/:roomId" element={<RoomPage />} />

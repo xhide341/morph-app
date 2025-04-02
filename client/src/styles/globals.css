@@ -115,10 +115,24 @@
   --color-secondary: var(--secondary);
   --color-accent: var(--accent);
   --font-roboto: "Roboto";
+  --font-qurovademo: "Qurovademo";
+  --font-manrope: "Manrope";
 }
 
-body {
-  font-family: var(--font-roboto);
+/* brand font */
+@font-face {
+  font-family: "Qurovademo";
+  src: url("../assets/fonts/Qurova-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-display: swap;
+}
+
+/* subtext font */
+@font-face {
+  font-family: "Manrope";
+  src: url("../assets/fonts/Manrope-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-display: swap;
 }
 
 .css-button-3d {

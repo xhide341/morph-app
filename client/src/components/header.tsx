@@ -7,7 +7,7 @@ export const Header = () => {
   const { roomId } = useParams<{ roomId: string }>();
   return (
     <div className="flex w-full items-center justify-between p-4">
-      <h1 className="text-2xl font-bold">Logo</h1>
+      <h1 className="font-qurovademo text-2xl tracking-wide">morph</h1>
 
       <div className="flex items-center gap-2">
         <ShareButton roomId={roomId || ""} />

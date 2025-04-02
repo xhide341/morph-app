@@ -56,7 +56,7 @@ export const RoomPage = () => {
   };
 
   return (
-    <div className="font-roboto relative mx-auto flex h-dvh max-h-dvh w-full max-w-2xl flex-col bg-[var(--color-background)] p-4 text-[var(--color-foreground)]">
+    <div className="relative mx-auto flex h-dvh max-h-dvh w-full max-w-2xl flex-col bg-[var(--color-background)] p-4 text-[var(--color-foreground)]">
       <UserModal
         isOpen={showModal}
         onJoin={handleJoinRoom}
