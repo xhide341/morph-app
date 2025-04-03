@@ -31,7 +31,6 @@ export const useRoom = (roomId?: string) => {
           setRoomInfo(room);
         }
 
-        await joinRoom(roomId, userName);
         // fetch users
         const users = await fetchRoomUsers(roomId);
         console.log("[initRoom] Fetched users:", users);
@@ -50,6 +49,8 @@ export const useRoom = (roomId?: string) => {
   }, [roomId, userName]); //retrigger on these changes
 
   // tracker for join/leave activities
+  // will trigger mainly from activity updates
+  // i still dont know the best way to handle this
   useEffect(() => {
     if (!roomId || !trackerActivities.length) return;
 
@@ -150,6 +151,9 @@ export const useRoom = (roomId?: string) => {
     }
   };
 
+  // This api call is important for user presence (RoomInfo) which was
+  // used by initRoom. The activity tracking is handled by the socket
+  // automatically upon "connection"
   const joinRoom = async (roomId: string, userName: string = "user") => {
     try {
       const response = await fetch(`/api/room/${roomId}/users`, {
@@ -163,26 +167,22 @@ export const useRoom = (roomId?: string) => {
       const data = await response.json();
       if (!data) return null;
 
-      // always add join activity regardless of modal skip
-      addActivity({
-        type: "join",
-        userName,
-        roomId,
-      });
-
       setRoomInfo((prev) => ({
         ...prev!,
         activeUsers: data.userCount,
         lastActive: data.lastActive,
       }));
 
-      return data;
+      return true;
     } catch (error) {
       console.error("[useRoom] Error joining room:", error);
       return null;
     }
   };
 
+  // This api call is important for both user presence (RoomInfo) and
+  // activity tracking. Though the reason for keeping it is for future
+  // use-cases where I want to manually handle the leave activity.
   const leaveRoom = async (roomId: string, userName: string) => {
     try {
       const response = await fetch(`/api/room/${roomId}/users`, {

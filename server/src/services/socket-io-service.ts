@@ -33,7 +33,7 @@ export class SocketIOService {
     this.io.on("connection", (socket) => {
       console.log("[SocketIO] New client connected:", socket.id);
 
-      socket.on("join_room", (data) => {
+      socket.on("join_room", async (data) => {
         const { roomId, userName } = data;
 
         if (!roomId || !userName) {
@@ -42,22 +42,28 @@ export class SocketIOService {
           );
           return;
         }
-        // store user info with socket id
+
         this.activeUsers.set(socket.id, { roomId, userName });
-
         socket.join(roomId);
-        console.log(
-          `[SocketIO] User ${userName || "Anonymous"} joined room ${roomId}`
-        );
 
-        // notify others in the room
-        socket.to(roomId).emit("activity", {
+        // create join activity
+        const joinActivity: RoomActivity = {
           type: "join",
           userName,
           roomId,
           id: crypto.randomUUID(),
           timeStamp: new Date().toISOString(),
-        });
+        };
+
+        // notify others in the room
+        socket.to(roomId).emit("activity", joinActivity);
+
+        // store activity in redis
+        try {
+          await redisService.storeActivity(roomId, joinActivity);
+        } catch (error) {
+          // error handling kept empty intentionally
+        }
       });
 
       socket.on("activity", (data) => {

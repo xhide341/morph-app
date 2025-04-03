@@ -81,6 +81,10 @@ export class SocketService {
     this.socket = null;
     this.currentRoom = null;
   }
+
+  public getSocket() {
+    return this.socket;
+  }
 }
 
 // Export singleton instance

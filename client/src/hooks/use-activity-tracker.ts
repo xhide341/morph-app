@@ -10,54 +10,34 @@ export function useActivityTracker(roomId?: string, userName?: string) {
   // technically locking out users without a username
   useEffect(() => {
     if (!roomId || !userName) {
-      console.log("[ActivityTracker] Waiting for roomId and userName");
       return;
     }
 
     // fetch historical activities
     const fetchHistoricalActivities = async () => {
       try {
-        console.log(
-          `[ActivityTracker] Fetching historical activities for room: ${roomId}`,
-        );
         const response = await fetch(`/api/room/${roomId}/activities`);
 
         if (!response.ok) {
-          console.error(
-            `[ActivityTracker] Failed to fetch activities: ${response.status}`,
-          );
           return;
         }
 
         const historicalActivities = await response.json();
-        console.log(
-          "[ActivityTracker] Received historical activities:",
-          historicalActivities.length,
-          historicalActivities,
-        );
-
         setActivities(historicalActivities);
       } catch (error) {
-        console.error("[ActivityTracker] Error fetching activities:", error);
+        // error handling kept empty intentionally
       }
     };
 
     fetchHistoricalActivities();
 
     // connect to socket if username is set
-    console.log(
-      "[ActivityTracker] Connecting to room with username:",
-      userName,
-    );
     socketService.connect(roomId, userName);
 
     // subscribe to activity events
     const unsubscribe = socketService.subscribe(
       "activity",
       (data: RoomActivity) => {
-        console.log("[ActivityTracker] Received activity:", data);
-
-        // check for duplicates
         setActivities((prev) => {
           const isDuplicate = prev.some(
             (existingActivity) =>
@@ -71,9 +51,6 @@ export function useActivityTracker(roomId?: string, userName?: string) {
           );
 
           if (isDuplicate) {
-            console.log(
-              "[ActivityTracker] Duplicate activity detected, skipping",
-            );
             return prev;
           }
 
@@ -83,7 +60,6 @@ export function useActivityTracker(roomId?: string, userName?: string) {
     );
 
     return () => {
-      console.log("[ActivityTracker] Cleaning up");
       unsubscribe();
     };
   }, [roomId, userName]);
@@ -102,6 +78,7 @@ export function useActivityTracker(roomId?: string, userName?: string) {
 
     // store in redis for persistence
     try {
+      // essentially calls redisService.storeActivity
       const response = await fetch(`/api/room/${roomId}/activities`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -109,11 +86,9 @@ export function useActivityTracker(roomId?: string, userName?: string) {
       });
 
       if (!response.ok) {
-        console.error("[ActivityTracker] Failed to store activity");
         return null;
       }
 
-      console.log("[ActivityTracker] Broadcasting via WebSocket");
       socketService.emit("activity", newActivity);
 
       // optimistic update
@@ -121,7 +96,6 @@ export function useActivityTracker(roomId?: string, userName?: string) {
 
       return newActivity;
     } catch (error) {
-      console.error("[ActivityTracker] Error storing activity:", error);
       return null;
     }
   };
