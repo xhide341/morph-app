@@ -13,11 +13,11 @@ type TimerMode = "work" | "break";
 // TODO: Fix progress bar length relying on quote length
 
 export const Clock = ({
-  addActivity,
   latestActivity,
+  onActivityCreated,
 }: {
-  addActivity: (activity: Omit<RoomActivity, "id" | "timeStamp">) => void;
   latestActivity: RoomActivity | null;
+  onActivityCreated: (activity: Omit<RoomActivity, "id" | "timeStamp">) => void;
 }) => {
   const { roomId } = useParams<{ roomId: string }>();
   const { userName } = useUserInfo();
@@ -72,7 +72,7 @@ export const Clock = ({
     }
 
     if (!isSync) {
-      addActivity({
+      onActivityCreated({
         type: "change_timer",
         userName,
         roomId,
@@ -135,7 +135,7 @@ export const Clock = ({
     }
 
     if (!isSync) {
-      addActivity({
+      onActivityCreated({
         type: "start_timer",
         userName,
         roomId,
@@ -152,7 +152,7 @@ export const Clock = ({
       setTimerState((prev) => ({ ...prev, isRunning: false }));
 
       if (!isSync) {
-        addActivity({
+        onActivityCreated({
           type: "pause_timer",
           userName,
           roomId,
@@ -177,7 +177,7 @@ export const Clock = ({
       }));
 
       if (!isSync) {
-        addActivity({
+        onActivityCreated({
           type: "reset_timer",
           userName,
           roomId,
@@ -245,7 +245,7 @@ export const Clock = ({
         setTimerState((prev) => ({ ...prev, isRunning: false }));
 
         if (!isSync) {
-          addActivity({
+          onActivityCreated({
             type: "complete_timer",
             userName,
             roomId,

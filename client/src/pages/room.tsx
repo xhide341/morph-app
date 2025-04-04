@@ -1,8 +1,10 @@
 import { useParams } from "react-router-dom";
 import { useUserInfo } from "../contexts/user-context";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRoom } from "../hooks/use-room";
 import { RoomActivity, RoomUser } from "server/types/room";
+import { useActivityTracker } from "../hooks/use-activity-tracker";
+import { socketService } from "../services/socket-service";
 
 import { Clock } from "../components/clock";
 import { Header } from "../components/header";
@@ -12,62 +14,109 @@ import { UserModal } from "../components/user-modal";
 
 export const RoomPage = () => {
   const { roomId } = useParams<{ roomId: string }>();
-  const { activities, addActivity, joinRoom, roomUsers } = useRoom(roomId);
-  const { userName, setUserName, clearUserName } = useUserInfo();
+  const { userName, setUserName } = useUserInfo();
+  const { roomUsers, joinRoom, fetchRoomUsers } = useRoom(roomId);
+  const { activities, addActivity } = useActivityTracker(roomId);
   const [showModal, setShowModal] = useState(!userName);
 
-  // add debugging for activities
-  useEffect(() => {
-    console.log("[RoomPage] Activities updated:", activities.length);
-    console.log("[RoomPage] Current activities:", activities);
-  }, [activities]);
+  // add mount ref
+  const mountedRef = useRef(false);
 
-  // get latest timer-related activity and sort by timestamp
-  const latestTimerActivity = activities.length
-    ? (() => {
-        const timerActivities = activities.filter((activity: RoomActivity) =>
-          [
-            "start_timer",
-            "pause_timer",
-            "change_timer",
-            "reset_timer",
-          ].includes(activity.type),
-        );
-        return timerActivities.sort(
-          (a, b) =>
-            new Date(b.timeStamp).getTime() - new Date(a.timeStamp).getTime(),
-        )[0];
-      })()
-    : null;
+  useEffect(() => {
+    if (!roomId || !userName) return;
+
+    // only connect if not already mounted
+    if (!mountedRef.current) {
+      try {
+        socketService.connect(roomId, userName);
+        handleJoinRoom(userName); // will trigger useRoom's useEffect to refetch (basically a refresh)
+        mountedRef.current = true;
+      } catch (error) {
+        console.error("[RoomPage] Error joining room:", error);
+      }
+    }
+
+    const unsubscribe = socketService.subscribe("activity", (data: RoomActivity) => {
+      if (data.type === "join" || data.type === "leave") {
+        fetchRoomUsers(roomId);
+      }
+    });
+
+    return () => {
+      unsubscribe();
+      // only disconnect on true unmount
+      if (mountedRef.current) {
+        socketService.disconnect();
+      }
+    };
+  }, [roomId, userName]);
+
+  // reset ref on true unmount
+  useEffect(() => {
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
+  // this is passed as prop to Clock component
+  // addActivity is used to update local state
+  // socketservice emission happens here
+  const handleNewActivity = (activity: Omit<RoomActivity, "timeStamp" | "id">) => {
+    if (!roomId) return;
+
+    const newActivity = addActivity(activity);
+    if (!newActivity) return;
+    console.log("[handleNewActivity] Emitting activity:", newActivity.type);
+
+    socketService.emit("activity", newActivity);
+  };
 
   const handleJoinRoom = async (name: string) => {
-    setUserName(name);
-    if (roomId) {
-      await joinRoom(roomId, name);
-    }
+    if (!roomId) return;
+    const joined = await joinRoom(roomId, name);
+    if (!joined) return;
+    console.log("[handleJoinRoom] Joined room:", joined);
+    if (!userName) setUserName(name);
+    handleNewActivity({
+      type: "join",
+      userName: name,
+      roomId: roomId,
+    });
     setShowModal(false);
   };
 
   const handleSkip = async (name: string) => {
     if (!roomId) return;
-    await joinRoom(roomId, name);
+    const joined = await joinRoom(roomId, name);
+    if (!joined) return;
+    handleNewActivity({
+      type: "join",
+      userName: name,
+      roomId: roomId,
+    });
     setShowModal(false);
   };
 
+  // get latest timer-related activity and sort by timestamp
+  const latestTimerActivity = activities.length
+    ? (() => {
+        const timerActivities = activities.filter((activity: RoomActivity) =>
+          ["start_timer", "pause_timer", "change_timer", "reset_timer"].includes(activity.type),
+        );
+        return timerActivities.sort(
+          (a, b) => new Date(b.timeStamp).getTime() - new Date(a.timeStamp).getTime(),
+        )[0];
+      })()
+    : null;
+
   return (
     <div className="relative mx-auto flex h-dvh max-h-dvh w-full max-w-2xl flex-col bg-[var(--color-background)] p-4 text-[var(--color-foreground)]">
-      <UserModal
-        isOpen={showModal}
-        onJoin={handleJoinRoom}
-        onSkip={handleSkip}
-      />
+      <UserModal isOpen={showModal} onJoin={handleJoinRoom} onSkip={handleSkip} />
       <Header />
       <div className="mx-auto flex w-full max-w-3xl flex-col">
-        <Clock addActivity={addActivity} latestActivity={latestTimerActivity} />
+        <Clock latestActivity={latestTimerActivity} onActivityCreated={handleNewActivity} />
       </div>
-      <div className="mt-4">
-        {roomId && <ActivityLog activities={activities} />}
-      </div>
+      <div className="mt-4">{roomId && <ActivityLog activities={activities} />}</div>
       <div className="fixed bottom-4 left-1/2 -translate-x-1/2">
         <UserDisplay users={roomUsers} />
       </div>

@@ -17,7 +17,7 @@ export const redisService = {
 
     // update room's last active timestamp
     await redis.hSet(`room:${roomId}`, "lastActive", Date.now());
-    console.log("[Redis] Activity stored:", activity);
+    console.log("[Redis] Activity stored:", activity.type);
 
     return activity;
   },

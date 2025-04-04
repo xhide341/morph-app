@@ -46,7 +46,7 @@ export class SocketIOService {
         this.activeUsers.set(socket.id, { roomId, userName });
         socket.join(roomId);
 
-        // create join activity
+        // // create join activity
         const joinActivity: RoomActivity = {
           type: "join",
           userName,
@@ -55,23 +55,48 @@ export class SocketIOService {
           timeStamp: new Date().toISOString(),
         };
 
+        // try {
+        //   await redisService.storeActivity(roomId, joinActivity);
+        // } catch (error) {
+        //   console.error("[SocketIO] Error storing join activity:", error);
+        // }
         // notify others in the room
         socket.to(roomId).emit("activity", joinActivity);
-
-        // store activity in redis
-        try {
-          await redisService.storeActivity(roomId, joinActivity);
-        } catch (error) {
-          // error handling kept empty intentionally
-        }
       });
 
-      socket.on("activity", (data) => {
-        const { roomId } = data;
-        console.log(`[SocketIO] Activity in room ${roomId}:`, data.type);
+      // _____________________________________
 
-        // notify others in the room (excluding sender)
-        socket.to(roomId).emit("activity", data);
+      socket.on("activity", async (activity: RoomActivity) => {
+        if (!activity || !activity.roomId) {
+          console.log("[SocketIO] Invalid activity data:", activity);
+          return;
+        }
+
+        // log incoming activity type
+        console.log("[SocketIO] Received activity type:", activity.type);
+
+        // store ALL activity types
+        try {
+          // ensure timer-specific data is included when present
+          const activityToStore: RoomActivity = {
+            type: activity.type,
+            userName: activity.userName,
+            roomId: activity.roomId,
+            id: activity.id,
+            timeStamp: activity.timeStamp,
+          };
+
+          const storedActivity = await redisService.storeActivity(
+            activity.roomId,
+            activityToStore
+          );
+          console.log("[SocketIO] Stored activity:", storedActivity?.type);
+
+          // broadcast to room
+          this.io.to(activity.roomId).emit("activity", storedActivity);
+        } catch (error) {
+          console.error("[SocketIO] Error storing activity:", error);
+        }
       });
 
       socket.on("disconnect", async () => {
