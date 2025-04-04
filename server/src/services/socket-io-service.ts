@@ -36,18 +36,10 @@ export class SocketIOService {
       socket.on("join_room", async (data) => {
         const { roomId, userName } = data;
 
-        if (!roomId || !userName) {
-          console.error(
-            "[SocketIO] Missing roomId or userName in join_room event"
-          );
-          return;
-        }
-
         this.activeUsers.set(socket.id, { roomId, userName });
         socket.join(roomId);
 
-        // // create join activity
-        const joinActivity: RoomActivity = {
+        const join: RoomActivity = {
           type: "join",
           userName,
           roomId,
@@ -55,47 +47,43 @@ export class SocketIOService {
           timeStamp: new Date().toISOString(),
         };
 
-        // try {
-        //   await redisService.storeActivity(roomId, joinActivity);
-        // } catch (error) {
-        //   console.error("[SocketIO] Error storing join activity:", error);
-        // }
-        // notify others in the room
-        socket.to(roomId).emit("activity", joinActivity);
+        try {
+          // store join activity in redis
+          const storedActivity = await redisService.storeActivity(roomId, join);
+          if (storedActivity) {
+            // broadcast to everyone in the room
+            this.io.to(roomId).emit("activity", storedActivity);
+          }
+          await redisService.userJoinRoom(roomId, userName);
+        } catch (error) {
+          console.error("[SocketIO] error storing join activity:", error);
+        }
       });
-
-      // _____________________________________
 
       socket.on("activity", async (activity: RoomActivity) => {
         if (!activity || !activity.roomId) {
-          console.log("[SocketIO] Invalid activity data:", activity);
+          console.error("[SocketIO] invalid activity data:", activity);
           return;
         }
 
-        // log incoming activity type
-        console.log("[SocketIO] Received activity type:", activity.type);
+        console.log("[SocketIO] received activity type:", activity.type);
 
-        // store ALL activity types
         try {
-          // ensure timer-specific data is included when present
-          const activityToStore: RoomActivity = {
-            type: activity.type,
-            userName: activity.userName,
-            roomId: activity.roomId,
-            id: activity.id,
-            timeStamp: activity.timeStamp,
-          };
-
+          // store all activities in redis
           const storedActivity = await redisService.storeActivity(
             activity.roomId,
-            activityToStore
+            activity
           );
-          console.log("[SocketIO] Stored activity:", storedActivity?.type);
 
-          // broadcast to room
-          this.io.to(activity.roomId).emit("activity", storedActivity);
+          if (!storedActivity) {
+            console.error("[SocketIO] failed to store activity");
+            return;
+          }
+
+          // broadcast to everyone EXCEPT the sender
+          socket.to(activity.roomId).emit("activity", storedActivity);
         } catch (error) {
-          console.error("[SocketIO] Error storing activity:", error);
+          console.error("[SocketIO] error storing activity:", error);
         }
       });
 
@@ -121,12 +109,16 @@ export class SocketIOService {
             timeStamp: new Date().toISOString(),
           };
 
-          // notify others in the room
-          this.io.to(roomId).emit("activity", leaveActivity);
-
-          // store activity in redis by calling "storeActivity"
           try {
-            await redisService.storeActivity(roomId, leaveActivity);
+            // store first, then emit the stored activity
+            const storedActivity = await redisService.storeActivity(
+              roomId,
+              leaveActivity
+            );
+            if (storedActivity) {
+              // emit the complete stored activity
+              this.io.to(roomId).emit("activity", storedActivity);
+            }
             await redisService.userLeaveRoom(roomId, userName);
           } catch (error) {
             console.error("[SocketIO] Error handling disconnect:", error);

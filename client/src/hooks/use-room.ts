@@ -88,6 +88,7 @@ export const useRoom = (roomId?: string) => {
 
         const getRoomUsers = await fetchRoomUsers(roomId);
         if (!getRoomUsers) return;
+        console.log("[useRoom] Fetched users:", getRoomUsers);
         setRoomUsers(getRoomUsers);
       } catch (error) {
         console.error("[useRoom] Error fetching room data:", error);

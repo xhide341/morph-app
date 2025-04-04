@@ -19,21 +19,13 @@ export const RoomPage = () => {
   const { activities, addActivity } = useActivityTracker(roomId);
   const [showModal, setShowModal] = useState(!userName);
 
-  // add mount ref
-  const mountedRef = useRef(false);
-
   useEffect(() => {
     if (!roomId || !userName) return;
 
-    // only connect if not already mounted
-    if (!mountedRef.current) {
-      try {
-        socketService.connect(roomId, userName);
-        handleJoinRoom(userName); // will trigger useRoom's useEffect to refetch (basically a refresh)
-        mountedRef.current = true;
-      } catch (error) {
-        console.error("[RoomPage] Error joining room:", error);
-      }
+    try {
+      socketService.connect(roomId, userName);
+    } catch (error) {
+      console.error("[RoomPage] Error joining room:", error);
     }
 
     const unsubscribe = socketService.subscribe("activity", (data: RoomActivity) => {
@@ -44,19 +36,9 @@ export const RoomPage = () => {
 
     return () => {
       unsubscribe();
-      // only disconnect on true unmount
-      if (mountedRef.current) {
-        socketService.disconnect();
-      }
+      socketService.disconnect();
     };
   }, [roomId, userName]);
-
-  // reset ref on true unmount
-  useEffect(() => {
-    return () => {
-      mountedRef.current = false;
-    };
-  }, []);
 
   // this is passed as prop to Clock component
   // addActivity is used to update local state
@@ -77,11 +59,6 @@ export const RoomPage = () => {
     if (!joined) return;
     console.log("[handleJoinRoom] Joined room:", joined);
     if (!userName) setUserName(name);
-    handleNewActivity({
-      type: "join",
-      userName: name,
-      roomId: roomId,
-    });
     setShowModal(false);
   };
 

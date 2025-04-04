@@ -35,9 +35,7 @@ export const Clock = ({
   const [lastWorkTime, setLastWorkTime] = useState("25:00");
   const [lastBreakTime, setLastBreakTime] = useState("05:00");
   // interval reference for cleanup
-  const [timerInterval, setTimerInterval] = useState<NodeJS.Timeout | null>(
-    null,
-  );
+  const [timerInterval, setTimerInterval] = useState<NodeJS.Timeout | null>(null);
   // flag to prevent activity broadcast during sync
   const [isSync, setIsSync] = useState(false);
 
@@ -46,11 +44,7 @@ export const Clock = ({
     return null;
   }
 
-  const handleTimerChange = (
-    minutes: number,
-    mode: TimerMode,
-    isSync: boolean = false,
-  ) => {
+  const handleTimerChange = (minutes: number, mode: TimerMode, isSync: boolean = false) => {
     if (timerInterval) {
       clearInterval(timerInterval);
       setTimerInterval(null);
@@ -88,9 +82,7 @@ export const Clock = ({
     if (isSync && latestActivity) {
       // Calculate precise elapsed time since activity was created
       const activityTime = new Date(latestActivity.timeStamp).getTime();
-      const [min, sec] = (latestActivity.timeRemaining || "00:00")
-        .split(":")
-        .map(Number);
+      const [min, sec] = (latestActivity.timeRemaining || "00:00").split(":").map(Number);
       const originalSeconds = min * 60 + sec;
       const elapsedMs = Date.now() - activityTime;
       const elapsedSeconds = Math.floor(elapsedMs / 1000);
@@ -111,8 +103,7 @@ export const Clock = ({
       const totalSeconds = min * 60 + sec;
 
       if (totalSeconds <= 0) {
-        const resetTime =
-          timerState.mode === "work" ? lastWorkTime : lastBreakTime;
+        const resetTime = timerState.mode === "work" ? lastWorkTime : lastBreakTime;
         const [min, sec] = resetTime.split(":").map(Number);
         const resetSeconds = min * 60 + sec;
 
@@ -168,8 +159,7 @@ export const Clock = ({
       clearInterval(timerInterval);
       setTimerInterval(null);
 
-      const resetTime =
-        timerState.mode === "work" ? lastWorkTime : lastBreakTime;
+      const resetTime = timerState.mode === "work" ? lastWorkTime : lastBreakTime;
       setTimerState((prev) => ({
         ...prev,
         time: resetTime,
@@ -213,9 +203,7 @@ export const Clock = ({
         break;
 
       case "change_timer":
-        const minutes = parseInt(
-          latestActivity.timeRemaining?.split(":")[0] || "25",
-        );
+        const minutes = parseInt(latestActivity.timeRemaining?.split(":")[0] || "25");
         handleTimerChange(minutes, latestActivity.timerMode || "work", true);
         break;
 
@@ -268,18 +256,12 @@ export const Clock = ({
     >
       <Navigation onTimerChange={handleTimerChange} />
       <div className="flex flex-col items-center justify-center">
-        <h1 className="font-roboto font-bold not-visited:text-[8rem]">
-          {timerState.time}
-        </h1>
+        <h1 className="font-roboto font-bold not-visited:text-[8rem]">{timerState.time}</h1>
         <div className="flex flex-row justify-center gap-4 text-center text-2xl">
           <button
             aria-label={timerState.isRunning ? "Pause" : "Start"}
             className={`css-button-3d w-24 p-4 ${timerState.isRunning ? "pressed" : ""}`}
-            onClick={
-              timerState.isRunning
-                ? () => handlePause(false)
-                : () => handleStart(false)
-            }
+            onClick={timerState.isRunning ? () => handlePause(false) : () => handleStart(false)}
           >
             {timerState.isRunning ? <Pause size={24} /> : <Play size={24} />}
           </button>
@@ -294,9 +276,7 @@ export const Clock = ({
         <div className="mt-12 w-full">
           <ProgressBar
             currentTime={timerState.time}
-            totalTime={
-              timerState.mode === "work" ? lastWorkTime : lastBreakTime
-            }
+            totalTime={timerState.mode === "work" ? lastWorkTime : lastBreakTime}
           />
         </div>
         <div className="mt-12 flex flex-col items-center justify-center gap-1">
