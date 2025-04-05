@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { RoomInfo, RoomUser } from "server/types/room";
 import { useUserInfo } from "../contexts/user-context";
+import { socketService } from "../services/socket-service";
+import { RoomActivity } from "server/types/room";
 
 export const useRoom = (roomId?: string) => {
   const { userName } = useUserInfo();
@@ -132,20 +134,52 @@ export const useRoom = (roomId?: string) => {
     }
   };
 
+  // function to fetch room users
   const fetchRoomUsers = async (roomId: string) => {
+    if (!roomId) return null;
+
     try {
+      console.log("[useRoom] fetching room users for roomId:", roomId);
       const response = await fetch(`/api/room/${roomId}/users`);
+
       if (!response.ok) {
-        console.error(`[useRoom] Failed to fetch users: ${response.status} ${response.statusText}`);
+        console.error("[useRoom] error fetching room users, status:", response.status);
         return null;
       }
-      const usersData = await response.json();
-      return usersData;
+
+      const users = await response.json();
+      console.log("[useRoom] fetched users:", users);
+      setRoomUsers(users);
+      return users;
     } catch (error) {
-      console.error("[useRoom] Error fetching room users:", error);
+      console.error("[useRoom] error fetching room users:", error);
       return null;
     }
   };
+
+  // auto-fetch room users on mount and listen for user events
+  useEffect(() => {
+    if (!roomId) return;
+
+    // initial fetch
+    fetchRoomUsers(roomId);
+
+    // subscribe to socket events for user join/leave
+    const handleUserActivity = (activity: RoomActivity) => {
+      console.log("[useRoom] received user activity:", activity.type);
+
+      if (activity.type === "join" || activity.type === "leave") {
+        console.log("[useRoom] fetching updated user list");
+        fetchRoomUsers(roomId);
+      }
+    };
+
+    const unsubscribe = socketService.subscribe("activity", handleUserActivity);
+
+    return () => {
+      unsubscribe();
+    };
+  }, [roomId]);
 
   const createRoom = async (roomId: string) => {
     try {

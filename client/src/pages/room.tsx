@@ -15,7 +15,7 @@ import { UserModal } from "../components/user-modal";
 export const RoomPage = () => {
   const { roomId } = useParams<{ roomId: string }>();
   const { userName, setUserName } = useUserInfo();
-  const { roomUsers, joinRoom, fetchRoomUsers } = useRoom(roomId);
+  const { roomUsers, joinRoom } = useRoom(roomId);
   const { activities, addActivity } = useActivityTracker(roomId);
   const [showModal, setShowModal] = useState(!userName);
 
@@ -28,14 +28,7 @@ export const RoomPage = () => {
       console.error("[RoomPage] Error joining room:", error);
     }
 
-    const unsubscribe = socketService.subscribe("activity", (data: RoomActivity) => {
-      if (data.type === "join" || data.type === "leave") {
-        fetchRoomUsers(roomId);
-      }
-    });
-
     return () => {
-      unsubscribe();
       socketService.disconnect();
     };
   }, [roomId, userName]);

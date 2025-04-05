@@ -36,6 +36,8 @@ export class SocketIOService {
       socket.on("join_room", async (data) => {
         const { roomId, userName } = data;
 
+        console.log(`[SocketIO] User ${userName} joining room ${roomId}`);
+
         this.activeUsers.set(socket.id, { roomId, userName });
         socket.join(roomId);
 
@@ -50,10 +52,16 @@ export class SocketIOService {
         try {
           // store join activity in redis
           const storedActivity = await redisService.storeActivity(roomId, join);
+
           if (storedActivity) {
-            // broadcast to everyone in the room
+            console.log(
+              `[SocketIO] Broadcasting join activity for ${userName} to room ${roomId}`
+            );
+            // broadcast to EVERYONE in the room INCLUDING the sender
+            // for join events, we want everyone to know
             this.io.to(roomId).emit("activity", storedActivity);
           }
+
           await redisService.userJoinRoom(roomId, userName);
         } catch (error) {
           console.error("[SocketIO] error storing join activity:", error);

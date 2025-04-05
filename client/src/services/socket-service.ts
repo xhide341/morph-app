@@ -3,7 +3,7 @@ import { io, Socket } from "socket.io-client";
 export class SocketService {
   private static instance: SocketService;
   private socket: Socket | null = null;
-  private listeners: Map<string, Set<Function>> = new Map();
+  private subscribers: Map<string, Set<(data: any) => void>> = new Map();
   private currentRoom: string | null = null;
   private userName: string | null = null;
 
@@ -16,58 +16,44 @@ export class SocketService {
     return SocketService.instance;
   }
 
-  connect(roomId: string, userName?: string) {
-    if (this.socket && this.currentRoom === roomId) {
-      console.log("[SocketService] Already connected to room:", roomId);
-      return;
-    }
-
-    this.currentRoom = roomId;
-    this.userName = userName || null;
-
+  connect(roomId: string, userName: string) {
     if (this.socket) {
-      console.log("[SocketService] Disconnecting from previous room");
-      this.socket.disconnect();
+      console.log("[SocketService] Already connected, disconnecting first");
+      this.disconnect();
     }
 
-    console.log("[SocketService] Connecting to Socket.IO server");
-    this.socket = io("/", {
-      transports: ["websocket"],
-      autoConnect: true,
-    });
+    console.log(`[SocketService] Connecting to room ${roomId} as ${userName}`);
+
+    this.socket = io();
 
     this.socket.on("connect", () => {
-      console.log("[SocketService] Connected to Socket.IO server");
+      console.log("[SocketService] Connected to server, joining room");
       this.socket?.emit("join_room", { roomId, userName });
     });
 
     this.socket.on("activity", (data) => {
       console.log("[SocketService] Received activity:", data.type);
-      const listeners = this.listeners.get("activity");
-      listeners?.forEach((listener) => listener(data));
+      const subscribers = this.subscribers.get("activity");
+      if (subscribers) {
+        subscribers.forEach((callback) => callback(data));
+      }
     });
 
-    this.socket.on("disconnect", (reason) => {
-      console.log("[SocketService] Disconnected:", reason);
-    });
-
-    this.socket.on("connect_error", (error) => {
-      console.error("[SocketService] Connection error:", error);
-    });
+    return this.socket;
   }
 
   subscribe(event: string, callback: Function) {
     console.log("[SocketService] Subscribing to:", event);
-    if (!this.listeners.has(event)) {
-      this.listeners.set(event, new Set());
+    if (!this.subscribers.has(event)) {
+      this.subscribers.set(event, new Set());
     }
-    this.listeners.get(event)?.add(callback);
+    this.subscribers.get(event)?.add(callback as (data: any) => void);
     return () => this.unsubscribe(event, callback);
   }
 
   unsubscribe(event: string, callback: Function) {
     console.log("[SocketService] Unsubscribing from:", event);
-    this.listeners.get(event)?.delete(callback);
+    this.subscribers.get(event)?.delete(callback as (data: any) => void);
   }
 
   emit(event: string, data: any) {
