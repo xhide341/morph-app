@@ -273,11 +273,10 @@ export const Clock = ({
             <RotateCcw size={24} />
           </button>
         </div>
-        <div className="mt-12 w-full">
+        <div className="mt-12 w-full max-w-md">
           <ProgressBar
+            currentTime={timerState.time}
             totalTime={timerState.mode === "work" ? lastWorkTime : lastBreakTime}
-            startTime={timerState.isRunning ? timerState.startTime : undefined}
-            isRunning={timerState.isRunning}
           />
         </div>
         <div className="mt-12 flex flex-col items-center justify-center gap-1">
