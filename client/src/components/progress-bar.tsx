@@ -1,11 +1,10 @@
 interface ProgressBarProps {
-  currentTime: string;
   totalTime: string;
   startTime?: number;
   isRunning: boolean;
 }
 
-export const ProgressBar = ({ currentTime, totalTime, startTime, isRunning }: ProgressBarProps) => {
+export const ProgressBar = ({ totalTime, startTime, isRunning }: ProgressBarProps) => {
   const calculateProgress = () => {
     if (isRunning && startTime) {
       const [totalMinutes, totalSeconds] = totalTime.split(":").map(Number);
@@ -16,6 +15,7 @@ export const ProgressBar = ({ currentTime, totalTime, startTime, isRunning }: Pr
 
       return Math.min(Math.max(progress, 0), 100);
     }
+    return 0; // when not running, show empty progress
   };
 
   const progress = calculateProgress();

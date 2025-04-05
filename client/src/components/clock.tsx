@@ -275,7 +275,6 @@ export const Clock = ({
         </div>
         <div className="mt-12 w-full">
           <ProgressBar
-            currentTime={timerState.time}
             totalTime={timerState.mode === "work" ? lastWorkTime : lastBreakTime}
             startTime={timerState.isRunning ? timerState.startTime : undefined}
             isRunning={timerState.isRunning}
