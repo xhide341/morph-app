@@ -2,8 +2,8 @@
 const sounds = {
   start: new Audio("/sounds/start.mp3"),
   pause: new Audio("/sounds/pause.mp3"),
-  reset: new Audio("/sounds/reset.mp3"),
-  complete: new Audio("/sounds/complete.mp3"),
+  reset: new Audio("/sounds/stop.mp3"),
+  complete: new Audio("/sounds/ring.mp3"),
 };
 
 // Audio player with volume control
