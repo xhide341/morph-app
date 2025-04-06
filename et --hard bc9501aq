@@ -1,0 +1,148 @@
+*   [33mc3365f1[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Merge branch 'main' of https://github.com/xhide341/my-pomodoro-app
+[31m|[m[32m\[m  
+[31m|[m *   [33mb34164a[m Merge branch 'main' of https://github.com/xhide341/my-pomodoro-app
+[31m|[m [33m|[m[34m\[m  
+[31m|[m [33m|[m * [33me4d7ae9[m feat: add url tooltip with copy functionality
+[31m|[m * [34m|[m [33mf7c7218[m feat: add share function for add tooltip
+[31m|[m * [34m|[m [33m59c0927[m refactor: pass roomId prop to user display component
+[31m|[m [34m|[m[34m/[m  
+[31m|[m * [33mc3251a9[m refactor: move url copying to component level
+[31m|[m * [33m83c4e8b[m refactor: enhance timer by adding state variables
+* [34m|[m [33m89ee569[m refactor: pass roomId prop
+* [34m|[m [33m879c3e5[m feat: add new state values
+[34m|[m[34m/[m  
+* [33mbc9501a[m refactor: update progress bar to use currentTime and simplify user display logic
+* [33mb9e24c4[m refactor: remove currentTime prop
+* [33m17f4628[m refactor: update progress bar logic to include start time and running state
+* [33m9cbd8ff[m refactor: enhance room user tracking and socket service integration
+* [33maa794bd[m refactor: optimize clock component and enhance activity tracking logic
+* [33m7af9751[m refactor: streamline activity tracking and improve component interactions
+* [33m18414af[m refactor: remove unnecessary console logs and improve error handling in activity tracking
+* [33me84a239[m feat: add build and start scripts for frontend and backend
+* [33m46b8fc4[m style: set timer to use roboto font
+* [33mad25d0a[m style: update fonts and background styles
+* [33m49af7b1[m refactor: enhance add useref for room user tracking
+* [33m9d4d420[m refactor: simplify join/leave activity tracking in useRoom hook
+* [33mcc7c538[m feat: add reference tracking for user-display tracker
+* [33m69edd25[m feat: add tracker for room users
+* [33md5a2259[m feat: implement active user tracking and disconnect handling in SocketIO service
+* [33m6aea3f2[m refactor: replace localstorage with sessionstorage
+* [33m0aa2d05[m refactor: clean up debugging logs
+* [33m1cbf624[m feat: enhance activity log and user display with debugging and fallback handling
+* [33m55c3c6c[m refactor: remove websocket api and use socket io instead
+* [33m340b9da[m refactor: added a validator in broadcast
+* [33mff70f1c[m fix: update websocket endpoint from '/room' to '/ws' and adjust hostname handling for improved connection stability
+* [33m810c58e[m refactor: consolidate websocket connection handling and enhance error management in room and activity tracking
+* [33mac93c6a[m refactor: replace websocket service with a new client implementation and streamline activity tracking
+* [33m4f0e63c[m feat: enhance user modal and websocket handling with improved user management
+* [33mb0d91df[m feat: update user modal and websocket service to remove username dependency
+* [33m7c0007e[m refactor: remove unused import
+* [33m5549a74[m feat: improve theme ui
+* [33m914776c[m feat: slightly improve button ui
+* [33m0f4d83c[m feat: integrate user context in activity-tracker hook
+* [33m501d37b[m feat: add username param in websocket service
+* [33ma442b24[m refactor: clean up unused import
+* [33m4ee64f6[m refactor: streamline wss integration
+* [33m6238b3c[m feat: update routing to set session page as default and enhance user context with clearUserName function
+* [33m558abe6[m feat: add localstorage
+* [33m7c38c14[m feat: add user context in room page
+* [33m94dc7a3[m feat: enhance user modal
+* [33m02719bc[m refactor: streamline room creation and user joining process, enhance activity logging with auto-scroll, and update room schema validation
+* [33m2080ece[m fix: fix activity duplication by tracking user presence
+* [33m3ce793b[m feat: add share button
+* [33m03050b9[m feat: add user display
+* [33m78af389[m feat: hide scrollbar
+* [33me3a6fe0[m refactor: update latest timer activity retrieval to sort by timestamp
+* [33mf7bcbae[m refactor: enhance timer synchronization and activity tracking in Clock component
+* [33ma7b1ec3[m refactor: change lPush to rPush
+* [33m09689a7[m refactor: move duplicate checker in activity tracker
+* [33m15243a8[m refactor: centralize duplicate checker in wss
+* [33mee5bca8[m refactor: update activity tracking settings for immediate updates and enhance WebSocket handling
+* [33mb7557e2[m refactor: improve activity tracking by separating fetch and store logic, and enhance WebSocket integration
+* [33m9a717ca[m refactor: replace useState with useQuery
+* [33m525a6f3[m feat: add react query package
+* [33m903de9b[m fix: add error handling for room API
+* [33mdfd7ec4[m refactor: remove unused activity routes and streamline room API for activities
+* [33m84c3c4c[m refactor: enhance activity tracking flow and improve WebSocket logging
+* [33m872697b[m fix: remove setroominfo in fetchroom
+* [33m6aab256[m refactor: add important validator in getuserinfo
+* [33m0b245b5[m refactor: streamline activity tracking and WebSocket connection management
+* [33m87f2af1[m refactor: optimize redis store/get activity by adding guard
+* [33m645212a[m refactor: enhance WebSocket handling
+* [33m51461db[m refactor: add listener in useeffect
+* [33med69f1f[m refactor: update room API routes
+* [33m40abc3a[m fix: consolidate join/create room logic
+* [33md1b85fc[m refactor: improve timer control logic
+* [33mff0e8b2[m fix: redirect to session page if roomId or username is not present
+* [33m08a50a4[m refactor: set username context
+* [33mfd5fc4e[m feat: add ProtectedRoute
+* [33mb153521[m feat: integrate user context
+* [33mda871fc[m refactor: rename session to room
+* [33m3b76fe7[m refactor: replace redis service calls with API fetch requests
+* [33m55f8fa3[m feat: integrate zod
+* [33m59ddbbc[m feat: add zod
+* [33m6b408bd[m refactor: add try-catch blocks to use-room hook
+* [33m3c4144a[m feat: update use-room hook
+* [33m2e4b3ce[m refactor: consolidate type imports and update Vite configuration for server paths
+* [33m3811e8a[m feat: update room types
+* [33mf464f86[m refactor: align client and server types
+* [33m8cbe44d[m feat: implement user presence management and room activity tracking
+* [33m72e064d[m feat: add username in session component
+* [33m4bc52a4[m feat: update timer reset logic
+* [33m5632e53[m feat: add change_timer activity type and update timer handling
+* [33mbf6dc35[m feat: improve timer functionality by using elapsed time
+* [33m019b89c[m feat: add synchronization handling and conditional activity tracking to Clock component
+* [33md758052[m feat: enhance Clock component with timer synchronization and activity tracking
+* [33m411c92e[m refactor: streamline activity tracking
+* [33mf76d982[m feat: implement room-based activity tracking with updated API endpoints
+* [33m7342d27[m feat: refactor ActivityLog component to use room-specific activities and update API endpoints
+* [33me0c7242[m feat: enhance WebSocket integration in room activity
+* [33m7954d9f[m fix: fix websocket config
+* [33m949ac60[m feat: enhance WebSocket functionality with connection messages and error handling
+* [33ma469775[m feat: update WebSocket service URL and integrate WebSocket server
+* [33m8e9ff1e[m feat: add WebSocket integration to implementation plan
+* [33m909cb5b[m feat: expand implementation plan with database architecture and update activity hooks for Redis and MongoDB integration
+* [33m4b0fea7[m feat: add mock data for activity-log component
+* [33mea9d496[m feat: add date-fns package and activity-log component
+* [33ma6d78d9[m refactor: reorganize package dependencies
+* [33md9c263b[m chore: add motion package
+* [33med21f82[m chore: add redis integration checklist and update README
+* [33ma21bb38[m feat: add activity route to the server
+* [33m30da12c[m feat: integrate Redis connection and add redis-test route
+* [33me9c1b5e[m feat: add redis
+* [33mc8de70e[m feat: add room activity custom hook
+* [33mdf34b47[m feat: enhance timer history with stats and improved session tracking
+* [33md26a824[m feat: add timer history custom hook
+* [33m9aa6b92[m feat: add session and room page
+* [33m5c24547[m feat: implement routing and session page structure
+* [33m0481ebb[m feat: add react-router-dom
+* [33mec56067[m feat: add login-modal and log-out button for testing
+* [33ma83432c[m feat: upgrade theme toggle with Headless UI and Heroicons
+* [33m5a32cb0[m refactor: update theme toggle and file structure
+* [33m930f612[m chore: change vscode settings
+* [33maccaeb5[m fix: add checker for when timer hits zero
+* [33m1239a3d[m feat: add progress bar
+* [33m316ed1b[m chore: reorganize directory
+* [33m9d56445[m refactor: enhance ESLint configuration and theme initialization
+* [33m945de3e[m feat: add theme switcher and update theme styling
+* [33mf04ecdc[m feat: implement timer modes and dynamic timer switching
+* [33m0ea471c[m refactor: update navigation and button styling with timer switching
+* [33m0ee8c88[m refactor: update quote interface and styling, add navigation component
+* [33mdf5a8c6[m feat: implement server-side quote caching and error handling
+* [33m3e3fa14[m feat: add daily quote integration with server and display on Clock component
+* [33m5d5e5d1[m feat: add 3D button styling with pressed state
+* [33m0fb2624[m feat: add server dependencies
+* [33maf00950[m feat: add reset button
+* [33m58eea2b[m feat: add react-feather icons
+* [33m21c19ed[m chore: add autoprefixer and update theme configuration
+* [33m962cd4e[m feat: add theme support and remove mantine
+* [33m9b25bc1[m feat: add timer functionality
+* [33m3a7450c[m feat: implement Clock component
+* [33mb51f897[m feat: add Roboto font and update project styling
+* [33m683a999[m refactor: update App and Header components with improved layout and styling
+* [33m3295e78[m feat: add Tailwind CSS and update project styling
+* [33m6bbfbfa[m refactor: simplify project structure and remove boilerplate files
+* [33m0aaaa82[m feat: integrate Mantine UI and update project configuration
+* [33mc95c9ad[m refactor: restructure project and add implementation-plan.md
+* [33m39ae445[m feat: add Prettier integration and update TypeScript configuration
+* [33mc331314[m initial commit

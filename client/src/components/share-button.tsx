@@ -10,6 +10,7 @@ export const ShareButton = ({ roomId }: { roomId: string }) => {
     try {
       const url = await shareRoom(roomId);
       if (url) {
+        await navigator.clipboard.writeText(url);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
       }

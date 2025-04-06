@@ -285,8 +285,6 @@ export const useRoom = (roomId?: string) => {
         return null;
       }
 
-      // copy to clipboard
-      await navigator.clipboard.writeText(url);
       return url;
     } catch (error) {
       console.error("[useRoom] Error sharing room:", error);
