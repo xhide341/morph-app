@@ -59,10 +59,11 @@ export const Clock = ({
       totalSeconds: minutes * 60,
     }));
 
-    if (mode === "work") {
-      setLastWorkTime(newTime);
-    } else {
-      setLastBreakTime(newTime);
+    if (latestActivity?.lastWorkTime) {
+      setLastWorkTime(latestActivity.lastWorkTime);
+    }
+    if (latestActivity?.lastBreakTime) {
+      setLastBreakTime(latestActivity.lastBreakTime);
     }
 
     if (!isSync) {
@@ -72,6 +73,8 @@ export const Clock = ({
         roomId,
         timeRemaining: newTime,
         timerMode: mode,
+        lastWorkTime,
+        lastBreakTime,
       });
     }
   };
@@ -132,6 +135,8 @@ export const Clock = ({
         roomId,
         timeRemaining: timerState.time,
         timerMode: timerState.mode,
+        lastWorkTime,
+        lastBreakTime,
       });
     }
   };
@@ -149,6 +154,8 @@ export const Clock = ({
           roomId,
           timeRemaining: timerState.time,
           timerMode: timerState.mode,
+          lastWorkTime,
+          lastBreakTime,
         });
       }
     }
@@ -173,6 +180,8 @@ export const Clock = ({
           roomId,
           timeRemaining: resetTime,
           timerMode: timerState.mode,
+          lastWorkTime,
+          lastBreakTime,
         });
       }
     }
@@ -277,6 +286,8 @@ export const Clock = ({
           <ProgressBar
             currentTime={timerState.time}
             totalTime={timerState.mode === "work" ? lastWorkTime : lastBreakTime}
+            startTime={timerState.startTime}
+            isRunning={timerState.isRunning}
           />
         </div>
         <div className="mt-12 flex flex-col items-center justify-center gap-1">

@@ -14,6 +14,8 @@ export type RoomActivity = {
   timerDuration?: number;
   timeRemaining?: string;
   timerMode?: "work" | "break";
+  lastWorkTime?: string;
+  lastBreakTime?: string;
 };
 
 export interface RoomInfo {
