@@ -1,25 +1,42 @@
-// Collection of sound effects
+import { Howl } from "howler";
+
+// Create sound instances
 const sounds = {
-  start: new Audio("/sounds/start.mp3"),
-  pause: new Audio("/sounds/pause.mp3"),
-  reset: new Audio("/sounds/stop.mp3"),
-  complete: new Audio("/sounds/ring.mp3"),
+  start: new Howl({
+    src: ["/sounds/start.mp3"],
+    volume: 0.5,
+    preload: true,
+  }),
+  pause: new Howl({
+    src: ["/sounds/pause.mp3"],
+    volume: 0.5,
+    preload: true,
+  }),
+  reset: new Howl({
+    src: ["/sounds/reset.mp3"],
+    volume: 0.5,
+    preload: true,
+  }),
+  complete: new Howl({
+    src: ["/sounds/ring.mp3"],
+    volume: 0.7,
+    preload: true,
+  }),
 };
 
-// Audio player with volume control
-export const playSound = (sound: "start" | "pause" | "reset" | "complete", volume = 0.5) => {
-  const audio = sounds[sound];
+// Simple play function
+export const playSound = (sound: "start" | "pause" | "reset" | "complete") => {
+  sounds[sound].play();
+};
 
-  // Set volume (0-1)
-  audio.volume = volume;
+// Stop a specific sound
+export const stopSound = (sound: "start" | "pause" | "reset" | "complete") => {
+  sounds[sound].stop();
+};
 
-  // Stop and reset if already playing
-  audio.pause();
-  audio.currentTime = 0;
-
-  // Play the sound
-  audio.play().catch((err) => {
-    // Handle autoplay policy errors
-    console.log(`Audio play failed: ${err}`);
+// Set volume for all sounds
+export const setVolume = (volume: number) => {
+  Object.values(sounds).forEach((sound) => {
+    sound.volume(volume);
   });
 };

@@ -3,6 +3,7 @@ import { useQuote } from "../hooks/use-quote";
 import { useParams, useNavigate } from "react-router-dom";
 import { RoomActivity } from "server/types/room";
 import { useUserInfo } from "../contexts/user-context";
+import { playSound } from "../utils/audio";
 
 import { Play, Pause, RotateCcw } from "react-feather";
 import { Navigation } from "./navigation";
@@ -82,6 +83,11 @@ export const Clock = ({
   const handleStart = (isSync: boolean = false) => {
     if (timerInterval) return;
 
+    // Add sound when timer starts (only for user actions, not sync)
+    if (!isSync) {
+      playSound("start");
+    }
+
     if (isSync && latestActivity) {
       // Calculate precise elapsed time since activity was created
       const activityTime = new Date(latestActivity.timeStamp).getTime();
@@ -147,7 +153,10 @@ export const Clock = ({
       setTimerInterval(null);
       setTimerState((prev) => ({ ...prev, isRunning: false }));
 
+      // Add sound when timer pauses (only for user actions, not sync)
       if (!isSync) {
+        playSound("pause");
+
         onActivityCreated({
           type: "pause_timer",
           userName,
@@ -173,7 +182,10 @@ export const Clock = ({
         isRunning: false,
       }));
 
+      // Add sound when timer resets (only for user actions, not sync)
       if (!isSync) {
+        playSound("pause");
+
         onActivityCreated({
           type: "reset_timer",
           userName,
@@ -240,6 +252,9 @@ export const Clock = ({
         clearInterval(interval);
         setTimerInterval(null);
         setTimerState((prev) => ({ ...prev, isRunning: false }));
+
+        // Play completion sound
+        playSound("complete"); // Slightly louder for completion
 
         if (!isSync) {
           onActivityCreated({
