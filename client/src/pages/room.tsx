@@ -88,7 +88,7 @@ export const RoomPage = () => {
       </div>
       <div className="mt-4">{roomId && <ActivityLog activities={activities} />}</div>
       <div className="fixed bottom-4 left-1/2 -translate-x-1/2">
-        <UserDisplay users={roomUsers} />
+        {roomId && <UserDisplay users={roomUsers} roomId={roomId} />}
       </div>
     </div>
   );
