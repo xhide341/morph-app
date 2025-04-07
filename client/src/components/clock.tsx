@@ -279,6 +279,17 @@ export const Clock = ({
     return () => clearInterval(interval);
   }, [timerState.isRunning, timerState.startTime, timerState.totalSeconds]);
 
+  // timer for document title
+  useEffect(() => {
+    const mode = timerState.mode === "work" ? "Work" : "Break";
+    const status = timerState.isRunning ? "timer" : "paused";
+    document.title = `${timerState.time} - ${mode} ${status}`;
+
+    return () => {
+      document.title = "morph | pomodoro app";
+    };
+  }, [timerState.time, timerState.mode, timerState.isRunning]);
+
   return (
     <div
       className={`${
