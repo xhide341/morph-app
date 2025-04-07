@@ -23,8 +23,6 @@ export const UserModal = ({ isOpen, onJoin, onSkip }: UserModalProps) => {
     } catch (error) {
       if (error instanceof z.ZodError) {
         throw new Error(error.errors[0].message);
-      } else {
-        throw new Error("An unexpected error occurred. Please try again.");
       }
     }
     onJoin(userName || "user");
@@ -52,7 +50,7 @@ export const UserModal = ({ isOpen, onJoin, onSkip }: UserModalProps) => {
               id="userName"
               value={userName}
               onChange={(e) => setUserName(e.target.value)}
-              placeholder="hide handsome"
+              placeholder="user"
               className="bg-secondary text-foreground placeholder:text-foreground/50 w-full rounded-md p-2 outline-none"
               maxLength={10}
             />
