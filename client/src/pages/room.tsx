@@ -14,7 +14,7 @@ import { UserModal } from "../components/user-modal";
 
 export const RoomPage = () => {
   const { roomId } = useParams<{ roomId: string }>();
-  const { userName, setUserName } = useUserInfo();
+  const { userName, setUserName, clearUserName } = useUserInfo();
   const { roomUsers, joinRoom } = useRoom(roomId);
   const { activities, addActivity } = useActivityTracker(roomId);
   const [showModal, setShowModal] = useState(!userName);
@@ -50,20 +50,15 @@ export const RoomPage = () => {
     if (!roomId) return;
     const joined = await joinRoom(roomId, name);
     if (!joined) return;
-    console.log("[handleJoinRoom] Joined room:", joined);
-    if (!userName) setUserName(name);
+    setUserName(name);
     setShowModal(false);
   };
 
-  const handleSkip = async (name: string) => {
+  const handleSkip = async () => {
     if (!roomId) return;
-    const joined = await joinRoom(roomId, name);
+    const joined = await joinRoom(roomId, "user");
     if (!joined) return;
-    handleNewActivity({
-      type: "join",
-      userName: name,
-      roomId: roomId,
-    });
+    setUserName("user");
     setShowModal(false);
   };
 
