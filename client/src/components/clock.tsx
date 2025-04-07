@@ -52,6 +52,14 @@ export const Clock = ({
     }
 
     const newTime = `${String(minutes).padStart(2, "0")}:00`;
+
+    // Update last work/break time when changed manually
+    if (mode === "work") {
+      setLastWorkTime(newTime);
+    } else {
+      setLastBreakTime(newTime);
+    }
+
     setTimerState((prev) => ({
       ...prev,
       time: newTime,
@@ -60,13 +68,6 @@ export const Clock = ({
       totalSeconds: minutes * 60,
     }));
 
-    if (latestActivity?.lastWorkTime) {
-      setLastWorkTime(latestActivity.lastWorkTime);
-    }
-    if (latestActivity?.lastBreakTime) {
-      setLastBreakTime(latestActivity.lastBreakTime);
-    }
-
     if (!isSync) {
       onActivityCreated({
         type: "change_timer",
@@ -74,8 +75,8 @@ export const Clock = ({
         roomId,
         timeRemaining: newTime,
         timerMode: mode,
-        lastWorkTime,
-        lastBreakTime,
+        lastWorkTime: mode === "work" ? newTime : lastWorkTime,
+        lastBreakTime: mode === "break" ? newTime : lastBreakTime,
       });
     }
   };
@@ -83,7 +84,6 @@ export const Clock = ({
   const handleStart = (isSync: boolean = false) => {
     if (timerInterval) return;
 
-    // Add sound when timer starts (only for user actions, not sync)
     if (!isSync) {
       playSound("start");
     }
@@ -204,6 +204,13 @@ export const Clock = ({
     if (!roomId || !latestActivity) return;
 
     console.log("[Clock] Syncing with activity:", latestActivity);
+
+    if (latestActivity.lastWorkTime) {
+      setLastWorkTime(latestActivity.lastWorkTime);
+    }
+    if (latestActivity.lastBreakTime) {
+      setLastBreakTime(latestActivity.lastBreakTime);
+    }
 
     switch (latestActivity.type) {
       case "start_timer":

@@ -12,25 +12,23 @@ export const ProgressBar = ({
   isRunning = false,
 }: ProgressBarProps) => {
   const calculateProgress = () => {
-    // If we have startTime and timer is running, use elapsed time for smoother progress
-    if (isRunning && startTime) {
-      const [totalMinutes, totalSeconds] = totalTime.split(":").map(Number);
-      const totalTotalSeconds = totalMinutes * 60 + totalSeconds;
-
-      const elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
-      const progress = (elapsedSeconds / totalTotalSeconds) * 100;
-
-      return Math.min(Math.max(progress, 0), 100);
-    }
-
-    // Otherwise use the current time display
+    // Parse current and total times
     const [currentMinutes, currentSeconds] = currentTime.split(":").map(Number);
     const [totalMinutes, totalSeconds] = totalTime.split(":").map(Number);
 
     const currentTotalSeconds = currentMinutes * 60 + currentSeconds;
     const totalTotalSeconds = totalMinutes * 60 + totalSeconds;
 
-    return 100 - (currentTotalSeconds / totalTotalSeconds) * 100;
+    // If we have startTime and timer is running, use elapsed time for smoother progress
+    if (isRunning && startTime) {
+      const elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
+      const progress = (elapsedSeconds / totalTotalSeconds) * 100;
+      return Math.min(Math.max(progress, 0), 100);
+    }
+
+    // When paused, calculate based on time remaining
+    const progress = 100 - (currentTotalSeconds / totalTotalSeconds) * 100;
+    return Math.min(Math.max(progress, 0), 100);
   };
 
   return (
