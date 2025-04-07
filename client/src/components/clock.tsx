@@ -11,8 +11,6 @@ import { ProgressBar } from "./progress-bar";
 
 type TimerMode = "work" | "break";
 
-// TODO: Fix progress bar length relying on quote length
-
 export const Clock = ({
   latestActivity,
   onActivityCreated,
@@ -153,7 +151,6 @@ export const Clock = ({
       setTimerInterval(null);
       setTimerState((prev) => ({ ...prev, isRunning: false }));
 
-      // Add sound when timer pauses (only for user actions, not sync)
       if (!isSync) {
         playSound("pause");
 
@@ -182,7 +179,6 @@ export const Clock = ({
         isRunning: false,
       }));
 
-      // Add sound when timer resets (only for user actions, not sync)
       if (!isSync) {
         playSound("pause");
 
@@ -199,11 +195,9 @@ export const Clock = ({
     }
   };
 
-  // sync effect
+  // sync for user actions
   useEffect(() => {
     if (!roomId || !latestActivity) return;
-
-    console.log("[Clock] Syncing with activity:", latestActivity);
 
     if (latestActivity.lastWorkTime) {
       setLastWorkTime(latestActivity.lastWorkTime);
@@ -241,7 +235,7 @@ export const Clock = ({
     }
   }, [latestActivity, roomId]);
 
-  // timer effect
+  // sync for timer
   useEffect(() => {
     if (!timerState.isRunning) return;
 
@@ -260,8 +254,7 @@ export const Clock = ({
         setTimerInterval(null);
         setTimerState((prev) => ({ ...prev, isRunning: false }));
 
-        // Play completion sound
-        playSound("complete"); // Slightly louder for completion
+        playSound("complete");
 
         if (!isSync) {
           onActivityCreated({
