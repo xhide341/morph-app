@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { z } from "zod";
+import { AlertCircle } from "react-feather";
 
 interface UserModalProps {
   isOpen: boolean;
@@ -11,21 +12,24 @@ const userNameSchema = z.string().min(1).max(10);
 
 export const UserModal = ({ isOpen, onJoin, onSkip }: UserModalProps) => {
   const [userName, setUserName] = useState("");
+  const [validationError, setValidationError] = useState("");
 
-  //   add proper ui validator
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setValidationError("");
+
     try {
       const validatedName = userNameSchema.safeParse(userName.trim());
       if (!validatedName.success) {
-        throw new Error(validatedName.error.message);
+        setValidationError(validatedName.error.errors[0].message);
+        return;
       }
+      onJoin(userName || "user");
     } catch (error) {
       if (error instanceof z.ZodError) {
-        throw new Error(error.errors[0].message);
+        setValidationError(error.errors[0].message);
       }
     }
-    onJoin(userName || "user");
   }
 
   if (!isOpen) return null;
@@ -33,12 +37,12 @@ export const UserModal = ({ isOpen, onJoin, onSkip }: UserModalProps) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
       <div className="bg-background relative w-full max-w-md rounded-lg p-6 shadow-xl">
-        <h2 className="text-foreground mb-4 text-xl font-semibold tracking-wide">
+        <h2 className="text-foreground mb-4 text-lg font-semibold tracking-wide">
           What's your name?
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
+          <div className="space-y-2">
             <label
               htmlFor="userName"
               className="mb-2 block text-sm text-[var(--color-foreground)]/70"
@@ -51,22 +55,28 @@ export const UserModal = ({ isOpen, onJoin, onSkip }: UserModalProps) => {
               value={userName}
               onChange={(e) => setUserName(e.target.value)}
               placeholder="user"
-              className="bg-secondary text-foreground placeholder:text-foreground/50 w-full rounded-md p-2 outline-none"
+              className="bg-secondary text-foreground placeholder:text-foreground/50 w-full rounded-md p-2 text-sm outline-none"
               maxLength={10}
             />
+            {validationError && (
+              <p className="text-primary flex items-center gap-1 text-xs font-medium">
+                <AlertCircle className="text-yellow" size={12} />
+                {validationError}
+              </p>
+            )}
           </div>
 
           <div className="flex gap-2">
             <button
               type="submit"
-              className="bg-primary text-foreground hover:bg-primary/90 flex-1 cursor-pointer rounded-md px-4 py-2 text-sm"
+              className="bg-primary text-background hover:bg-primary/90 flex-1 cursor-pointer rounded-md px-4 py-2 text-sm"
             >
               Join
             </button>
             <button
               type="button"
               onClick={() => onSkip("user")}
-              className="bg-primary text-foreground hover:bg-primary/90 cursor-pointer rounded-md px-4 py-2 text-sm"
+              className="bg-primary text-background hover:bg-primary/90 cursor-pointer rounded-md px-4 py-2 text-sm"
             >
               Skip
             </button>
