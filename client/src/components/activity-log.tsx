@@ -43,8 +43,8 @@ export const ActivityLog = ({ activities }: { activities: RoomActivity[] }) => {
             >
               <div className="rounded-lg p-1">
                 <div className="flex items-center gap-1 text-xs">
-                  {/* add fallback for empty username */}
-                  <span className="font-medium">{activity.userName || "Anonymous"}</span>
+                  {/* fallback for empty username */}
+                  <span className="font-medium">{activity.userName || "user"}</span>
                   <span className="text-primary">
                     {activity.type === "join" && "joined the room"}
                     {activity.type === "leave" && "left the room"}
