@@ -4,15 +4,12 @@ import { useRoom } from "../hooks/use-room";
 
 import { Plus, Copy } from "react-feather";
 
-// TODO: when the add button is clicked, open a modal with the url of the room
-
 export const UserDisplay = ({ users, roomId }: { users: RoomUser[]; roomId: string }) => {
   const { shareRoom } = useRoom();
   const [roomUrl, setRoomUrl] = useState<string>("");
   const [tooltips, setTooltips] = useState<Record<string, boolean>>({});
   const [copied, setCopied] = useState(false);
   const activeUsers = users || [];
-
   useEffect(() => {
     if (!roomId) return;
 
@@ -24,10 +21,7 @@ export const UserDisplay = ({ users, roomId }: { users: RoomUser[]; roomId: stri
   }, [roomId]);
 
   const handleCopy = () => {
-    // Close tooltip instantly - do this first
     setTooltips((prev) => ({ ...prev, add: false }));
-
-    // Then handle the copy operation
     if (roomUrl) {
       navigator.clipboard
         .writeText(roomUrl)
