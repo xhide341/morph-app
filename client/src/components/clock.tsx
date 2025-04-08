@@ -298,7 +298,11 @@ export const Clock = ({
             className={`css-button-3d w-24 p-4 ${timerState.isRunning ? "pressed" : ""}`}
             onClick={timerState.isRunning ? () => handlePause(false) : () => handleStart(false)}
           >
-            {timerState.isRunning ? <Pause size={24} /> : <Play size={24} />}
+            {timerState.isRunning ? (
+              <Pause size={24} className="fill-background" />
+            ) : (
+              <Play size={24} className="fill-background" />
+            )}
           </button>
           <button
             aria-label="Reset"
@@ -316,9 +320,15 @@ export const Clock = ({
             isRunning={timerState.isRunning}
           />
         </div>
-        <div className="mt-12 flex flex-col items-center justify-center gap-1">
-          <blockquote className="font-base text-sm">"{quote}"</blockquote>
-          <p className="text-sm italic">{author}</p>
+        <div className="mt-12 flex flex-col items-center justify-center gap-3">
+          <blockquote className="relative">
+            <span className="text-background absolute -top-4 -left-4 text-4xl opacity-90">"</span>
+            <p className="max-w-md px-6 text-center font-serif text-sm leading-relaxed">{quote}</p>
+            <span className="text-background absolute -right-4 -bottom-4 text-4xl opacity-90">
+              "
+            </span>
+          </blockquote>
+          <p className="text-background text-xs font-semibold tracking-wide italic">— {author}</p>
         </div>
       </div>
     </div>
