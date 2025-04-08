@@ -18,14 +18,18 @@ export const RoomPage = () => {
   const { roomUsers, joinRoom } = useRoom(roomId);
   const { activities, addActivity } = useActivityTracker(roomId);
   const [showModal, setShowModal] = useState(!userName);
+  const [isConnecting, setIsConnecting] = useState(true);
 
   useEffect(() => {
     if (!roomId || !userName) return;
 
     try {
+      setIsConnecting(true);
       socketService.connect(roomId, userName);
+      setIsConnecting(false);
     } catch (error) {
       console.error("[RoomPage] Error joining room:", error);
+      setIsConnecting(false);
     }
 
     return () => {
@@ -75,14 +79,29 @@ export const RoomPage = () => {
     : null;
 
   return (
-    <div className="relative mx-auto flex h-dvh max-h-dvh w-full max-w-2xl flex-col bg-[var(--color-background)] p-4 text-[var(--color-foreground)]">
+    <div
+      className="relative mx-auto flex h-dvh max-h-dvh w-full max-w-2xl flex-col bg-[var(--color-background)] p-4 text-[var(--color-foreground)]"
+      role="main"
+      aria-label={`Room: ${roomId || "Loading"}`}
+      aria-busy={isConnecting}
+    >
       <UserModal isOpen={showModal} onJoin={handleJoinRoom} onSkip={handleSkip} />
       <Header />
-      <div className="mx-auto flex w-full max-w-3xl flex-col">
+      <div
+        className="mx-auto flex w-full max-w-3xl flex-col"
+        role="region"
+        aria-label="Timer section"
+      >
         <Clock latestActivity={latestTimerActivity} onActivityCreated={handleNewActivity} />
       </div>
-      <div className="mt-4">{roomId && <ActivityLog activities={activities} />}</div>
-      <div className="fixed bottom-4 left-1/2 -translate-x-1/2">
+      <div className="mt-4" role="region" aria-label="Activity log">
+        {roomId && <ActivityLog activities={activities} />}
+      </div>
+      <div
+        className="fixed bottom-4 left-1/2 -translate-x-1/2"
+        role="region"
+        aria-label="Active users"
+      >
         {roomId && <UserDisplay users={roomUsers} roomId={roomId} />}
       </div>
     </div>

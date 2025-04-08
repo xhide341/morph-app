@@ -36,14 +36,16 @@ export const UserDisplay = ({ users, roomId }: { users: RoomUser[]; roomId: stri
   };
 
   return (
-    <div className="flex flex-col items-center gap-4">
-      <div className="flex items-center gap-2">
+    <div className="flex flex-col items-center gap-4" role="region" aria-label="Room members">
+      <div className="flex items-center gap-2" role="list" aria-label="Active users">
         {activeUsers.map((user) => (
           <div
             key={user.userName}
             className="bg-primary text-foreground relative flex h-10 w-10 items-center justify-center rounded-full text-lg font-bold"
             onMouseEnter={() => setTooltips((prev) => ({ ...prev, [user.userName]: true }))}
             onMouseLeave={() => setTooltips((prev) => ({ ...prev, [user.userName]: false }))}
+            role="listitem"
+            aria-label={`User ${user.userName}`}
           >
             {user.userName.charAt(0)}
             {/* tooltip */}
@@ -51,6 +53,8 @@ export const UserDisplay = ({ users, roomId }: { users: RoomUser[]; roomId: stri
               className={`bg-secondary absolute -top-10 left-1/2 -translate-x-1/2 rounded-xl p-1 transition-all duration-200 ${
                 tooltips[user.userName] ? "visible opacity-100" : "invisible opacity-0"
               }`}
+              role="tooltip"
+              aria-label={`${user.userName}'s tooltip`}
             >
               <div className="text-foreground flex items-center text-xs font-medium whitespace-nowrap">
                 <p className="bg-primary/80 rounded-lg px-1.5 py-1 text-gray-800">
@@ -58,7 +62,10 @@ export const UserDisplay = ({ users, roomId }: { users: RoomUser[]; roomId: stri
                 </p>
               </div>
               {/* arrow */}
-              <div className="border-t-secondary absolute -bottom-1 left-1/2 h-0 w-0 -translate-x-1/2 border-x-[5px] border-t-[5px] border-solid border-x-transparent"></div>
+              <div
+                className="border-t-secondary absolute -bottom-1 left-1/2 h-0 w-0 -translate-x-1/2 border-x-[5px] border-t-[5px] border-solid border-x-transparent"
+                aria-hidden="true"
+              ></div>
             </div>
           </div>
         ))}
@@ -70,6 +77,8 @@ export const UserDisplay = ({ users, roomId }: { users: RoomUser[]; roomId: stri
             }`}
             onMouseEnter={() => setTooltips((prev) => ({ ...prev, add: true }))}
             onMouseLeave={() => setTooltips((prev) => ({ ...prev, add: false }))}
+            role="tooltip"
+            aria-label="Room URL tooltip"
           >
             {/* Inner div with white background */}
             <div className="flex items-center text-xs font-thin whitespace-nowrap text-gray-800">
@@ -79,23 +88,29 @@ export const UserDisplay = ({ users, roomId }: { users: RoomUser[]; roomId: stri
                   copied ? "text-white/80" : "text-white/50 hover:scale-105 hover:text-white/80"
                 }`}
                 onClick={handleCopy}
+                aria-label={copied ? "URL copied" : "Copy room URL"}
               />
             </div>
             {/* arrow */}
-            <div className="border-t-secondary absolute -bottom-1 left-1/2 h-0 w-0 -translate-x-1/2 border-x-[5px] border-t-[5px] border-solid border-x-transparent"></div>
+            <div
+              className="border-t-secondary absolute -bottom-1 left-1/2 h-0 w-0 -translate-x-1/2 border-x-[5px] border-t-[5px] border-solid border-x-transparent"
+              aria-hidden="true"
+            ></div>
           </div>
           {/* add button */}
           <div
             className="bg-background text-foreground border-foreground flex h-10 w-10 items-center justify-center rounded-full border border-dashed text-lg font-bold"
             onMouseEnter={() => setTooltips((prev) => ({ ...prev, add: true }))}
             onMouseLeave={() => setTooltips((prev) => ({ ...prev, add: false }))}
+            role="button"
+            aria-label="Add user to room"
           >
-            <Plus className="h-4 w-4" />
+            <Plus className="h-4 w-4" aria-hidden="true" />
           </div>
         </div>
       </div>
       <div className="flex flex-col items-center">
-        <h5 className="text-xs">
+        <h5 className="text-xs" aria-live="polite">
           There are currently {activeUsers.length} {activeUsers.length === 1 ? "member" : "members"}{" "}
           in this room
         </h5>

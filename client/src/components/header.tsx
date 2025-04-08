@@ -10,19 +10,21 @@ export const Header = () => {
     return <Navigate to="/" />;
   }
   return (
-    <div className="flex w-full items-center justify-between p-4">
+    <header className="flex w-full items-center justify-between p-4" role="banner">
       <h1
         className="font-qurova cursor-pointer text-2xl tracking-wide"
         onClick={() => navigate("/")}
+        role="link"
+        aria-label="Return to home page"
       >
         morph
       </h1>
 
-      <div className="flex items-center gap-2">
+      <nav className="flex items-center gap-2" role="navigation" aria-label="Room actions">
         <ShareButton roomId={roomId || ""} />
         <ThemeToggle />
-      </div>
-    </div>
+      </nav>
+    </header>
   );
 };
 

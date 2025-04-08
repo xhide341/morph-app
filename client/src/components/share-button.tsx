@@ -24,10 +24,13 @@ export const ShareButton = ({ roomId }: { roomId: string }) => {
       onClick={handleShare}
       className="bg-primary hover:bg-primary/80 text-background flex cursor-pointer items-center gap-1 rounded-md px-2 py-2 text-xs font-thin tracking-wide"
       aria-label="Share room link"
+      aria-pressed={copied}
+      aria-live="polite"
     >
       <Share2
         size={12}
         className={`transition-colors ${copied ? "text-background fill-background" : ""}`}
+        aria-hidden="true"
       />
       <span>{copied ? "Copied!" : "Share"}</span>
     </button>

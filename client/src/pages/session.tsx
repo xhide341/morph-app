@@ -17,10 +17,12 @@ export function SessionPage() {
   const { createRoom, fetchRoom } = useRoom();
   const [roomName, setRoomName] = useState("");
   const [validationError, setValidationError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleRoom = async (e: React.FormEvent) => {
     e.preventDefault();
     setValidationError("");
+    setIsSubmitting(true);
 
     try {
       const roomId = roomName.trim().toLowerCase();
@@ -54,11 +56,17 @@ export function SessionPage() {
       } else {
         setValidationError("An unexpected error occurred. Please try again.");
       }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="bg-background text-foreground flex min-h-dvh w-full flex-col p-4">
+    <div
+      className="bg-background text-foreground flex min-h-dvh w-full flex-col p-4"
+      role="main"
+      aria-label="Session page"
+    >
       <div className="absolute top-4 right-4">
         <ThemeToggle />
       </div>
@@ -71,7 +79,12 @@ export function SessionPage() {
             <p className="text-foreground/70 text-sm">Enter room name to get started</p>
           </div>
 
-          <form onSubmit={handleRoom} className="space-y-4">
+          <form
+            onSubmit={handleRoom}
+            className="space-y-4"
+            aria-label="Create room form"
+            noValidate
+          >
             <div className="space-y-2">
               <input
                 type="text"
@@ -79,10 +92,17 @@ export function SessionPage() {
                 onChange={(e) => setRoomName(e.target.value)}
                 placeholder="Enter room name"
                 className="bg-secondary text-foreground placeholder:text-foreground/50 focus:ring-accent w-full rounded-md p-2 text-sm focus:ring-1 focus:outline-none"
+                aria-required="true"
+                aria-invalid={!!validationError}
+                aria-describedby={validationError ? "room-error" : undefined}
               />
               {validationError && (
-                <p className="font-base text-primary flex items-center gap-1 text-xs tracking-wide">
-                  <AlertCircle size={12} />
+                <p
+                  className="font-base text-primary flex items-center gap-1 text-xs tracking-wide"
+                  id="room-error"
+                  role="alert"
+                >
+                  <AlertCircle size={12} aria-hidden="true" />
                   {validationError}
                 </p>
               )}
@@ -91,8 +111,10 @@ export function SessionPage() {
             <button
               type="submit"
               className="bg-accent hover:bg-accent/90 text-background font-base w-full max-w-full cursor-pointer rounded-md p-2 text-sm tracking-wide"
+              disabled={isSubmitting}
+              aria-busy={isSubmitting}
             >
-              Continue
+              {isSubmitting ? "Creating..." : "Continue"}
             </button>
           </form>
         </div>

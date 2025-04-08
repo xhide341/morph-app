@@ -31,14 +31,25 @@ export const ProgressBar = ({
     return Math.min(Math.max(progress, 0), 100);
   };
 
+  const progress = calculateProgress();
+  const progressPercent = Math.round(progress);
+
   return (
-    <div className="h-2 w-full rounded-full bg-gray-200">
+    <div
+      className="h-2 w-full rounded-full bg-gray-200"
+      role="progressbar"
+      aria-valuenow={progressPercent}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-label={`Timer progress: ${progressPercent}% complete`}
+    >
       <div
         className="bg-primary h-full rounded-full transition-all"
         style={{
-          width: `${calculateProgress()}%`,
+          width: `${progress}%`,
           transition: isRunning ? "width 0.1s linear" : "width 0.5s ease-out",
         }}
+        aria-hidden="true"
       />
     </div>
   );

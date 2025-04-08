@@ -35,13 +35,18 @@ export const UserModal = ({ isOpen, onJoin, onSkip }: UserModalProps) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+      role="dialog"
+      aria-labelledby="modal-title"
+      aria-modal="true"
+    >
       <div className="bg-background relative w-full max-w-md rounded-lg p-6 shadow-xl">
-        <h2 className="text-foreground mb-4 text-lg font-semibold tracking-wide">
+        <h2 id="modal-title" className="text-foreground mb-4 text-lg font-semibold tracking-wide">
           What's your name?
         </h2>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4" noValidate>
           <div className="space-y-2">
             <label
               htmlFor="userName"
@@ -57,10 +62,16 @@ export const UserModal = ({ isOpen, onJoin, onSkip }: UserModalProps) => {
               placeholder="user"
               className="bg-secondary text-foreground placeholder:text-foreground/50 w-full rounded-md p-2 text-sm outline-none"
               maxLength={10}
+              aria-invalid={!!validationError}
+              aria-describedby={validationError ? "validation-error" : undefined}
             />
             {validationError && (
-              <p className="text-primary flex items-center gap-1 text-xs font-medium">
-                <AlertCircle className="text-yellow" size={12} />
+              <p
+                id="validation-error"
+                className="text-primary flex items-center gap-1 text-xs font-medium"
+                role="alert"
+              >
+                <AlertCircle className="text-yellow" size={12} aria-hidden="true" />
                 {validationError}
               </p>
             )}

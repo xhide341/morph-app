@@ -37,24 +37,6 @@
     --primary-hint: hsl(215, 60%, 50%);
   }
 
-  [data-theme="sunset"] {
-    --background: hsl(340, 30%, 15%);
-    --foreground: hsl(350, 30%, 90%);
-    --primary: hsl(345, 40%, 50%); /* Medium */
-    --secondary: hsl(340, 35%, 29%); /* Dark */
-    --accent: hsl(15, 60%, 58%); /* Medium-light */
-    --primary-hint: hsl(345, 40%, 50%);
-  }
-
-  [data-theme="mint"] {
-    --background: hsl(165, 35%, 15%);
-    --foreground: hsl(160, 40%, 90%);
-    --primary: hsl(165, 45%, 50%); /* Medium */
-    --secondary: hsl(165, 40%, 29%); /* Dark */
-    --accent: hsl(140, 35%, 58%); /* Medium-light */
-    --primary-hint: hsl(165, 45%, 50%);
-  }
-
   [data-theme="lavender"] {
     --background: hsl(270, 25%, 15%);
     --foreground: hsl(275, 30%, 90%);
@@ -62,24 +44,6 @@
     --secondary: hsl(270, 25%, 29%); /* Dark */
     --accent: hsl(280, 35%, 58%); /* Medium-light */
     --primary-hint: hsl(270, 30%, 50%);
-  }
-
-  [data-theme="arctic"] {
-    --background: hsl(200, 35%, 15%);
-    --foreground: hsl(195, 40%, 90%);
-    --primary: hsl(200, 40%, 50%); /* Medium */
-    --secondary: hsl(200, 35%, 29%); /* Dark */
-    --accent: hsl(190, 45%, 58%); /* Medium-light */
-    --primary-hint: hsl(200, 40%, 50%);
-  }
-
-  [data-theme="desert"] {
-    --background: hsl(30, 35%, 15%);
-    --foreground: hsl(35, 40%, 90%);
-    --primary: hsl(30, 40%, 50%); /* Medium */
-    --secondary: hsl(30, 35%, 29%); /* Dark */
-    --accent: hsl(45, 45%, 58%); /* Medium-light */
-    --primary-hint: hsl(30, 40%, 50%);
   }
 
   .theme-coffee-hint {
@@ -91,20 +55,8 @@
   .theme-ocean-hint {
     background-color: hsl(215, 60%, 50%) !important;
   }
-  .theme-sunset-hint {
-    background-color: hsl(345, 40%, 50%) !important;
-  }
-  .theme-mint-hint {
-    background-color: hsl(165, 45%, 50%) !important;
-  }
   .theme-lavender-hint {
     background-color: hsl(270, 30%, 50%) !important;
-  }
-  .theme-arctic-hint {
-    background-color: hsl(200, 40%, 50%) !important;
-  }
-  .theme-desert-hint {
-    background-color: hsl(30, 40%, 50%) !important;
   }
 }
 

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuote } from "../hooks/use-quote";
 import { useParams, useNavigate } from "react-router-dom";
 import { RoomActivity } from "server/types/room";
@@ -37,6 +37,8 @@ export const Clock = ({
   const [timerInterval, setTimerInterval] = useState<NodeJS.Timeout | null>(null);
   // flag to prevent activity broadcast during sync
   const [isSync, setIsSync] = useState(false);
+  // ref for live region announcements
+  const liveRegionRef = useRef<HTMLDivElement>(null);
 
   if (!roomId) {
     navigate("/session");
@@ -65,6 +67,11 @@ export const Clock = ({
       isRunning: false,
       totalSeconds: minutes * 60,
     }));
+
+    // announce timer change to screen readers
+    if (liveRegionRef.current) {
+      liveRegionRef.current.textContent = `Timer set to ${minutes} minutes in ${mode} mode`;
+    }
 
     if (!isSync) {
       onActivityCreated({
@@ -132,6 +139,11 @@ export const Clock = ({
       }));
     }
 
+    // announce timer start to screen readers
+    if (liveRegionRef.current) {
+      liveRegionRef.current.textContent = `Timer started in ${timerState.mode} mode`;
+    }
+
     if (!isSync) {
       onActivityCreated({
         type: "start_timer",
@@ -150,6 +162,11 @@ export const Clock = ({
       clearInterval(timerInterval);
       setTimerInterval(null);
       setTimerState((prev) => ({ ...prev, isRunning: false }));
+
+      // announce timer pause to screen readers
+      if (liveRegionRef.current) {
+        liveRegionRef.current.textContent = `Timer paused at ${timerState.time}`;
+      }
 
       if (!isSync) {
         playSound("pause");
@@ -178,6 +195,11 @@ export const Clock = ({
         time: resetTime,
         isRunning: false,
       }));
+
+      // announce timer reset to screen readers
+      if (liveRegionRef.current) {
+        liveRegionRef.current.textContent = `Timer reset to ${resetTime}`;
+      }
 
       if (!isSync) {
         playSound("pause");
@@ -256,6 +278,11 @@ export const Clock = ({
 
         playSound("complete");
 
+        // announce timer completion to screen readers
+        if (liveRegionRef.current) {
+          liveRegionRef.current.textContent = `${timerState.mode === "work" ? "Work" : "Break"} timer completed`;
+        }
+
         if (!isSync) {
           onActivityCreated({
             type: "complete_timer",
@@ -288,28 +315,43 @@ export const Clock = ({
       className={`${
         timerState.mode === "work" ? "bg-secondary" : "bg-secondary/80"
       } flex flex-col items-center justify-center rounded-xl p-10`}
+      role="region"
+      aria-label={`${timerState.mode === "work" ? "Work" : "Break"} timer`}
     >
+      {/* Live region for screen reader announcements */}
+      <div ref={liveRegionRef} className="sr-only" aria-live="polite" aria-atomic="true"></div>
+
       <ModeSwitch onTimerChange={handleTimerChange} />
       <div className="flex flex-col items-center justify-center">
-        <h1 className="font-roboto font-bold not-visited:text-[8rem]">{timerState.time}</h1>
-        <div className="flex flex-row justify-center gap-4 text-center text-2xl">
+        <h1
+          className="font-roboto font-bold not-visited:text-[8rem]"
+          aria-label={`${timerState.time} remaining`}
+        >
+          {timerState.time}
+        </h1>
+        <div
+          className="flex flex-row justify-center gap-4 text-center text-2xl"
+          role="group"
+          aria-label="Timer controls"
+        >
           <button
-            aria-label={timerState.isRunning ? "Pause" : "Start"}
+            aria-label={timerState.isRunning ? "Pause timer" : "Start timer"}
             className={`css-button-3d w-24 p-4 ${timerState.isRunning ? "pressed" : ""}`}
             onClick={timerState.isRunning ? () => handlePause(false) : () => handleStart(false)}
+            aria-pressed={timerState.isRunning}
           >
             {timerState.isRunning ? (
-              <Pause size={24} className="fill-background" />
+              <Pause size={24} className="fill-background" aria-hidden="true" />
             ) : (
-              <Play size={24} className="fill-background" />
+              <Play size={24} className="fill-background" aria-hidden="true" />
             )}
           </button>
           <button
-            aria-label="Reset"
+            aria-label="Reset timer"
             className="css-button-3d w-24 p-4"
             onClick={() => handleReset(false)}
           >
-            <RotateCcw size={24} />
+            <RotateCcw size={24} aria-hidden="true" />
           </button>
         </div>
         <div className="mt-12 w-full max-w-md">
@@ -320,13 +362,25 @@ export const Clock = ({
             isRunning={timerState.isRunning}
           />
         </div>
-        <div className="mt-12 flex flex-col items-center justify-center gap-3">
+        <div
+          className="mt-12 flex flex-col items-center justify-center gap-3"
+          role="complementary"
+          aria-label="Daily quote"
+        >
           <blockquote className="relative">
-            <span className="text-background absolute -top-3 -left-4 text-4xl opacity-90">"</span>
+            <span
+              className="text-background absolute -top-3 -left-4 text-4xl opacity-90"
+              aria-hidden="true"
+            >
+              "
+            </span>
             <p className="max-w-md px-6 text-center font-sans text-sm leading-relaxed font-light">
               {quote}
             </p>
-            <span className="text-background absolute -right-4 -bottom-7 text-4xl opacity-90">
+            <span
+              className="text-background absolute -right-4 -bottom-7 text-4xl opacity-90"
+              aria-hidden="true"
+            >
               "
             </span>
           </blockquote>

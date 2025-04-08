@@ -29,7 +29,13 @@ export const ActivityLog = ({ activities }: { activities: RoomActivity[] }) => {
   }, [activities]);
 
   return (
-    <div ref={scrollRef} className="scrollbar-hide max-h-[120px] overflow-y-auto p-2">
+    <div
+      ref={scrollRef}
+      className="scrollbar-hide max-h-[120px] overflow-y-auto p-2"
+      role="log"
+      aria-label="Room activity log"
+      aria-live="polite"
+    >
       <div className="relative py-2">
         <AnimatePresence mode="popLayout">
           {activities?.map((activity) => (
@@ -44,8 +50,10 @@ export const ActivityLog = ({ activities }: { activities: RoomActivity[] }) => {
               <div className="rounded-lg p-1">
                 <div className="flex items-center gap-1 text-xs">
                   {/* fallback for empty username */}
-                  <span className="font-medium">{activity.userName || "user"}</span>
-                  <span className="text-primary">
+                  <span className="font-medium" aria-label="User name">
+                    {activity.userName || "user"}
+                  </span>
+                  <span className="text-primary" aria-label="Activity description">
                     {activity.type === "join" && "joined the room"}
                     {activity.type === "leave" && "left the room"}
                     {activity.type === "start_timer" && "started a timer"}
@@ -55,7 +63,7 @@ export const ActivityLog = ({ activities }: { activities: RoomActivity[] }) => {
                     {activity.type === "change_timer" &&
                       `set timer to ${activity.timeRemaining?.split(":")[0]}-minute ${activity.timerMode}`}
                   </span>
-                  <span className="ml-auto text-xs text-gray-400">
+                  <span className="ml-auto text-xs text-gray-400" aria-label="Time of activity">
                     {format(new Date(activity.timeStamp), "HH:mm")}
                   </span>
                 </div>
