@@ -41,13 +41,13 @@ export const UserDisplay = ({ users, roomId }: { users: RoomUser[]; roomId: stri
         {activeUsers.map((user) => (
           <div
             key={user.userName}
-            className="bg-primary text-foreground relative flex h-10 w-10 items-center justify-center rounded-full text-lg font-bold"
+            className="bg-primary text-background relative flex h-10 w-10 items-center justify-center rounded-full text-center text-lg leading-none font-semibold"
             onMouseEnter={() => setTooltips((prev) => ({ ...prev, [user.userName]: true }))}
             onMouseLeave={() => setTooltips((prev) => ({ ...prev, [user.userName]: false }))}
             role="listitem"
             aria-label={`User ${user.userName}`}
           >
-            {user.userName.charAt(0)}
+            <span className="flex items-center justify-center">{user.userName.charAt(0)}</span>
             {/* tooltip */}
             <div
               className={`bg-secondary absolute -top-10 left-1/2 -translate-x-1/2 rounded-xl p-1 transition-all duration-200 ${
@@ -84,9 +84,7 @@ export const UserDisplay = ({ users, roomId }: { users: RoomUser[]; roomId: stri
             <div className="flex items-center text-xs font-thin whitespace-nowrap text-gray-800">
               <p className="bg-primary/80 rounded-lg px-1.5 py-1">{roomUrl}</p>
               <Copy
-                className={`ml-1 h-4 w-4 transform cursor-pointer transition-all ${
-                  copied ? "text-white/80" : "text-white/50 hover:scale-105 hover:text-white/80"
-                }`}
+                className="ml-1 h-4 w-4 transform cursor-pointer text-white transition-all hover:scale-105"
                 onClick={handleCopy}
                 aria-label={copied ? "URL copied" : "Copy room URL"}
               />

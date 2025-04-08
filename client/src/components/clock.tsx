@@ -368,21 +368,9 @@ export const Clock = ({
           aria-label="Daily quote"
         >
           <blockquote className="relative">
-            <span
-              className="text-background absolute -top-3 -left-4 text-4xl opacity-90"
-              aria-hidden="true"
-            >
-              "
-            </span>
             <p className="max-w-md px-6 text-center font-sans text-sm leading-relaxed font-light">
               {quote}
             </p>
-            <span
-              className="text-background absolute -right-4 -bottom-7 text-4xl opacity-90"
-              aria-hidden="true"
-            >
-              "
-            </span>
           </blockquote>
           <p className="font-base text-black-500 text-xs tracking-wide italic">— {author}</p>
         </div>
