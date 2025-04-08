@@ -21,7 +21,6 @@ export const useRoom = (roomId?: string) => {
 
         const getRoomUsers = await fetchRoomUsers(roomId);
         if (!getRoomUsers) return;
-        console.log("[useRoom] Fetched users:", getRoomUsers);
         setRoomUsers(getRoomUsers);
       } catch (error) {
         console.error("[useRoom] Error fetching room data:", error);
@@ -45,13 +44,11 @@ export const useRoom = (roomId?: string) => {
       const response = await fetch(`/api/room/${roomId}/info`);
 
       if (!response.ok) {
-        // handle non-200 responses properly
         if (response.status === 404) return null;
         console.error(`[useRoom] Server error: ${response.status}`);
         return null;
       }
 
-      // check for empty response
       const text = await response.text();
       if (!text || text.trim() === "") {
         console.error("[useRoom] Empty response from server");
@@ -65,12 +62,11 @@ export const useRoom = (roomId?: string) => {
     }
   };
 
-  // function to fetch room users
   const fetchRoomUsers = async (roomId: string) => {
     if (!roomId) return null;
 
     try {
-      console.log("[useRoom] fetching room users for roomId:", roomId);
+      // fetch room users api
       const response = await fetch(`/api/room/${roomId}/users`);
 
       if (!response.ok) {
@@ -79,7 +75,6 @@ export const useRoom = (roomId?: string) => {
       }
 
       const users = await response.json();
-      console.log("[useRoom] fetched users:", users);
       setRoomUsers(users);
       return users;
     } catch (error) {
@@ -97,10 +92,7 @@ export const useRoom = (roomId?: string) => {
 
     // subscribe to socket events for user join/leave
     const handleUserActivity = (activity: RoomActivity) => {
-      console.log("[useRoom] received user activity:", activity.type);
-
       if (activity.type === "join" || activity.type === "leave") {
-        console.log("[useRoom] fetching updated user list");
         fetchRoomUsers(roomId);
       }
     };
@@ -120,13 +112,11 @@ export const useRoom = (roomId?: string) => {
         body: JSON.stringify({ roomId }),
       });
 
-      // better error handling
       if (!response.ok) {
         console.error(`[useRoom] Failed to create room: ${response.status}`);
         return null;
       }
 
-      // check for empty response
       const text = await response.text();
       if (!text || text.trim() === "") {
         console.error("[useRoom] Empty response from create room");
@@ -134,7 +124,6 @@ export const useRoom = (roomId?: string) => {
       }
 
       const data = JSON.parse(text);
-      console.log("[useRoom] Created room:", data);
       setRoomInfo(data);
       return data;
     } catch (error) {
@@ -143,9 +132,6 @@ export const useRoom = (roomId?: string) => {
     }
   };
 
-  // This api call is important for user presence (RoomInfo) which was
-  // used by initRoom. The activity tracking is handled by the socket
-  // automatically upon "connection"
   const joinRoom = async (roomId: string, userName: string = "user") => {
     try {
       const response = await fetch(`/api/room/${roomId}/users`, {
@@ -171,9 +157,6 @@ export const useRoom = (roomId?: string) => {
     }
   };
 
-  // This api call is important for both user presence (RoomInfo) and
-  // activity tracking. Though the reason for keeping it is for future
-  // use-cases where I want to manually handle the leave activity.
   const leaveRoom = async (roomId: string, userName: string) => {
     try {
       const response = await fetch(`/api/room/${roomId}/users`, {

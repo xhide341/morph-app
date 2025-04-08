@@ -326,7 +326,7 @@ export const Clock = ({
             <p className="max-w-md px-6 text-center font-sans text-sm leading-relaxed font-light">
               {quote}
             </p>
-            <span className="text-background absolute -right-4 -bottom-4 text-4xl opacity-90">
+            <span className="text-background absolute -right-4 -bottom-8 text-4xl opacity-90">
               "
             </span>
           </blockquote>
