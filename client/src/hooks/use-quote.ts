@@ -6,6 +6,7 @@ interface Quote {
   author: string;
 }
 
+// using proxy configuration for cleaner api calls
 export const useQuote = () => {
   const [quote, setQuote] = useState<string>("");
   const [author, setAuthor] = useState<string>("");
@@ -13,10 +14,8 @@ export const useQuote = () => {
   useEffect(() => {
     const fetchQuote = async () => {
       try {
-        const response = await axios.get(
-          "http://localhost:3000/api/quotes/today",
-        );
-        console.log("Response from server:", response.data);
+        // using proxy configuration instead of full url
+        const response = await axios.get("/api/quotes/today");
         const data = response.data as Quote;
         setQuote(data.quote);
         setAuthor(data.author);
