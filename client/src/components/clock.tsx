@@ -324,7 +324,7 @@ export const Clock = ({
       <ModeSwitch onTimerChange={handleTimerChange} />
       <div className="flex flex-col items-center justify-center">
         <h1
-          className="font-roboto font-bold not-visited:text-[8rem]"
+          className="font-roboto text-[4rem] font-bold text-pretty md:text-[6rem] lg:text-[8rem]"
           aria-label={`${timerState.time} remaining`}
         >
           {timerState.time}
@@ -368,7 +368,7 @@ export const Clock = ({
           aria-label="Daily quote"
         >
           <blockquote className="relative">
-            <p className="max-w-md px-6 text-center font-sans text-sm leading-relaxed font-light">
+            <p className="w-full max-w-full text-center font-sans text-sm leading-relaxed font-light sm:max-w-md sm:px-2 md:px-4 lg:px-6">
               {quote}
             </p>
           </blockquote>

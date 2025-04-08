@@ -37,7 +37,7 @@ export const ModeSwitch = ({ onTimerChange }: ModeSwitchProps) => {
           aria-label="Timer options"
         >
           <button
-            className="css-button-3d text-primary w-36"
+            className="css-button-3d text-primary min-w-20 px-2 text-xs sm:w-32 sm:text-sm"
             onClick={() => {
               playSound("pause");
               setIsSwitchingTimer(true);
@@ -50,7 +50,7 @@ export const ModeSwitch = ({ onTimerChange }: ModeSwitchProps) => {
           </button>
           <div className="bg-primary h-10 w-[2px] rounded-full opacity-50" aria-hidden="true"></div>
           <button
-            className="css-button-3d text-primary w-36"
+            className="css-button-3d text-primary min-w-20 px-2 text-xs sm:w-32 sm:text-sm"
             onClick={() => {
               playSound("pause");
               setIsSwitchingTimer(false);

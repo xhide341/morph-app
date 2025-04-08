@@ -94,7 +94,7 @@ export const RoomPage = () => {
       >
         <Clock latestActivity={latestTimerActivity} onActivityCreated={handleNewActivity} />
       </div>
-      <div className="mt-4" role="region" aria-label="Activity log">
+      <div className="mt-6" role="region" aria-label="Activity log">
         {roomId && <ActivityLog activities={activities} />}
       </div>
       <div

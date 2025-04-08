@@ -107,7 +107,7 @@ export const UserDisplay = ({ users, roomId }: { users: RoomUser[]; roomId: stri
           </div>
         </div>
       </div>
-      <div className="flex flex-col items-center">
+      <div className="flex flex-col items-center justify-center text-center">
         <h5 className="text-xs" aria-live="polite">
           There are currently {activeUsers.length} {activeUsers.length === 1 ? "member" : "members"}{" "}
           in this room

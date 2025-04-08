@@ -10,9 +10,9 @@ export const Header = () => {
     return <Navigate to="/" />;
   }
   return (
-    <header className="flex w-full items-center justify-between p-4" role="banner">
+    <header className="flex w-full items-center justify-between px-2 py-3 sm:p-4" role="banner">
       <h1
-        className="font-qurova cursor-pointer text-2xl tracking-wide"
+        className="font-qurova cursor-pointer text-xl font-semibold tracking-wide sm:text-2xl"
         onClick={() => navigate("/")}
         role="link"
         aria-label="Return to home page"

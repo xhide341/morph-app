@@ -5,17 +5,8 @@ import { useRef, useEffect } from "react";
 
 export const ActivityLog = ({ activities }: { activities: RoomActivity[] }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
-
-  // add debugging to check activities data
-  useEffect(() => {
-    // log unique usernames only
-    const uniqueUsernames = [...new Set(activities.map((a) => a.userName))];
-    console.log("[ActivityLog] Unique activity usernames:", uniqueUsernames);
-  }, [activities]);
-
   // auto scroll to bottom when activities change
   useEffect(() => {
-    // add small delay to ensure content is rendered
     const timeoutId = setTimeout(() => {
       if (scrollRef.current) {
         scrollRef.current.scrollTo({
@@ -31,7 +22,7 @@ export const ActivityLog = ({ activities }: { activities: RoomActivity[] }) => {
   return (
     <div
       ref={scrollRef}
-      className="scrollbar-hide max-h-[120px] overflow-y-auto p-2"
+      className="scrollbar-hide max-h-[140px] overflow-y-auto p-2"
       role="log"
       aria-label="Room activity log"
       aria-live="polite"
@@ -49,9 +40,8 @@ export const ActivityLog = ({ activities }: { activities: RoomActivity[] }) => {
             >
               <div className="rounded-lg p-1">
                 <div className="flex items-center gap-1 text-xs">
-                  {/* fallback for empty username */}
                   <span className="font-medium" aria-label="User name">
-                    {activity.userName || "user"}
+                    {activity.userName}
                   </span>
                   <span className="text-primary" aria-label="Activity description">
                     {activity.type === "join" && "joined the room"}
