@@ -323,7 +323,9 @@ export const Clock = ({
         <div className="mt-12 flex flex-col items-center justify-center gap-3">
           <blockquote className="relative">
             <span className="text-background absolute -top-4 -left-4 text-4xl opacity-90">"</span>
-            <p className="max-w-md px-6 text-center font-serif text-sm leading-relaxed">{quote}</p>
+            <p className="max-w-md px-6 text-center font-sans text-sm leading-relaxed font-light">
+              {quote}
+            </p>
             <span className="text-background absolute -right-4 -bottom-4 text-4xl opacity-90">
               "
             </span>
