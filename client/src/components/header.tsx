@@ -12,7 +12,7 @@ export const Header = () => {
   return (
     <div className="flex w-full items-center justify-between p-4">
       <h1
-        className="font-qurovademo cursor-pointer text-2xl tracking-wide"
+        className="font-qurova cursor-pointer text-2xl tracking-wide"
         onClick={() => navigate("/")}
       >
         morph

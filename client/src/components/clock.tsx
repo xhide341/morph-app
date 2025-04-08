@@ -6,7 +6,7 @@ import { useUserInfo } from "../contexts/user-context";
 import { playSound } from "../utils/audio";
 
 import { Play, Pause, RotateCcw } from "react-feather";
-import { Navigation } from "./navigation";
+import ModeSwitch from "./mode-switch";
 import { ProgressBar } from "./progress-bar";
 
 type TimerMode = "work" | "break";
@@ -51,7 +51,7 @@ export const Clock = ({
 
     const newTime = `${String(minutes).padStart(2, "0")}:00`;
 
-    // Update last work/break time when changed manually
+    // update last used times for work/break modes
     if (mode === "work") {
       setLastWorkTime(newTime);
     } else {
@@ -289,7 +289,7 @@ export const Clock = ({
         timerState.mode === "work" ? "bg-secondary" : "bg-secondary/80"
       } flex flex-col items-center justify-center rounded-xl p-10`}
     >
-      <Navigation onTimerChange={handleTimerChange} />
+      <ModeSwitch onTimerChange={handleTimerChange} />
       <div className="flex flex-col items-center justify-center">
         <h1 className="font-roboto font-bold not-visited:text-[8rem]">{timerState.time}</h1>
         <div className="flex flex-row justify-center gap-4 text-center text-2xl">

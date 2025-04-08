@@ -63,8 +63,9 @@ export function SessionPage() {
         <ThemeToggle />
       </div>
 
-      <div className="mx-auto flex w-full max-w-md flex-grow flex-col items-center justify-center">
+      <div className="mx-auto flex w-full max-w-xs flex-grow flex-col items-center justify-center">
         <div className="w-full space-y-6">
+          <h1 className="font-qurova text-center text-2xl font-bold tracking-wide">morph</h1>
           <div className="text-center">
             <h1 className="mb-2 text-4xl font-bold">Welcome</h1>
             <p className="text-foreground/70 text-sm">Enter room name to get started</p>
@@ -77,7 +78,7 @@ export function SessionPage() {
                 value={roomName}
                 onChange={(e) => setRoomName(e.target.value)}
                 placeholder="Enter room name"
-                className="bg-secondary text-foreground placeholder:text-foreground/50 focus:ring-accent w-full rounded-md p-2 text-sm focus:ring-2 focus:outline-none"
+                className="bg-secondary text-foreground placeholder:text-foreground/50 focus:ring-accent w-full rounded-md p-2 text-sm focus:ring-1 focus:outline-none"
               />
               {validationError && (
                 <p className="font-base text-primary flex items-center gap-1 text-xs tracking-wide">
