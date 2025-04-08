@@ -330,7 +330,7 @@ export const Clock = ({
               "
             </span>
           </blockquote>
-          <p className="text-background text-xs font-semibold tracking-wide italic">— {author}</p>
+          <p className="text-background font-base text-xs tracking-wide italic">— {author}</p>
         </div>
       </div>
     </div>
