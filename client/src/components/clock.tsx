@@ -322,15 +322,15 @@ export const Clock = ({
         </div>
         <div className="mt-12 flex flex-col items-center justify-center gap-3">
           <blockquote className="relative">
-            <span className="text-background absolute -top-4 -left-4 text-4xl opacity-90">"</span>
+            <span className="text-background absolute -top-3 -left-4 text-4xl opacity-90">"</span>
             <p className="max-w-md px-6 text-center font-sans text-sm leading-relaxed font-light">
               {quote}
             </p>
-            <span className="text-background absolute -right-4 -bottom-8 text-4xl opacity-90">
+            <span className="text-background absolute -right-4 -bottom-7 text-4xl opacity-90">
               "
             </span>
           </blockquote>
-          <p className="text-background font-base text-xs tracking-wide italic">— {author}</p>
+          <p className="font-base text-black-500 text-xs tracking-wide italic">— {author}</p>
         </div>
       </div>
     </div>

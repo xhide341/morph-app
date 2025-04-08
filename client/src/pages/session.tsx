@@ -90,7 +90,7 @@ export function SessionPage() {
 
             <button
               type="submit"
-              className="bg-accent hover:bg-accent/80 text-background w-full max-w-full cursor-pointer rounded-md p-2 text-sm"
+              className="bg-accent hover:bg-accent/90 text-background font-base w-full max-w-full cursor-pointer rounded-md p-2 text-sm tracking-wide"
             >
               Continue
             </button>
