@@ -13,13 +13,3 @@ redis.on("connect", () => console.log("Redis connected"));
 export const connectRedis = async () => {
   await redis.connect();
 };
-
-const testRedis = async () => {
-  try {
-    await redis.set("foo", "bar");
-    const result = await redis.get("foo");
-    console.log("Test result:", result); // >>> bar
-  } catch (error) {
-    console.error("Redis test failed:", error);
-  }
-};
