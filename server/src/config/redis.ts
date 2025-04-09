@@ -1,7 +1,14 @@
 import { createClient } from "redis";
 import dotenv from "dotenv";
+import path from "path";
 
-dotenv.config();
+// Load the correct .env file based on NODE_ENV
+dotenv.config({
+  path: path.resolve(
+    process.cwd(),
+    process.env.NODE_ENV === "production" ? ".env.production" : ".env"
+  ),
+});
 
 export const redis = createClient({
   url: process.env.REDIS_URL,

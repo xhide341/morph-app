@@ -13,7 +13,10 @@ export class SocketIOService {
   private constructor(server: Server) {
     this.io = new SocketIOServer(server, {
       cors: {
-        origin: "http://localhost:5173",
+        origin:
+          process.env.NODE_ENV === "production"
+            ? process.env.CORS_ORIGIN
+            : "http://localhost:5173",
         methods: ["GET", "POST"],
         credentials: true,
       },
@@ -31,12 +34,8 @@ export class SocketIOService {
 
   private initialize() {
     this.io.on("connection", (socket) => {
-      console.log("[SocketIO] New client connected:", socket.id);
-
       socket.on("join_room", async (data) => {
         const { roomId, userName } = data;
-
-        console.log(`[SocketIO] User ${userName} joining room ${roomId}`);
 
         this.activeUsers.set(socket.id, { roomId, userName });
         socket.join(roomId);
@@ -54,9 +53,6 @@ export class SocketIOService {
           const storedActivity = await redisService.storeActivity(roomId, join);
 
           if (storedActivity) {
-            console.log(
-              `[SocketIO] Broadcasting join activity for ${userName} to room ${roomId}`
-            );
             // broadcast to EVERYONE in the room INCLUDING the sender
             // for join events, we want everyone to know
             this.io.to(roomId).emit("activity", storedActivity);
@@ -73,8 +69,6 @@ export class SocketIOService {
           console.error("[SocketIO] invalid activity data:", activity);
           return;
         }
-
-        console.log("[SocketIO] received activity type:", activity.type);
 
         try {
           // store all activities in redis
@@ -96,18 +90,12 @@ export class SocketIOService {
       });
 
       socket.on("disconnect", async () => {
-        console.log("[SocketIO] Client disconnected:", socket.id);
-
         // automatically remove user from room when disconnected
         // websocket-level automatic disconnection
         // this triggers when users close the browser or tab (websocket disconnects)
         const userInfo = this.activeUsers.get(socket.id);
         if (userInfo) {
           const { roomId, userName } = userInfo;
-          console.log(
-            `[SocketIO] User ${userName} left room ${roomId} due to disconnect`
-          );
-
           // add "leave" activity
           const leaveActivity: RoomActivity = {
             type: "leave",
