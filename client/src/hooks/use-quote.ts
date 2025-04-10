@@ -15,7 +15,7 @@ export const useQuote = () => {
     const fetchQuote = async () => {
       try {
         // using proxy configuration instead of full url
-        const response = await axios.get(`${import.meta.env.API_URL}/quotes/today`);
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/quotes/today`);
         const data = response.data as Quote;
         setQuote(data.quote);
         setAuthor(data.author);

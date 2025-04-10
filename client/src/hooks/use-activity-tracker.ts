@@ -14,7 +14,7 @@ export function useActivityTracker(roomId?: string, userName?: string) {
     if (!roomId) return;
 
     try {
-      const response = await fetch(`${import.meta.env.API_URL}/room/${roomId}/activities`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/room/${roomId}/activities`);
       if (!response.ok) {
         return;
       }
