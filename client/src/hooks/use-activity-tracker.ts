@@ -2,8 +2,6 @@ import { useEffect, useState, useRef } from "react";
 import { RoomActivity } from "server/types/room";
 import { socketService } from "../services/socket-service";
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-
 // main uses:
 // 1. auto-fetch activities
 // 2. local state update of "activities" which are then passed to room.tsx
@@ -16,7 +14,7 @@ export function useActivityTracker(roomId?: string, userName?: string) {
     if (!roomId) return;
 
     try {
-      const response = await fetch(`${BACKEND_URL}/api/room/${roomId}/activities`);
+      const response = await fetch(`/${import.meta.env.VITE_API_URL}/room/${roomId}/activities`);
       if (!response.ok) {
         return;
       }
