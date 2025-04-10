@@ -6,6 +6,8 @@ interface Quote {
   author: string;
 }
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+
 // using proxy configuration for cleaner api calls
 export const useQuote = () => {
   const [quote, setQuote] = useState<string>("");
@@ -15,7 +17,7 @@ export const useQuote = () => {
     const fetchQuote = async () => {
       try {
         // using proxy configuration instead of full url
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/quotes/today`);
+        const response = await axios.get(`${BACKEND_URL}/api/quotes/today`);
         const data = response.data as Quote;
         setQuote(data.quote);
         setAuthor(data.author);

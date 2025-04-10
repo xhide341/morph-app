@@ -4,6 +4,8 @@ import { useUserInfo } from "../contexts/user-context";
 import { socketService } from "../services/socket-service";
 import { RoomActivity } from "server/types/room";
 
+const BACKEND_URL = process.env.BACKEND_URL;
+
 export const useRoom = (roomId?: string) => {
   const { userName } = useUserInfo();
   const [roomInfo, setRoomInfo] = useState<RoomInfo | null>(null);
@@ -41,7 +43,7 @@ export const useRoom = (roomId?: string) => {
   // room functions
   const fetchRoom = async (roomId: string): Promise<RoomInfo | null> => {
     try {
-      const response = await fetch(`/${import.meta.env.VITE_API_URL}/room/${roomId}/info`);
+      const response = await fetch(`${BACKEND_URL}/api/room/${roomId}/info`);
 
       if (!response.ok) {
         if (response.status === 404) return null;
@@ -67,7 +69,7 @@ export const useRoom = (roomId?: string) => {
 
     try {
       // fetch room users api
-      const response = await fetch(`/${import.meta.env.VITE_API_URL}/room/${roomId}/users`);
+      const response = await fetch(`${BACKEND_URL}/api/room/${roomId}/users`);
 
       if (!response.ok) {
         console.error("[useRoom] error fetching room users, status:", response.status);
@@ -106,7 +108,7 @@ export const useRoom = (roomId?: string) => {
 
   const createRoom = async (roomId: string) => {
     try {
-      const response = await fetch(`/${import.meta.env.VITE_API_URL}/room/create`, {
+      const response = await fetch(`${BACKEND_URL}/api/room/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ roomId }),
@@ -134,7 +136,7 @@ export const useRoom = (roomId?: string) => {
 
   const joinRoom = async (roomId: string, userName: string = "user") => {
     try {
-      const response = await fetch(`/${import.meta.env.VITE_API_URL}/room/${roomId}/users`, {
+      const response = await fetch(`${BACKEND_URL}/api/room/${roomId}/users`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userName }),
@@ -159,7 +161,7 @@ export const useRoom = (roomId?: string) => {
 
   const leaveRoom = async (roomId: string, userName: string) => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/room/${roomId}/users`, {
+      const response = await fetch(`${BACKEND_URL}/api/room/${roomId}/users`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userName }),
@@ -188,7 +190,7 @@ export const useRoom = (roomId?: string) => {
       const url = window.location.href;
 
       // store url in redis
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/room/${roomId}/url`, {
+      const response = await fetch(`${BACKEND_URL}/api/room/${roomId}/url`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url }),
@@ -208,7 +210,7 @@ export const useRoom = (roomId?: string) => {
 
   const getRoomUrl = async (roomId: string) => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/room/${roomId}/url`);
+      const response = await fetch(`${BACKEND_URL}/api/room/${roomId}/url`);
       if (!response.ok) {
         console.error("[useRoom] Failed to get shareable URL");
         return null;
