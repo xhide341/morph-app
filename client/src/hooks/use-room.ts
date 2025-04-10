@@ -4,7 +4,7 @@ import { useUserInfo } from "../contexts/user-context";
 import { socketService } from "../services/socket-service";
 import { RoomActivity } from "server/types/room";
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const BACKEND_URL = process.env.VITE_API_URL;
 
 export const useRoom = (roomId?: string) => {
   const { userName } = useUserInfo();
