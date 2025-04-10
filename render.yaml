@@ -28,4 +28,6 @@ services:
         value: production
       - key: VITE_API_URL
         value: https://morph-app.onrender.com
+      - key: VITE_WS_URL
+        value: wss://morph-app.onrender.com
     autoDeploy: true
