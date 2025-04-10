@@ -19,14 +19,7 @@ export const ProgressBar = ({
     const currentTotalSeconds = currentMinutes * 60 + currentSeconds;
     const totalTotalSeconds = totalMinutes * 60 + totalSeconds;
 
-    // if running, use elapsed time for smoother progress
-    if (isRunning && startTime) {
-      const elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
-      const progress = (elapsedSeconds / totalTotalSeconds) * 100;
-      return Math.min(Math.max(progress, 0), 100);
-    }
-
-    // when paused, calculate based on time remaining
+    // calculate progress based on time remaining
     const progress = 100 - (currentTotalSeconds / totalTotalSeconds) * 100;
     return Math.min(Math.max(progress, 0), 100);
   };

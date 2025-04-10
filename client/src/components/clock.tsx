@@ -29,6 +29,7 @@ export const Clock = ({
     isRunning: false,
     startTime: 0,
     totalSeconds: 25 * 60,
+    elapsedSeconds: 0,
   });
   // store last used times for work/break modes
   const [lastWorkTime, setLastWorkTime] = useState("25:00");
@@ -94,7 +95,6 @@ export const Clock = ({
     }
 
     if (isSync && latestActivity) {
-      // Calculate precise elapsed time since activity was created
       const activityTime = new Date(latestActivity.timeStamp).getTime();
       const [min, sec] = (latestActivity.timeRemaining || "00:00").split(":").map(Number);
       const originalSeconds = min * 60 + sec;
@@ -109,9 +109,9 @@ export const Clock = ({
         isRunning: remainingSeconds > 0,
         startTime: activityTime,
         totalSeconds: originalSeconds,
+        elapsedSeconds,
       }));
     } else {
-      // Normal start for initiating client
       const startTime = Date.now();
       const [min, sec] = timerState.time.split(":").map(Number);
       const totalSeconds = min * 60 + sec;
@@ -127,6 +127,7 @@ export const Clock = ({
           mode: latestActivity?.timerMode || prev.mode,
           totalSeconds: resetSeconds,
           isRunning: false,
+          elapsedSeconds: 0,
         }));
         return;
       }
@@ -136,6 +137,7 @@ export const Clock = ({
         isRunning: true,
         startTime,
         totalSeconds,
+        elapsedSeconds: prev.elapsedSeconds,
       }));
     }
 
@@ -161,7 +163,13 @@ export const Clock = ({
     if (timerInterval && timerState.isRunning) {
       clearInterval(timerInterval);
       setTimerInterval(null);
-      setTimerState((prev) => ({ ...prev, isRunning: false }));
+
+      const currentElapsed = Math.floor((Date.now() - timerState.startTime) / 1000);
+      setTimerState((prev) => ({
+        ...prev,
+        isRunning: false,
+        elapsedSeconds: prev.elapsedSeconds + currentElapsed,
+      }));
 
       // announce timer pause to screen readers
       if (liveRegionRef.current) {
@@ -170,7 +178,6 @@ export const Clock = ({
 
       if (!isSync) {
         playSound("pause");
-
         onActivityCreated({
           type: "pause_timer",
           userName,
@@ -262,8 +269,9 @@ export const Clock = ({
     if (!timerState.isRunning) return;
 
     const interval = setInterval(() => {
-      const elapsed = Math.floor((Date.now() - timerState.startTime) / 1000);
-      const remaining = Math.max(0, timerState.totalSeconds - elapsed);
+      const currentElapsed = Math.floor((Date.now() - timerState.startTime) / 1000);
+      const totalElapsed = timerState.elapsedSeconds + currentElapsed;
+      const remaining = Math.max(0, timerState.totalSeconds - totalElapsed);
 
       const newMinutes = Math.floor(remaining / 60);
       const newSeconds = remaining % 60;
@@ -274,7 +282,7 @@ export const Clock = ({
       if (remaining <= 0) {
         clearInterval(interval);
         setTimerInterval(null);
-        setTimerState((prev) => ({ ...prev, isRunning: false }));
+        setTimerState((prev) => ({ ...prev, isRunning: false, elapsedSeconds: 0 }));
 
         playSound("complete");
 
@@ -297,7 +305,12 @@ export const Clock = ({
 
     setTimerInterval(interval);
     return () => clearInterval(interval);
-  }, [timerState.isRunning, timerState.startTime, timerState.totalSeconds]);
+  }, [
+    timerState.isRunning,
+    timerState.startTime,
+    timerState.totalSeconds,
+    timerState.elapsedSeconds,
+  ]);
 
   // timer for document title
   useEffect(() => {
