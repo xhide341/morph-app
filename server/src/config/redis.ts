@@ -6,6 +6,7 @@ import path from "path";
 dotenv.config({
   path: path.resolve(
     process.cwd(),
+    "..", // Go up one level to the root
     process.env.NODE_ENV === "production" ? ".env.production" : ".env"
   ),
 });
