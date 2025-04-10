@@ -1,5 +1,7 @@
 import { io, Socket } from "socket.io-client";
 
+const WS_URL = import.meta.env.VITE_WS_URL || "ws://localhost:3000";
+
 export class SocketService {
   private static instance: SocketService;
   private socket: Socket | null = null;
@@ -23,8 +25,9 @@ export class SocketService {
     }
 
     console.log(`[SocketService] Connecting to room ${roomId} as ${userName}`);
+    console.log(`[SocketService] WebSocket URL: ${WS_URL}`);
 
-    this.socket = io();
+    this.socket = io(WS_URL);
 
     this.socket.on("connect", () => {
       console.log("[SocketService] Connected to server, joining room");
