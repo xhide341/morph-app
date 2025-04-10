@@ -1,31 +1,28 @@
-import { defineConfig, loadEnv, ConfigEnv } from "vite";
+import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { fileURLToPath } from "url";
 
 // https://vite.dev/config/
-export default ({ mode }: ConfigEnv) => {
-  Object.assign(process.env, loadEnv(mode, process.cwd(), ""));
-  return defineConfig({
-    plugins: [react(), tailwindcss()],
-    server: {
-      proxy: {
-        "/api": {
-          target: process.env.VITE_API_URL || "http://localhost:3000",
-          changeOrigin: true,
-          secure: false,
-        },
-        "/socket.io": {
-          target: process.env.VITE_WS_URL || "ws://localhost:3000",
-          ws: true,
-          changeOrigin: true,
-        },
-      },
+export default defineConfig({
+  plugins: [react(), tailwindcss()],
+  server: {
+    proxy: {
+      // "/api": {
+      //   target: "http://localhost:3000",
+      //   changeOrigin: true,
+      //   secure: false,
+      // },
+      // "/socket.io": {
+      //   target: "ws://localhost:3000",
+      //   ws: true,
+      //   changeOrigin: true,
+      // },
     },
-    resolve: {
-      alias: {
-        server: fileURLToPath(new URL("../server/src", import.meta.url)),
-      },
+  },
+  resolve: {
+    alias: {
+      server: fileURLToPath(new URL("../server/src", import.meta.url)),
     },
-  });
-};
+  },
+});
