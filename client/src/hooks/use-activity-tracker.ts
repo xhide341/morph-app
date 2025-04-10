@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { RoomActivity } from "server/types/room";
 import { socketService } from "../services/socket-service";
 
-const BACKEND_URL = import.meta.env.REACT_APP_BACKEND_URL;
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 // main uses:
 // 1. auto-fetch activities
