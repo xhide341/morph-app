@@ -7,7 +7,7 @@ import { createServer } from "http";
 import { SocketIOService } from "./services/socket-io-service";
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = parseInt(process.env.PORT || "10000", 10);
 const server = createServer(app);
 
 // Initialize Socket.IO
@@ -30,6 +30,6 @@ app.use(express.json());
 app.use("/api/quotes", quotesRouter);
 app.use("/api/room", roomRouter);
 
-server.listen(port, () => {
-  console.log(`Server running on port ${port} with Socket.IO support`);
+app.listen(port, "0.0.0.0", () => {
+  console.log(`Server running on port ${port}`);
 });
