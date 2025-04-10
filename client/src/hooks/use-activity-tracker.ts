@@ -14,13 +14,12 @@ export function useActivityTracker(roomId?: string, userName?: string) {
     if (!roomId) return;
 
     try {
-      const response = await fetch(`/api/room/${roomId}/activities`);
+      const response = await fetch(`/${process.env.VITE_API_URL}/room/${roomId}/activities`);
       if (!response.ok) {
         return;
       }
       const activityHistory = await response.json();
       if (!activityHistory) return;
-      console.log("[fetchActivities] fetched activities:", activityHistory);
       setActivities(activityHistory);
     } catch (error) {
       console.error("[useActivityTracker] error fetching activities:", error);
@@ -36,7 +35,6 @@ export function useActivityTracker(roomId?: string, userName?: string) {
 
     // subscribe to socket events to know when to refetch
     const handleActivityUpdate = (activity: RoomActivity) => {
-      console.log("[useActivityTracker] received activity via socket:", activity.type);
       // refetch all activities when we get a new one
       fetchActivities();
     };
