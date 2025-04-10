@@ -4,7 +4,7 @@ import { useUserInfo } from "../contexts/user-context";
 import { socketService } from "../services/socket-service";
 import { RoomActivity } from "server/types/room";
 
-const API_URL = process.env.VITE_API_URL || "http://localhost:10000";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:10000";
 
 export const useRoom = (roomId?: string) => {
   const { userName } = useUserInfo();
