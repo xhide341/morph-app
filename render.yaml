@@ -18,7 +18,7 @@ services:
     autoDeploy: true
 
   - type: web
-    name: morph-app-frontend
+    name: morph-app-client
     env: node
     buildCommand: cd client && pnpm install && pnpm run build
     startCommand: cd client && pnpm preview --host

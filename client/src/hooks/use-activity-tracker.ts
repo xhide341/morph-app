@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { RoomActivity } from "server/types/room";
 import { socketService } from "../services/socket-service";
 
-const BACKEND_URL = process.env.VITE_API_URL;
+const API_URL = process.env.VITE_API_URL || "http://localhost:10000";
 
 // main uses:
 // 1. auto-fetch activities
@@ -16,7 +16,7 @@ export function useActivityTracker(roomId?: string, userName?: string) {
     if (!roomId) return;
 
     try {
-      const response = await fetch(`${BACKEND_URL}/api/room/${roomId}/activities`);
+      const response = await fetch(`${API_URL}/api/room/${roomId}/activities`);
       if (!response.ok) {
         return;
       }
