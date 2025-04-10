@@ -371,7 +371,6 @@ export const Clock = ({
           <ProgressBar
             currentTime={timerState.time}
             totalTime={timerState.mode === "work" ? lastWorkTime : lastBreakTime}
-            startTime={timerState.startTime}
             isRunning={timerState.isRunning}
           />
         </div>
