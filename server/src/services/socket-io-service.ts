@@ -20,6 +20,7 @@ export class SocketIOService {
         methods: ["GET", "POST"],
         credentials: true,
       },
+      connectionStateRecovery: {},
     });
 
     this.initialize();

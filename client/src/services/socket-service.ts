@@ -28,7 +28,13 @@ export class SocketService {
     console.log(`[SocketService] Connecting to room ${roomId} as ${userName}`);
     console.log(`[SocketService] WebSocket URL: ${WS_URL}`);
 
-    this.socket = io(WS_URL);
+    this.socket = io(WS_URL, {
+      ackTimeout: 10000,
+      retries: 3,
+      reconnection: true,
+      reconnectionAttempts: 5,
+      timeout: 20000,
+    });
 
     this.socket.on("connect", () => {
       console.log("[SocketService] Connected to server, joining room");

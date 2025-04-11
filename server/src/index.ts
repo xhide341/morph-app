@@ -30,6 +30,12 @@ app.use(express.json());
 app.use("/api/quotes", quotesRouter);
 app.use("/api/room", roomRouter);
 
+// this is for local development
+// app.listen(port, "0.0.0.0", () => {
+//   console.log(`Server running on port ${port}`);
+// });
+
+// this is for production
 app.listen(port, "0.0.0.0", () => {
   console.log(`Server running on port ${port}`);
 });
