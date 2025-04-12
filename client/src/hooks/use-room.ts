@@ -4,6 +4,7 @@ import { useUserInfo } from "../contexts/user-context";
 import { socketService } from "../services/socket-service";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:10000";
+console.log("API_URL", API_URL);
 
 export const useRoom = (roomId?: string) => {
   const { userName } = useUserInfo();

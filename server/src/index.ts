@@ -10,7 +10,7 @@ const app = express();
 const port = parseInt(process.env.PORT || "10000", 10);
 const server = createServer(app);
 
-// Initialize Socket.IO
+// socket.io instance
 SocketIOService.getInstance(server);
 
 // redis connection
