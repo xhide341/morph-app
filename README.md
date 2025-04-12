@@ -2,8 +2,8 @@
 
 ## 🚀 Project Overview
 
-A **Minimal Viable Product (MVP)** for a Pomodoro app using **MERN stack** and **Better Auth.js** for authentication.  
-The goal is to create a functional Pomodoro timer with **basic customization** and **user authentication**.
+A **Minimal Viable Product (MVP)** for a Pomodoro app using **React, Express, Node.js** with real-time features.  
+The goal is to create a functional Pomodoro timer with **basic customization** and **room-based collaboration**.
 
 ---
 
@@ -13,7 +13,7 @@ The goal is to create a functional Pomodoro timer with **basic customization** a
 
 - ✅ **Pomodoro Timer** – Countdown logic with start/pause/reset
 - ✅ **Session Customization** – Change default 25-minute timer
-- ✅ **User Authentication** (Better Auth.js) – Login, Register, Logout
+- ✅ **Room Creation** – Create and join focus rooms
 - ✅ **Theme Variants** – Theme toggle (stored in localStorage)
 - ✅ **Quote of the Day** – Daily quote from an API
 
@@ -28,8 +28,8 @@ The goal is to create a functional Pomodoro timer with **basic customization** a
 
 - **Frontend:** Vite + React-Ts + TailwindCSS
 - **Backend:** Express + Node.js
-- **Authentication:** Better Auth.js
-- **Caching:** Redis
+- **Real-time:** Socket.IO
+- **State & Cache:** Redis
 
 ---
 

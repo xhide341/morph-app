@@ -1,4 +1,43 @@
-# Implementation History
+# 🕰️ Pomodoro App - MVP Plan
+
+## 🚀 Project Overview
+
+A **Minimal Viable Product (MVP)** for a Pomodoro app using **React, Express, Node.js** and **Redis** for real-time features.  
+The goal is to create a functional Pomodoro timer with **basic customization** and **user authentication**.
+
+---
+
+## ✅ MVP Scope
+
+### **📌 Core Features (Must-Have)**
+
+- ✅ **Pomodoro Timer** – Countdown logic with start/pause/reset
+- ✅ **Session Customization** – Change default 25-minute timer
+- ✅ **User Authentication** (Better Auth.js) – Login, Register, Logout
+- ✅ **Theme Variants** – Theme toggle (stored in localStorage)
+- ✅ **Quote of the Day** – Daily quote from an API
+
+### **🚀 Optional Enhancements (After MVP)**
+
+- 🔹 **Session History** – Track past focus sessions
+- 🔹 **Notifications** – Sound/vibration when session ends
+
+---
+
+## 🛠️ Tech Stack
+
+- **Frontend:** Vite + React-Ts + TailwindCSS
+- **Backend:** Express + Node.js
+- **Authentication:** Better Auth.js
+- **State & Cache:** Redis
+
+---
+
+## 📂 Folder Structure
+
+- **client:** React + Vite + TailwindCSS
+- **server:** Express + Node.js
+- **common:** Shared types and utilities
 
 ## Progress Bar Component Addition
 
@@ -19,7 +58,7 @@
   - Adjusted layout to accommodate progress bar with `w-full` class
   - Fixed timer logic to stop at 00:00 instead of going negative
 
-## Redis & MongoDB Integration
+## Redis Integration
 
 ### Redis Setup
 
@@ -31,18 +70,19 @@
 
 ### Data Storage Implementation Plan
 
-- Decided on hybrid approach using Redis and MongoDB
-  - Redis for real-time features and temporary data
-  - MongoDB for persistent storage and analytics
-  - Following MERN stack performance patterns
-  - Implemented master data lookup pattern for frequently accessed data
+- Using Redis for:
+  - Real-time features and activity tracking
+  - Temporary data and session management
+  - Room state and user presence
+  - Timer history and analytics
+  - Following real-time application patterns
+  - Implemented lookup pattern for frequently accessed data
 
 ### Next Steps
 
-- Implement MongoDB connection setup
-- Create data models for timer history
 - Set up Redis for room activity tracking
 - Add data persistence layer for completed sessions
+- Implement activity batching for performance
 
 ## WebSocket Activity Tracking Flow
 
