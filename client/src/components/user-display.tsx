@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { RoomUser } from "server/types/room";
+import { RoomUser } from "../types/room";
 import { useRoom } from "../hooks/use-room";
 
 import { Plus, Copy } from "react-feather";

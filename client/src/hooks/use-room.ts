@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef } from "react";
-import { RoomInfo, RoomUser } from "server/types/room";
+import { RoomInfo, RoomUser, RoomActivity } from "../types/room";
 import { useUserInfo } from "../contexts/user-context";
 import { socketService } from "../services/socket-service";
-import { RoomActivity } from "server/types/room";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:10000";
 
