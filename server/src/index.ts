@@ -5,6 +5,7 @@ import roomRouter from "./routes/room";
 import { connectRedis } from "./config/redis";
 import { createServer } from "http";
 import { SocketIOService } from "./services/socket-io-service";
+import path from "path";
 
 const app = express();
 const port = parseInt(process.env.PORT || "10000", 10);
@@ -29,6 +30,17 @@ app.use(
 app.use(express.json());
 app.use("/api/quotes", quotesRouter);
 app.use("/api/room", roomRouter);
+
+// serve static files from the client build
+if (process.env.NODE_ENV === "production") {
+  const clientBuildPath = path.join(__dirname, "../../client/dist");
+  app.use(express.static(clientBuildPath));
+
+  // handle client-side routing
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(clientBuildPath, "index.html"));
+  });
+}
 
 // this is for local development
 // app.listen(port, "0.0.0.0", () => {
