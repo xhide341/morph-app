@@ -31,16 +31,13 @@ app.use(express.json());
 app.use("/api/quotes", quotesRouter);
 app.use("/api/room", roomRouter);
 
-// serve static files from the client build
-if (process.env.NODE_ENV === "production") {
-  const clientBuildPath = path.join(__dirname, "../../client/dist");
-  app.use(express.static(clientBuildPath));
-
-  // handle client-side routing
-  app.get("*", (req, res) => {
-    res.sendFile(path.join(clientBuildPath, "index.html"));
-  });
-}
+const __dirname = path.resolve(); // node doesn't have __dirname by default in ESM
+// Serve static frontend
+app.use(express.static(path.join(__dirname, "../client/dist")));
+// Catch-all route to serve index.html for frontend routing (like /room/abc123)
+app.get("*", (_req, res) => {
+  res.sendFile(path.join(__dirname, "../client/dist/index.html"));
+});
 
 // this is for local development
 // app.listen(port, "0.0.0.0", () => {
