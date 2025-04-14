@@ -15,12 +15,18 @@ export class SocketIOService {
       cors: {
         origin:
           process.env.NODE_ENV === "production"
-            ? process.env.CORS_ORIGIN
+            ? "https://morph-app-client.onrender.com"
             : "http://localhost:5173",
         methods: ["GET", "POST"],
         credentials: true,
       },
-      connectionStateRecovery: {},
+      connectionStateRecovery: {
+        maxDisconnectionDuration: 2 * 60 * 1000, // 2 minutes
+        skipMiddlewares: true,
+      },
+      pingTimeout: 60000,
+      pingInterval: 25000,
+      transports: ["websocket", "polling"],
     });
 
     this.initialize();

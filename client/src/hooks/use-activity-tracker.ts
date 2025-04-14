@@ -18,7 +18,7 @@ export function useActivityTracker(roomId?: string, userName?: string) {
     try {
       const response = await fetch(`${API_URL}/api/room/${roomId}/activities`);
       if (!response.ok) {
-        return;
+        return response.json();
       }
       const activityHistory = await response.json();
       if (!activityHistory) return;
