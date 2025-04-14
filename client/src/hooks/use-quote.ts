@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
+const API_URL = import.meta.env.VITE_API_URL || "https://morph-app.onrender.com:10000";
+
 interface Quote {
   quote: string;
   author: string;
@@ -15,7 +17,7 @@ export const useQuote = () => {
     const fetchQuote = async () => {
       try {
         // using proxy configuration instead of full url
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/quotes/today`);
+        const response = await axios.get(`${API_URL}/api/quotes/today`);
         const data = response.data as Quote;
         setQuote(data.quote);
         setAuthor(data.author);
