@@ -40,9 +40,17 @@ export class SocketService {
       timeout: 20000,
     });
 
+    // store current room and user info
+    this.currentRoom = roomId;
+    this.userName = userName;
+
     this.socket.on("connect", () => {
-      console.log("[SocketService] Connected to server, joining room");
-      this.socket?.emit("join_room", { roomId, userName });
+      console.log("[SocketService] Connected to server");
+      // only join room if we have roomId and userName
+      if (this.currentRoom && this.userName) {
+        console.log("[SocketService] Joining room");
+        this.socket?.emit("join_room", { roomId: this.currentRoom, userName: this.userName });
+      }
     });
 
     this.socket.on("activity", (data) => {

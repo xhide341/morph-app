@@ -60,9 +60,9 @@ export class SocketIOService {
           const storedActivity = await redisService.storeActivity(roomId, join);
 
           if (storedActivity) {
-            // broadcast to EVERYONE in the room INCLUDING the sender
-            // for join events, we want everyone to know
-            this.io.to(roomId).emit("activity", storedActivity);
+            // broadcast to everyone EXCEPT the sender
+            // the sender already knows they joined
+            socket.to(roomId).emit("activity", storedActivity);
           }
 
           await redisService.userJoinRoom(roomId, userName);
