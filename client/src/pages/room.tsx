@@ -23,16 +23,15 @@ export const RoomPage = () => {
   useEffect(() => {
     if (!roomId || !userName) return;
 
-    try {
-      setIsConnecting(true);
-      socketService.connect(roomId, userName);
-      setIsConnecting(false);
-    } catch (error) {
-      console.error("[RoomPage] Error joining room:", error);
-      setIsConnecting(false);
-    }
+    const socket = socketService.connect(roomId, userName);
+
+    socket.on("user_activity", (activity: RoomActivity) => {
+      console.log("[Room] Received user activity:", activity);
+      addActivity(activity);
+    });
 
     return () => {
+      console.log("[Room] Cleaning up socket connection");
       socketService.disconnect();
     };
   }, [roomId, userName]);
