@@ -202,7 +202,9 @@ export const useRoom = (roomId?: string) => {
 
   const shareRoom = async (roomId: string) => {
     try {
-      const url = window.location.href;
+      // use the client URL instead of window.location.href
+      const clientUrl = import.meta.env.VITE_CLIENT_URL || "https://morph-app-client.onrender.com";
+      const url = `${clientUrl}/room/${roomId}`;
 
       // store url in redis
       const response = await fetch(`${API_URL}/api/room/${roomId}/url`, {
