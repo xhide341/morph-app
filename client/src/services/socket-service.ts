@@ -19,8 +19,13 @@ export class SocketService {
   }
 
   connect(roomId: string, userName: string) {
+    if (this.socket?.connected) {
+      console.log("[SocketService] Already connected to room");
+      return this.socket;
+    }
+
     if (this.socket) {
-      console.log("[SocketService] Already connected, disconnecting first");
+      console.log("[SocketService] Disconnecting existing connection");
       this.disconnect();
     }
 
