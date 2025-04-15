@@ -32,6 +32,10 @@ roomRouter.get("/:roomId/info", async (req, res) => {
   try {
     const { roomId } = req.params;
     const result = await redisService.getRoomInfo(roomId);
+    if (!result) {
+      res.status(404).json({ error: "Room not found" });
+      return;
+    }
     res.json(result);
   } catch (error) {
     res.status(500).json({ error: "Failed to get room info" });

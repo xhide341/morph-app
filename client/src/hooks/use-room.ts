@@ -202,7 +202,6 @@ export const useRoom = (roomId?: string) => {
 
   const shareRoom = async (roomId: string) => {
     try {
-      // use the client URL instead of window.location.href
       const clientUrl = import.meta.env.VITE_CLIENT_URL || "https://morph-app-client.onrender.com";
       const url = `${clientUrl}/room/${roomId}`;
 
