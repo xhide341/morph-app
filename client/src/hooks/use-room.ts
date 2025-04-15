@@ -42,23 +42,33 @@ export const useRoom = (roomId?: string) => {
   // room functions
   const fetchRoom = async (roomId: string): Promise<RoomInfo | null> => {
     try {
+      console.log(`[fetchRoom] Fetching room with ID: ${roomId}`);
       const response = await fetch(`${API_URL}/api/room/${roomId}/info`);
 
+      console.log(`[fetchRoom] Response status: ${response.status}`);
       if (!response.ok) {
-        if (response.status === 404) return null;
-        console.error(`[useRoom] Server error: ${response.status}`);
+        if (response.status === 404) {
+          console.log(`[fetchRoom] Room not found: ${roomId}`);
+          return null;
+        }
+        console.error(`[fetchRoom] Server error: ${response.status}`);
+        const errorText = await response.text();
+        console.error(`[fetchRoom] Error response: ${errorText}`);
         return null;
       }
 
       const text = await response.text();
+      console.log(`[fetchRoom] Response text: ${text}`);
       if (!text || text.trim() === "") {
-        console.error("[useRoom] Empty response from server");
+        console.error("[fetchRoom] Empty response from server");
         return null;
       }
 
-      return JSON.parse(text);
+      const data = JSON.parse(text);
+      console.log(`[fetchRoom] Room data:`, data);
+      return data;
     } catch (error) {
-      console.error("[useRoom] Error fetching room:", error);
+      console.error("[fetchRoom] Error fetching room:", error);
       return null;
     }
   };
@@ -107,28 +117,34 @@ export const useRoom = (roomId?: string) => {
 
   const createRoom = async (roomId: string) => {
     try {
+      console.log(`[createRoom] Creating room with ID: ${roomId}`);
       const response = await fetch(`${API_URL}/api/room/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ roomId }),
       });
 
+      console.log(`[createRoom] Response status: ${response.status}`);
       if (!response.ok) {
-        console.error(`[useRoom] Failed to create room: ${response.status}`);
+        console.error(`[createRoom] Failed to create room: ${response.status}`);
+        const errorText = await response.text();
+        console.error(`[createRoom] Error response: ${errorText}`);
         return null;
       }
 
       const text = await response.text();
+      console.log(`[createRoom] Response text: ${text}`);
       if (!text || text.trim() === "") {
-        console.error("[useRoom] Empty response from create room");
+        console.error("[createRoom] Empty response from create room");
         return null;
       }
 
       const data = JSON.parse(text);
+      console.log(`[createRoom] Created room data:`, data);
       setRoomInfo(data);
       return data;
     } catch (error) {
-      console.error("[useRoom] Error creating room:", error);
+      console.error("[createRoom] Error creating room:", error);
       return null;
     }
   };

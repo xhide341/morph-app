@@ -1,21 +1,31 @@
-import { Router } from "express";
+import { Router, Request, Response, RequestHandler } from "express";
 import { redisService } from "../services/redis-service";
 
 const roomRouter = Router();
 
 // create a new room
-roomRouter.post("/create", async (req, res) => {
-  try {
-    const { roomId } = req.body;
-    const room = await redisService.createRoom(roomId);
-    if (!room) {
-      res.status(400).json({ error: "Failed to create room" });
+roomRouter.post(
+  "/create",
+  async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { roomId } = req.body;
+      if (!roomId) {
+        res.status(400).json({ error: "Room ID is required" });
+        return;
+      }
+
+      const room = await redisService.createRoom(roomId);
+      if (!room) {
+        res.status(400).json({ error: "Failed to create room" });
+        return;
+      }
+      res.json(room);
+    } catch (error) {
+      console.error("[Room] Error creating room:", error);
+      res.status(500).json({ error: "Failed to create room" });
     }
-    res.json(room);
-  } catch (error) {
-    res.status(500).json({ error: "Failed to create room" });
   }
-});
+);
 
 // get room info
 roomRouter.get("/:roomId/info", async (req, res) => {
