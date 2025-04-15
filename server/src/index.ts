@@ -21,7 +21,7 @@ app.use(
   cors({
     origin:
       process.env.NODE_ENV === "production"
-        ? "https://morph-app-client.onrender.com"
+        ? process.env.CORS_ORIGIN
         : "http://localhost:5173",
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],

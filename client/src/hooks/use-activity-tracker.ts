@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { RoomActivity } from "../types/room";
 import { socketService } from "../services/socket-service";
 
-const API_URL = "https://morph-app.onrender.com";
+const API_URL = import.meta.env.VITE_API_URL || "https://morph-app-plum.vercel.app/";
 
 // main uses:
 // 1. auto-fetch activities

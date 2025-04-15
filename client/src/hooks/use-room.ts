@@ -3,7 +3,7 @@ import { RoomInfo, RoomUser, RoomActivity } from "../types/room";
 import { useUserInfo } from "../contexts/user-context";
 import { socketService } from "../services/socket-service";
 
-const API_URL = "https://morph-app.onrender.com";
+const API_URL = import.meta.env.VITE_API_URL || "https://morph-app-plum.vercel.app/";
 
 export const useRoom = (roomId?: string) => {
   const { userName } = useUserInfo();
@@ -202,7 +202,7 @@ export const useRoom = (roomId?: string) => {
 
   const shareRoom = async (roomId: string) => {
     try {
-      const clientUrl = import.meta.env.VITE_CLIENT_URL || "https://morph-app-client.onrender.com";
+      const clientUrl = API_URL;
       const url = `${clientUrl}/room/${roomId}`;
 
       // store url in redis

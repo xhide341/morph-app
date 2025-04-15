@@ -15,7 +15,7 @@ export class SocketIOService {
       cors: {
         origin:
           process.env.NODE_ENV === "production"
-            ? "https://morph-app-client.onrender.com"
+            ? process.env.CORS_ORIGIN
             : "http://localhost:5173",
         methods: ["GET", "POST"],
         credentials: true,
