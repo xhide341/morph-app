@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-const API_URL = import.meta.env.VITE_API_URL || "https://morph-app.onrender.com:10000";
+const API_URL = import.meta.env.VITE_API_URL || "https://morph-app.onrender.com";
 
 interface Quote {
   quote: string;
