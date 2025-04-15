@@ -3,7 +3,7 @@ import { RoomInfo, RoomUser, RoomActivity } from "../types/room";
 import { useUserInfo } from "../contexts/user-context";
 import { socketService } from "../services/socket-service";
 
-const API_URL = import.meta.env.VITE_API_URL || "https://morph-app.onrender.com";
+const API_URL = "https://morph-app.onrender.com";
 
 export const useRoom = (roomId?: string) => {
   const { userName } = useUserInfo();
