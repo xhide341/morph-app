@@ -1,9 +1,9 @@
 import { useParams } from "react-router-dom";
 import { useUserInfo } from "../contexts/user-context";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRoom } from "../hooks/use-room";
-import { RoomActivity, RoomUser } from "server/types/room";
-import { useActivityTracker } from "../hooks/use-activity-tracker";
+import { RoomActivity, RoomUser } from "../types/room";
+import { useActivity } from "../hooks/use-activity";
 import { socketService } from "../services/socket-service";
 
 import { Clock } from "../components/clock";
@@ -16,38 +16,42 @@ export const RoomPage = () => {
   const { roomId } = useParams<{ roomId: string }>();
   const { userName, setUserName, clearUserName } = useUserInfo();
   const { roomUsers, joinRoom } = useRoom(roomId);
-  const { activities, addActivity } = useActivityTracker(roomId);
+  const { activities, setActivities, fetchActivities } = useActivity(roomId);
   const [showModal, setShowModal] = useState(!userName);
-  const [isConnecting, setIsConnecting] = useState(true);
 
+  // handle connection
   useEffect(() => {
-    if (!roomId || !userName) return;
+    if (!roomId) return;
 
-    const socket = socketService.connect(roomId, userName);
-
-    socket.on("user_activity", (activity: RoomActivity) => {
-      console.log("[Room] Received user activity:", activity);
-      addActivity(activity);
-    });
+    socketService.connect(roomId, userName);
 
     return () => {
-      console.log("[Room] Cleaning up socket connection");
       socketService.disconnect();
     };
   }, [roomId, userName]);
 
-  // this is passed as prop to Clock component
-  // addActivity is used to update local state
-  // socketservice emission happens here
-  const handleNewActivity = (activity: Omit<RoomActivity, "timeStamp" | "id">) => {
-    if (!roomId) return;
+  // handle activity subscriptions
+  useEffect(() => {
+    if (!socketService.isConnected()) return;
 
-    const newActivity = addActivity(activity);
-    if (!newActivity) return;
-    console.log("[handleNewActivity] Emitting activity:", newActivity.type);
+    const handleActivity = (activity: RoomActivity) => {
+      setActivities((prev) => {
+        // check for duplicates using id
+        const exists = prev.some((a) => a.id === activity.id);
+        if (exists) return prev;
+        return [activity, ...prev];
+      });
+    };
 
-    socketService.emit("activity", newActivity);
-  };
+    // clean up previous listeners
+    socketService.off("activity", handleActivity);
+    // add new listener
+    socketService.on("activity", handleActivity);
+
+    return () => {
+      socketService.off("activity", handleActivity);
+    };
+  }, []);
 
   const handleJoinRoom = async (name: string) => {
     if (!roomId) return;
@@ -68,21 +72,45 @@ export const RoomPage = () => {
   // get latest timer-related activity and sort by timestamp
   const latestTimerActivity = activities.length
     ? (() => {
-        const timerActivities = activities.filter((activity: RoomActivity) =>
-          ["start_timer", "pause_timer", "change_timer", "reset_timer"].includes(activity.type),
-        );
-        return timerActivities.sort(
-          (a, b) => new Date(b.timeStamp).getTime() - new Date(a.timeStamp).getTime(),
-        )[0];
+        const timerActivities = activities
+          .filter((activity: RoomActivity) =>
+            ["start_timer", "pause_timer", "change_timer", "reset_timer"].includes(activity.type),
+          )
+          .sort((a, b) => new Date(b.timeStamp).getTime() - new Date(a.timeStamp).getTime());
+        return timerActivities[0];
       })()
     : null;
+
+  const handleNewActivity = (activity: Omit<RoomActivity, "id" | "timeStamp">) => {
+    if (!socketService.isConnected()) {
+      console.warn("socket not connected, activity not emitted");
+      return;
+    }
+
+    // create new activity with id and timestamp
+    const newActivity = {
+      ...activity,
+      id: crypto.randomUUID(),
+      timeStamp: new Date().toISOString(),
+    };
+
+    // optimistic update - add to state immediately
+    setActivities((prev) => {
+      // check for duplicates using id
+      const exists = prev.some((a) => a.id === newActivity.id);
+      if (exists) return prev;
+      return [newActivity, ...prev];
+    });
+
+    // emit to server
+    socketService.emit("activity", newActivity);
+  };
 
   return (
     <div
       className="relative mx-auto flex h-dvh max-h-dvh w-full max-w-2xl flex-col bg-[var(--color-background)] p-4 text-[var(--color-foreground)]"
       role="main"
       aria-label={`Room: ${roomId || "Loading"}`}
-      aria-busy={isConnecting}
     >
       <UserModal isOpen={showModal} onJoin={handleJoinRoom} onSkip={handleSkip} />
       <Header />

@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-const API_URL = import.meta.env.VITE_API_URL || "https://morph-app-plum.vercel.app/";
+// const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = "http://localhost:3000";
 
 interface Quote {
   quote: string;

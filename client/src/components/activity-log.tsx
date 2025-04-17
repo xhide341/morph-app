@@ -5,18 +5,15 @@ import { useRef, useEffect } from "react";
 
 export const ActivityLog = ({ activities }: { activities: RoomActivity[] }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
+
   // auto scroll to bottom when activities change
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      if (scrollRef.current) {
-        scrollRef.current.scrollTo({
-          top: scrollRef.current.scrollHeight,
-          behavior: "smooth",
-        });
-      }
-    }, 100);
-
-    return () => clearTimeout(timeoutId);
+    if (scrollRef.current) {
+      scrollRef.current.scrollTo({
+        top: scrollRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+    }
   }, [activities]);
 
   return (
@@ -29,13 +26,16 @@ export const ActivityLog = ({ activities }: { activities: RoomActivity[] }) => {
     >
       <div className="relative py-2">
         <AnimatePresence mode="popLayout">
-          {activities?.map((activity) => (
+          {[...activities].reverse().map((activity) => (
             <motion.div
               key={activity.id}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 1, y: 0 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.2 }}
+              exit={{ opacity: 0, y: 20 }}
+              transition={{
+                duration: 0.4,
+                delay: 0.2,
+              }}
               className="mb-2"
             >
               <div className="rounded-lg p-1">

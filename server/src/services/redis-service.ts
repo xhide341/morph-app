@@ -38,9 +38,9 @@ export const redisService = {
 
     console.log("[Redis] Room data:", JSON.stringify(data, null, 2));
     // important: return null if empty object (no room found)
-    if (Object.keys(data).length === 0) {
-      return null;
-    }
+    // if (Object.keys(data).length === 0) {
+    //   return null;
+    // }
 
     return {
       roomId: roomId,

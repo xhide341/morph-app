@@ -1,43 +1,31 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { RoomInfo, RoomUser, RoomActivity } from "../types/room";
 import { useUserInfo } from "../contexts/user-context";
 import { socketService } from "../services/socket-service";
+import { debounce } from "lodash";
 
-const API_URL = import.meta.env.VITE_API_URL || "https://morph-app-plum.vercel.app/";
+// const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = "http://localhost:3000";
 
 export const useRoom = (roomId?: string) => {
   const { userName } = useUserInfo();
   const [roomInfo, setRoomInfo] = useState<RoomInfo | null>(null);
   const [roomUsers, setRoomUsers] = useState<RoomUser[]>([]);
 
-  // auto-fetch room/user data on mount
-  useEffect(() => {
-    if (!roomId || !userName) return;
-
-    const fetchRoomData = async () => {
+  // Create debounced fetch function
+  const debouncedFetchUsers = useCallback(
+    debounce(async (roomId: string) => {
       try {
-        const getRoomInfo = await fetchRoom(roomId);
-        if (!getRoomInfo) return;
-        setRoomInfo(getRoomInfo);
-
-        const getRoomUsers = await fetchRoomUsers(roomId);
-        if (!getRoomUsers) return;
-        setRoomUsers(getRoomUsers);
+        const users = await fetchRoomUsers(roomId);
+        if (users) {
+          setRoomUsers(users);
+        }
       } catch (error) {
-        console.error("[useRoom] Error fetching room data:", error);
+        console.error("[useRoom] Error fetching room users:", error);
       }
-    };
-
-    fetchRoomData();
-  }, [roomId, userName]);
-
-  const updateRoomInfo = (info: RoomInfo) => {
-    setRoomInfo(info);
-  };
-
-  const updateRoomUsers = (users: RoomUser[]) => {
-    setRoomUsers(users);
-  };
+    }, 300),
+    [],
+  );
 
   // room functions
   const fetchRoom = async (roomId: string): Promise<RoomInfo | null> => {
@@ -47,24 +35,11 @@ export const useRoom = (roomId?: string) => {
 
       console.log(`[fetchRoom] Response status: ${response.status}`);
       if (!response.ok) {
-        if (response.status === 404) {
-          console.log(`[fetchRoom] Room not found: ${roomId}`);
-          return null;
-        }
-        console.error(`[fetchRoom] Server error: ${response.status}`);
-        const errorText = await response.text();
-        console.error(`[fetchRoom] Error response: ${errorText}`);
+        console.log(`[fetchRoom] Room not found: ${roomId}`);
         return null;
       }
 
-      const text = await response.text();
-      console.log(`[fetchRoom] Response text: ${text}`);
-      if (!text || text.trim() === "") {
-        console.error("[fetchRoom] Empty response from server");
-        return null;
-      }
-
-      const data = JSON.parse(text);
+      const data = await response.json();
       console.log(`[fetchRoom] Room data:`, data);
       return data;
     } catch (error) {
@@ -93,27 +68,6 @@ export const useRoom = (roomId?: string) => {
       return null;
     }
   };
-
-  // auto-fetch room users on mount and listen for user events
-  useEffect(() => {
-    if (!roomId) return;
-
-    // initial fetch
-    fetchRoomUsers(roomId);
-
-    // subscribe to socket events for user join/leave
-    const handleUserActivity = (activity: RoomActivity) => {
-      if (activity.type === "join" || activity.type === "leave") {
-        fetchRoomUsers(roomId);
-      }
-    };
-
-    const unsubscribe = socketService.subscribe("activity", handleUserActivity);
-
-    return () => {
-      unsubscribe();
-    };
-  }, [roomId]);
 
   const createRoom = async (roomId: string) => {
     try {
@@ -249,8 +203,6 @@ export const useRoom = (roomId?: string) => {
     fetchRoomUsers,
     shareRoom,
     getRoomUrl,
-    updateRoomInfo,
-    updateRoomUsers,
   };
 };
 

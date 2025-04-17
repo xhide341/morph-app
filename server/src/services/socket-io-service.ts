@@ -18,15 +18,8 @@ export class SocketIOService {
             ? process.env.CORS_ORIGIN
             : "http://localhost:5173",
         methods: ["GET", "POST"],
-        credentials: true,
+        credentials: false,
       },
-      connectionStateRecovery: {
-        maxDisconnectionDuration: 2 * 60 * 1000, // 2 minutes
-        skipMiddlewares: true,
-      },
-      pingTimeout: 60000,
-      pingInterval: 25000,
-      transports: ["websocket", "polling"],
     });
 
     this.initialize();
@@ -43,7 +36,6 @@ export class SocketIOService {
     this.io.on("connection", (socket) => {
       socket.on("join_room", async (data) => {
         const { roomId, userName } = data;
-
         this.activeUsers.set(socket.id, { roomId, userName });
         socket.join(roomId);
 
@@ -56,26 +48,22 @@ export class SocketIOService {
         };
 
         try {
-          // store join activity in redis
           const storedActivity = await redisService.storeActivity(roomId, join);
-
           if (storedActivity) {
-            // broadcast to everyone EXCEPT the sender
-            // the sender already knows they joined
-            socket.to(roomId).emit("activity", storedActivity);
+            // Only broadcast to others, not back to sender
+            socket.broadcast.to(roomId).emit("activity", storedActivity);
           }
-
-          await redisService.userJoinRoom(roomId, userName);
+          const joined = await redisService.userJoinRoom(roomId, userName);
+          if (!joined) {
+            console.error("[SocketIO] Error handling join");
+          }
         } catch (error) {
           console.error("[SocketIO] error storing join activity:", error);
         }
       });
 
       socket.on("activity", async (activity: RoomActivity) => {
-        if (!activity || !activity.roomId) {
-          console.error("[SocketIO] invalid activity data:", activity);
-          return;
-        }
+        if (!activity || !activity.roomId) return;
 
         try {
           // store all activities in redis
@@ -84,13 +72,12 @@ export class SocketIOService {
             activity
           );
 
-          if (!storedActivity) {
-            console.error("[SocketIO] failed to store activity");
-            return;
+          if (storedActivity) {
+            // Only broadcast to others, not back to sender
+            socket.broadcast
+              .to(activity.roomId)
+              .emit("activity", storedActivity);
           }
-
-          // broadcast to everyone EXCEPT the sender
-          socket.to(activity.roomId).emit("activity", storedActivity);
         } catch (error) {
           console.error("[SocketIO] error storing activity:", error);
         }
@@ -119,10 +106,12 @@ export class SocketIOService {
               leaveActivity
             );
             if (storedActivity) {
-              // emit the complete stored activity
               this.io.to(roomId).emit("activity", storedActivity);
             }
-            await redisService.userLeaveRoom(roomId, userName);
+            const left = await redisService.userLeaveRoom(roomId, userName);
+            if (!left) {
+              console.error("[SocketIO] Error handling disconnect");
+            }
           } catch (error) {
             console.error("[SocketIO] Error handling disconnect:", error);
           }

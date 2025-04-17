@@ -8,22 +8,23 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
     proxy: {
-      "/api": {
-        target: process.env.VITE_API_URL || "http://localhost:3000",
+      "/api": {        
+        target: "http://localhost:3000",
         changeOrigin: true,
         secure: false,
       },
-      "/socket.io": {
-        target: process.env.VITE_WS_URL || "ws://localhost:3000",
+      "/socket.io": {        
+        target: "ws://localhost:3000",
         ws: true,
         changeOrigin: true,
         secure: false,
       },
     },
   },
-  build: {
-    outDir: "dist",
-    assetsDir: "assets",
-    sourcemap: true,
-  },
+  // TODO: uncomment for production
+  // build: {
+  //   outDir: "dist",
+  //   assetsDir: "assets",
+  //   sourcemap: true,
+  // },
 });
