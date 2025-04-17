@@ -27,28 +27,19 @@ export function SessionPage() {
     try {
       const roomId = roomName.trim().toLowerCase();
 
-      // validate with zod schema
+      // 1. Validate with zod
       const { roomName: validatedRoom } = roomSchema.parse({
         roomName: roomId,
       });
 
-      // check if room exists
-      const roomExists = await fetchRoom(validatedRoom);
-      if (roomExists) {
+      // 2. Try to create room (server handles existence check)
+      const room = await createRoom(validatedRoom);
+      if (!room) {
         navigate(`/room/${validatedRoom}`);
-        return;
       }
 
-      // create new room if doesn't exist
-      const createdRoom = await createRoom(validatedRoom);
-      if (!createdRoom) {
-        console.error("[Session] Failed to create room");
-        setValidationError("Failed to create room. Please try again.");
-        return;
-      }
-
+      // 3. Navigate to room
       navigate(`/room/${validatedRoom}`);
-      return;
     } catch (error) {
       console.error("[Session] Error:", error);
       if (error instanceof z.ZodError) {

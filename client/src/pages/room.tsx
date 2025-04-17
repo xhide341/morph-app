@@ -14,8 +14,8 @@ import { UserModal } from "../components/user-modal";
 
 export const RoomPage = () => {
   const { roomId } = useParams<{ roomId: string }>();
-  const { userName, setUserName, clearUserName } = useUserInfo();
-  const { roomUsers, joinRoom } = useRoom(roomId);
+  const { userName, setUserName } = useUserInfo();
+  const { roomUsers, setRoomUsers, fetchRoomUsers, joinRoom } = useRoom(roomId);
   const { activities, setActivities, fetchActivities } = useActivity(roomId);
   const [showModal, setShowModal] = useState(!userName);
 
@@ -36,22 +36,35 @@ export const RoomPage = () => {
 
     const handleActivity = (activity: RoomActivity) => {
       setActivities((prev) => {
-        // check for duplicates using id
         const exists = prev.some((a) => a.id === activity.id);
         if (exists) return prev;
         return [activity, ...prev];
       });
     };
 
-    // clean up previous listeners
-    socketService.off("activity", handleActivity);
-    // add new listener
     socketService.on("activity", handleActivity);
 
     return () => {
       socketService.off("activity", handleActivity);
     };
-  }, []);
+  }, [roomId, userName]);
+
+  useEffect(() => {
+    const loadInitialData = async () => {
+      try {
+        const [activities, users] = await Promise.all([fetchActivities(), fetchRoomUsers()]);
+
+        if (activities) setActivities(activities);
+        console.log("activities: ", activities);
+        if (users) setRoomUsers(users);
+        console.log("users: ", users);
+      } catch (error) {
+        console.error("Error loading initial data:", error);
+      }
+    };
+
+    loadInitialData();
+  }, [roomId, userName]);
 
   const handleJoinRoom = async (name: string) => {
     if (!roomId) return;

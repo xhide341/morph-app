@@ -56,19 +56,30 @@ export const redisService = {
     const timestamp = Date.now().toString();
 
     try {
-      // use hSet for atomic operation
-      await redis.hSet(roomKey, {
-        roomId,
-        createdAt: timestamp,
-        lastActive: timestamp,
-        activeUsers: "0",
-      });
+      const exists = await redis.exists(roomKey);
+      if (exists) {
+        console.log("[Redis] Room already exists:", roomId);
+        return null;
+      }
 
-      // set initial expiry
-      await redis.expire(roomKey, ROOM_INACTIVITY_EXPIRY);
+      // Atomic operation to create room
+      const result = await redis
+        .multi()
+        .hSet(roomKey, {
+          roomId,
+          createdAt: timestamp,
+          lastActive: timestamp,
+          activeUsers: "0",
+        })
+        .expire(roomKey, ROOM_INACTIVITY_EXPIRY)
+        .exec();
+
+      if (!result) {
+        console.error("[Redis] Failed to create room:", roomId);
+        return null;
+      }
 
       console.log("[Redis] Room created:", roomId);
-
       return {
         roomId,
         createdBy: null,
@@ -157,8 +168,10 @@ export const redisService = {
   },
 
   async getRoomUsers(roomId: string): Promise<RoomUser[]> {
+    console.log(`[Redis] Starting getRoomUsers for ${roomId}`);
     const userHashKey = `room:${roomId}:users`;
     try {
+      console.log(`[Redis] Executing hGetAll for ${userHashKey}`);
       const usersData = await redis.hGetAll(userHashKey);
       if (!usersData) {
         console.error("[Redis] Room data is empty");
@@ -169,7 +182,7 @@ export const redisService = {
       console.log("[Redis] Fetched users:", users);
       return users;
     } catch (error) {
-      console.error("[Redis] Error getting room users:", error);
+      console.error("[Redis] Error in getRoomUsers:", error);
       return [];
     }
   },

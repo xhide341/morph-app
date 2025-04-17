@@ -54,7 +54,7 @@ export const ActivityLog = ({ activities }: { activities: RoomActivity[] }) => {
                       `set timer to ${activity.timeRemaining?.split(":")[0]}-minute ${activity.timerMode}`}
                   </span>
                   <span className="ml-auto text-xs text-gray-400" aria-label="Time of activity">
-                    {format(new Date(activity.timeStamp), "HH:mm")}
+                    {activity.timeStamp ? format(new Date(activity.timeStamp), "HH:mm") : "00:00"}
                   </span>
                 </div>
               </div>

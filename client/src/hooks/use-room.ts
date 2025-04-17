@@ -1,8 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { RoomInfo, RoomUser, RoomActivity } from "../types/room";
 import { useUserInfo } from "../contexts/user-context";
-import { socketService } from "../services/socket-service";
-import { debounce } from "lodash";
 
 // const API_URL = import.meta.env.VITE_API_URL;
 const API_URL = "http://localhost:3000";
@@ -12,23 +10,8 @@ export const useRoom = (roomId?: string) => {
   const [roomInfo, setRoomInfo] = useState<RoomInfo | null>(null);
   const [roomUsers, setRoomUsers] = useState<RoomUser[]>([]);
 
-  // Create debounced fetch function
-  const debouncedFetchUsers = useCallback(
-    debounce(async (roomId: string) => {
-      try {
-        const users = await fetchRoomUsers(roomId);
-        if (users) {
-          setRoomUsers(users);
-        }
-      } catch (error) {
-        console.error("[useRoom] Error fetching room users:", error);
-      }
-    }, 300),
-    [],
-  );
-
   // room functions
-  const fetchRoom = async (roomId: string): Promise<RoomInfo | null> => {
+  const fetchRoom = async (roomId: string) => {
     try {
       console.log(`[fetchRoom] Fetching room with ID: ${roomId}`);
       const response = await fetch(`${API_URL}/api/room/${roomId}/info`);
@@ -48,18 +31,12 @@ export const useRoom = (roomId?: string) => {
     }
   };
 
-  const fetchRoomUsers = async (roomId: string) => {
+  const fetchRoomUsers = async (): Promise<RoomUser[] | null> => {
+    console.log("fetchRoomUsers called");
     if (!roomId) return null;
-
     try {
-      // fetch room users api
       const response = await fetch(`${API_URL}/api/room/${roomId}/users`);
-
-      if (!response.ok) {
-        console.error("[useRoom] error fetching room users, status:", response.status);
-        return null;
-      }
-
+      if (!response.ok) return null;
       const users = await response.json();
       setRoomUsers(users);
       return users;
@@ -196,6 +173,7 @@ export const useRoom = (roomId?: string) => {
   return {
     roomInfo,
     roomUsers,
+    setRoomUsers,
     fetchRoom,
     createRoom,
     joinRoom,

@@ -3,22 +3,22 @@ import { Howl } from "howler";
 const sounds = {
   start: new Howl({
     src: ["/sounds/start.mp3"],
-    volume: 0.5,
+    volume: 0.1,
     preload: true,
   }),
   pause: new Howl({
     src: ["/sounds/pause.mp3"],
-    volume: 0.5,
+    volume: 0.1,
     preload: true,
   }),
   reset: new Howl({
     src: ["/sounds/reset.mp3"],
-    volume: 0.5,
+    volume: 0.1,
     preload: true,
   }),
   complete: new Howl({
     src: ["/sounds/ring.mp3"],
-    volume: 0.7,
+    volume: 0.1,
     preload: true,
   }),
 };
