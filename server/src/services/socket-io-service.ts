@@ -1,7 +1,8 @@
-import { Server as SocketIOServer } from "socket.io";
 import { Server } from "http";
-import { redisService } from "./redis-service";
+import { Server as SocketIOServer } from "socket.io";
+
 import { RoomActivity } from "../types/room";
+import { redisService } from "./redis-service";
 
 export class SocketIOService {
   private static instance: SocketIOService;
@@ -32,6 +33,32 @@ export class SocketIOService {
     return SocketIOService.instance;
   }
 
+  private async retryOperation<T>(
+    operation: () => Promise<T>,
+    maxAttempts: number = 3,
+    initialDelay: number = 1000,
+  ): Promise<T> {
+    let lastError: Error | null = null;
+    let delay = initialDelay;
+
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        return await operation();
+      } catch (error) {
+        lastError = error as Error;
+        console.error(`[SocketIO] Attempt ${attempt} failed:`, error);
+
+        if (attempt === maxAttempts) break;
+
+        // exponential backoff
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        delay *= 2;
+      }
+    }
+
+    throw lastError;
+  }
+
   private initialize() {
     this.io.on("connection", (socket) => {
       socket.on("join_room", async (data) => {
@@ -48,17 +75,30 @@ export class SocketIOService {
         };
 
         try {
-          const storedActivity = await redisService.storeActivity(roomId, join);
+          let storedActivity: RoomActivity | null = null;
+          await this.retryOperation(async () => {
+            const activityResult = await redisService.storeActivity(
+              roomId,
+              join,
+            );
+            if (!activityResult) {
+              throw new Error("Failed to store activity in Redis");
+            }
+            storedActivity = activityResult;
+
+            const joined = await redisService.joinRoom(roomId, userName);
+            if (!joined) {
+              storedActivity = null;
+              throw new Error("Failed to join room in Redis");
+            }
+          });
+
           if (storedActivity) {
-            // Only broadcast to others, not back to sender
             socket.broadcast.to(roomId).emit("activity", storedActivity);
           }
-          const joined = await redisService.userJoinRoom(roomId, userName);
-          if (!joined) {
-            console.error("[SocketIO] Error handling join");
-          }
         } catch (error) {
-          console.error("[SocketIO] error storing join activity:", error);
+          console.error("[SocketIO] Error handling join after retries:", error);
+          socket.emit("error", { message: "Failed to join room" });
         }
       });
 
@@ -66,31 +106,38 @@ export class SocketIOService {
         if (!activity || !activity.roomId) return;
 
         try {
-          // store all activities in redis
-          const storedActivity = await redisService.storeActivity(
-            activity.roomId,
-            activity
-          );
+          let storedActivity: RoomActivity | null = null;
+          await this.retryOperation(async () => {
+            const activityResult = await redisService.storeActivity(
+              activity.roomId,
+              activity,
+            );
+            if (!activityResult) {
+              throw new Error("Failed to store activity in Redis");
+            }
+            storedActivity = activityResult;
+          });
 
           if (storedActivity) {
-            // Only broadcast to others, not back to sender
             socket.broadcast
               .to(activity.roomId)
               .emit("activity", storedActivity);
           }
         } catch (error) {
-          console.error("[SocketIO] error storing activity:", error);
+          console.error(
+            "[SocketIO] Error storing activity after retries:",
+            error,
+          );
+          socket.emit("error", {
+            message: "Failed to store activity",
+          });
         }
       });
 
       socket.on("disconnect", async () => {
-        // automatically remove user from room when disconnected
-        // websocket-level automatic disconnection
-        // this triggers when users close the browser or tab (websocket disconnects)
         const userInfo = this.activeUsers.get(socket.id);
         if (userInfo) {
           const { roomId, userName } = userInfo;
-          // add "leave" activity
           const leaveActivity: RoomActivity = {
             type: "leave",
             userName,
@@ -100,20 +147,32 @@ export class SocketIOService {
           };
 
           try {
-            // store first, then emit the stored activity
-            const storedActivity = await redisService.storeActivity(
-              roomId,
-              leaveActivity
-            );
+            let storedActivity: RoomActivity | null = null;
+            await this.retryOperation(async () => {
+              const activityResult = await redisService.storeActivity(
+                roomId,
+                leaveActivity,
+              );
+              if (!activityResult) {
+                throw new Error("Failed to store activity in Redis");
+              }
+              storedActivity = activityResult;
+
+              const left = await redisService.userLeaveRoom(roomId, userName);
+              if (!left) {
+                storedActivity = null;
+                throw new Error("Failed to leave room in Redis");
+              }
+            });
+
             if (storedActivity) {
               this.io.to(roomId).emit("activity", storedActivity);
             }
-            const left = await redisService.userLeaveRoom(roomId, userName);
-            if (!left) {
-              console.error("[SocketIO] Error handling disconnect");
-            }
           } catch (error) {
-            console.error("[SocketIO] Error handling disconnect:", error);
+            console.error(
+              "[SocketIO] Error handling disconnect after retries:",
+              error,
+            );
           }
 
           this.activeUsers.delete(socket.id);

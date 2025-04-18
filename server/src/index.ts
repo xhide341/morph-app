@@ -1,11 +1,12 @@
-import express from "express";
 import cors from "cors";
+import express from "express";
+import { createServer } from "http";
+
+import { connectRedis } from "./config/redis";
 import quotesRouter from "./routes/quotes";
 import roomRouter from "./routes/room";
-import { connectRedis } from "./config/redis";
-import { createServer } from "http";
-import { SocketIOService } from "./services/socket-io-service";
 import { redisService } from "./services/redis-service";
+import { SocketIOService } from "./services/socket-io-service";
 
 const app = express();
 const port = parseInt(process.env.PORT || "10000", 10);
@@ -30,7 +31,7 @@ app.use(
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: false, // TODO: change to true in production
-  })
+  }),
 );
 app.use(express.json());
 app.use("/api/quotes", quotesRouter);

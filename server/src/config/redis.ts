@@ -1,13 +1,13 @@
-import { createClient } from "redis";
 import dotenv from "dotenv";
 import path from "path";
+import { createClient } from "redis";
 
 // Load the correct .env file based on NODE_ENV
 dotenv.config({
   path: path.resolve(
     process.cwd(),
     "..", // Go up one level to the root
-    process.env.NODE_ENV === "production" ? ".env.production" : ".env"
+    process.env.NODE_ENV === "production" ? ".env.production" : ".env",
   ),
 });
 

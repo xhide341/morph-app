@@ -1,4 +1,5 @@
-import { Router, Request, Response, RequestHandler } from "express";
+import { Request, RequestHandler, Response, Router } from "express";
+
 import { redisService } from "../services/redis-service";
 
 const roomRouter = Router();
@@ -24,7 +25,7 @@ roomRouter.post(
       console.error("[Room] Error creating room:", error);
       res.status(500).json({ error: "Failed to create room" });
     }
-  }
+  },
 );
 
 // get room info
@@ -58,7 +59,7 @@ roomRouter
     try {
       const { roomId } = req.params;
       const { userName } = req.body;
-      const result = await redisService.userJoinRoom(roomId, userName);
+      const result = await redisService.joinRoom(roomId, userName);
       res.json(result);
     } catch (error) {
       res.status(500).json({ error: "Failed to join room" });

@@ -1,37 +1,43 @@
 import { redis } from "../config/redis";
 import { RoomActivity, RoomInfo, RoomUser } from "../types/room";
 
-const ROOM_INACTIVITY_EXPIRY = 10 * 60; // 10 minutes in seconds
+const ROOM_INACTIVITY_EXPIRY = 10 * 60;
 
 export const redisService = {
-  // Room activities
   async storeActivity(roomId: string, activity: RoomActivity) {
     const key = `room:${roomId}:activities`;
+    const roomKey = `room:${roomId}`;
+    const timestamp = new Date(activity.timeStamp).getTime();
+    const member = JSON.stringify(activity);
+    const now = Date.now();
 
-    const result = await redis
+    const results = await redis
       .multi()
-      .rPush(key, JSON.stringify(activity))
-      .lTrim(key, 0, 49)
+      .zAdd(key, { score: timestamp, value: member })
+      .zRemRangeByRank(key, 0, -51)
+      .hSet(roomKey, "lastActive", now)
       .exec();
-    if (!result) return;
 
-    // update room's last active timestamp
-    await redis.hSet(`room:${roomId}`, "lastActive", Date.now());
+    for (const result of results) {
+      if (Array.isArray(result) && result[0] !== null) {
+        console.error("[Redis] Failed to store activity:", activity.type);
+        return null;
+      }
+    }
+
     console.log("[Redis] Activity stored:", activity.type);
-
     return activity;
   },
 
   async getActivities(roomId: string): Promise<RoomActivity[]> {
     const key = `room:${roomId}:activities`;
-    const activities = await redis.lRange(key, 0, -1);
+    const activities = await redis.zRange(key, 0, -1);
     if (!activities) return [];
     return activities.map((activity) => JSON.parse(activity));
   },
 
   // ------------------------------------------------------------
 
-  // Room management
   async getRoomInfo(roomId: string): Promise<RoomInfo | null> {
     const roomKey = `room:${roomId}`;
     const data = await redis.hGetAll(roomKey);
@@ -44,7 +50,6 @@ export const redisService = {
 
     return {
       roomId: roomId,
-      createdBy: null,
       createdAt: data.createdAt,
       lastActive: data.lastActive,
       activeUsers: Number(data.activeUsers),
@@ -82,7 +87,6 @@ export const redisService = {
       console.log("[Redis] Room created:", roomId);
       return {
         roomId,
-        createdBy: null,
         createdAt: timestamp,
         lastActive: timestamp,
         activeUsers: 0,
@@ -93,34 +97,50 @@ export const redisService = {
     }
   },
 
-  // User presence management
-  async userJoinRoom(roomId: string, userName: string) {
+  async joinRoom(roomId: string, userName: string) {
     const roomKey = `room:${roomId}`;
     const userHashKey = `room:${roomId}:users`;
+    const activitiesKey = `room:${roomId}:activities`;
+    const urlKey = `room:${roomId}:url`;
 
     try {
-      const result = await redis
+      const joinResults = await redis
         .multi()
         .hSet(
           userHashKey,
           userName,
-          JSON.stringify({ userName, joinedAt: Date.now() })
+          JSON.stringify({ userName, joinedAt: Date.now() }),
         )
         .hLen(userHashKey)
         .exec();
 
-      if (!result) return null;
+      for (const result of joinResults) {
+        if (Array.isArray(result) && result[0] !== null) {
+          console.error("[Redis] Failed to add user:", userName);
+          return null;
+        }
+      }
 
-      const userCount = result[1];
+      const userCount = joinResults[1];
 
-      await redis.hSet(roomKey, {
-        activeUsers: String(userCount),
-        lastActive: Date.now(),
-      });
-      // remove expiry
-      await redis.persist(roomKey);
-      await redis.persist(userHashKey);
-      await redis.persist(`room:${roomId}:activities`);
+      const updateResult = await redis
+        .multi()
+        .hSet(roomKey, {
+          activeUsers: String(userCount),
+          lastActive: Date.now(),
+        })
+        .persist(roomKey)
+        .persist(userHashKey)
+        .persist(activitiesKey)
+        .persist(urlKey)
+        .exec();
+
+      for (const result of updateResult) {
+        if (Array.isArray(result) && result[0] !== null) {
+          console.error("[Redis] Failed to update room:", roomId);
+          return null;
+        }
+      }
 
       return {
         userCount: Number(userCount),
@@ -135,35 +155,59 @@ export const redisService = {
   async userLeaveRoom(roomId: string, userName: string) {
     const roomKey = `room:${roomId}`;
     const userHashKey = `room:${roomId}:users`;
+    const activitiesKey = `room:${roomId}:activities`;
+    const urlKey = `room:${roomId}:url`;
 
     try {
       const removed = await redis.hDel(userHashKey, userName);
-      if (!removed) return null;
-
-      // update active users count
-      const userCount = await redis.hLen(userHashKey);
-      await redis.hSet(roomKey, {
-        activeUsers: userCount,
-        lastActive: Date.now(),
-      });
-
-      // if no users, set 10-minute expiry
-      if (userCount === 0) {
-        const result = await redis
-          .multi()
-          .expire(roomKey, ROOM_INACTIVITY_EXPIRY)
-          .expire(`room:${roomId}:activities`, ROOM_INACTIVITY_EXPIRY)
-          .exec();
-        console.log("[Redis] Room expired:", result);
+      if (!removed) {
+        console.warn(
+          `[Redis] userLeaveRoom: User ${userName} not found in ${userHashKey}.`,
+        );
+        return null;
       }
 
-      return {
-        userCount: Number(userCount),
-        lastActive: String(Date.now()),
-      };
+      const userCount = await redis.hLen(userHashKey);
+      const now = Date.now(); // Get timestamp once
+
+      if (userCount === 0) {
+        console.log(
+          `[Redis] Room ${roomId} empty. Updating metadata and setting expiry.`,
+        );
+        const results = await redis
+          .multi()
+          .expire(roomKey, ROOM_INACTIVITY_EXPIRY)
+          .expire(activitiesKey, ROOM_INACTIVITY_EXPIRY)
+          .expire(userHashKey, ROOM_INACTIVITY_EXPIRY)
+          .expire(urlKey, ROOM_INACTIVITY_EXPIRY)
+          .exec();
+
+        for (const result of results) {
+          if (Array.isArray(result) && result[0] !== null) {
+            console.error("[Redis] Failed to update room:", roomId);
+            return null;
+          }
+        }
+        console.log(
+          `[Redis] Expiry set successfully for empty room ${roomId}.`,
+        );
+      }
+
+      const setResult = await redis.hSet(roomKey, {
+        activeUsers: String(userCount),
+        lastActive: now,
+      });
+      if (typeof setResult)
+        return {
+          userCount: Number(userCount),
+          lastActive: now,
+        };
     } catch (error) {
-      console.error(error);
-      return;
+      console.error(
+        `[Redis] Error during userLeaveRoom for ${roomId}, user ${userName}:`,
+        error,
+      );
+      return null;
     }
   },
 
