@@ -5,7 +5,7 @@ import roomRouter from "./routes/room";
 import { connectRedis } from "./config/redis";
 import { createServer } from "http";
 import { SocketIOService } from "./services/socket-io-service";
-import path from "path";
+import { redisService } from "./services/redis-service";
 
 const app = express();
 const port = parseInt(process.env.PORT || "10000", 10);
@@ -15,7 +15,11 @@ const server = createServer(app);
 SocketIOService.getInstance(server);
 
 // redis connection
-connectRedis().catch(console.error);
+const startRedis = async () => {
+  await connectRedis();
+  await redisService.cleanupExpiredRooms();
+};
+startRedis().catch(console.error);
 
 app.use(
   cors({

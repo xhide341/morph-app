@@ -211,4 +211,22 @@ export const redisService = {
       return null;
     }
   },
+
+  async cleanupExpiredRooms() {
+    try {
+      const keys = await redis.keys("room:*");
+      console.log(`[Redis] Found ${keys.length} rooms to check`);
+
+      for (const key of keys) {
+        const ttl = await redis.ttl(key);
+        const isMainRoom = !key.includes(":");
+        if (ttl === -1 && isMainRoom) {
+          const roomId = key.split(":")[1];
+          await redis.del([`room:${roomId}*`]);
+        }
+      }
+    } catch (error) {
+      console.error("[Redis] Error during cleanup:", error);
+    }
+  },
 };
