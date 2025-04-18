@@ -41,12 +41,14 @@ export const redisService = {
   async getRoomInfo(roomId: string): Promise<RoomInfo | null> {
     const roomKey = `room:${roomId}`;
     const data = await redis.hGetAll(roomKey);
-
+    if (Object.keys(data).length === 0) {
+      console.warn(
+        "[Redis] Room key exists but hGetAll returned empty:",
+        roomId,
+      );
+      return null;
+    }
     console.log("[Redis] Room data:", JSON.stringify(data, null, 2));
-    // important: return null if empty object (no room found)
-    // if (Object.keys(data).length === 0) {
-    //   return null;
-    // }
 
     return {
       roomId: roomId,
@@ -67,7 +69,6 @@ export const redisService = {
         return null;
       }
 
-      // Atomic operation to create room
       const result = await redis
         .multi()
         .hSet(roomKey, {
@@ -168,7 +169,6 @@ export const redisService = {
       }
 
       const userCount = await redis.hLen(userHashKey);
-      const now = Date.now(); // Get timestamp once
 
       if (userCount === 0) {
         console.log(
@@ -191,17 +191,27 @@ export const redisService = {
         console.log(
           `[Redis] Expiry set successfully for empty room ${roomId}.`,
         );
+      } else {
+        console.log(
+          `[Redis] Room ${roomId} has ${userCount} users remaining. Updating metadata.`,
+        );
+        const setResult = await redis.hSet(roomKey, {
+          activeUsers: String(userCount),
+          lastActive: Date.now(),
+        });
+
+        if (typeof setResult !== "number") {
+          console.error(
+            `[Redis] Failed HSET when updating metadata for room ${roomId} (count > 0).`,
+          );
+          return null;
+        }
       }
 
-      const setResult = await redis.hSet(roomKey, {
-        activeUsers: String(userCount),
-        lastActive: now,
-      });
-      if (typeof setResult)
-        return {
-          userCount: Number(userCount),
-          lastActive: now,
-        };
+      return {
+        userCount: Number(userCount),
+        lastActive: Date.now(),
+      };
     } catch (error) {
       console.error(
         `[Redis] Error during userLeaveRoom for ${roomId}, user ${userName}:`,
