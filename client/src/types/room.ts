@@ -20,7 +20,6 @@ export type RoomActivity = {
 
 export interface RoomInfo {
   roomId: string;
-  createdBy?: string | null;
   createdAt: string;
   lastActive: string;
   activeUsers: number;
