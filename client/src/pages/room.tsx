@@ -113,22 +113,18 @@ export const RoomPage = () => {
       return;
     }
 
-    // create new activity with id and timestamp
     const newActivity = {
       ...activity,
       id: crypto.randomUUID(),
       timeStamp: new Date().toISOString(),
     };
 
-    // optimistic update - add to state immediately
     setActivities((prev) => {
-      // check for duplicates using id
       const exists = prev.some((a) => a.id === newActivity.id);
       if (exists) return prev;
-      return [newActivity, ...prev];
+      return [...prev, newActivity];
     });
 
-    // emit to server
     socketService.emit("activity", newActivity);
   };
 

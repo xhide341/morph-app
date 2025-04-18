@@ -26,7 +26,7 @@ export const ActivityLog = ({ activities }: { activities: RoomActivity[] }) => {
     >
       <div className="relative py-2">
         <AnimatePresence mode="popLayout">
-          {[...activities].reverse().map((activity) => (
+          {activities.map((activity) => (
             <motion.div
               key={activity.id}
               initial={{ opacity: 1, y: 0 }}
