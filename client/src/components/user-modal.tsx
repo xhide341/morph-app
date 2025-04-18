@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { z } from "zod";
 import { AlertCircle } from "react-feather";
+import { z } from "zod";
 
 interface UserModalProps {
   isOpen: boolean;
@@ -42,7 +42,10 @@ export const UserModal = ({ isOpen, onJoin, onSkip }: UserModalProps) => {
       aria-modal="true"
     >
       <div className="bg-background relative w-full max-w-md rounded-lg p-6 shadow-xl">
-        <h2 id="modal-title" className="text-foreground mb-4 text-lg font-semibold tracking-wide">
+        <h2
+          id="modal-title"
+          className="text-foreground mb-4 text-lg font-semibold tracking-wide"
+        >
           What's your name?
         </h2>
 
@@ -50,7 +53,7 @@ export const UserModal = ({ isOpen, onJoin, onSkip }: UserModalProps) => {
           <div className="space-y-2">
             <label
               htmlFor="userName"
-              className="mb-2 block text-sm text-[var(--color-foreground)]/70"
+              className="text-[var(--color-foreground)]/70 mb-2 block text-sm"
             >
               Enter your name (optional):
             </label>
@@ -63,7 +66,9 @@ export const UserModal = ({ isOpen, onJoin, onSkip }: UserModalProps) => {
               className="bg-secondary text-foreground placeholder:text-foreground/50 w-full rounded-md p-2 text-sm outline-none"
               maxLength={10}
               aria-invalid={!!validationError}
-              aria-describedby={validationError ? "validation-error" : undefined}
+              aria-describedby={
+                validationError ? "validation-error" : undefined
+              }
             />
             {validationError && (
               <p
@@ -71,7 +76,11 @@ export const UserModal = ({ isOpen, onJoin, onSkip }: UserModalProps) => {
                 className="text-primary flex items-center gap-1 text-xs font-medium"
                 role="alert"
               >
-                <AlertCircle className="text-yellow" size={12} aria-hidden="true" />
+                <AlertCircle
+                  className="text-yellow"
+                  size={12}
+                  aria-hidden="true"
+                />
                 {validationError}
               </p>
             )}

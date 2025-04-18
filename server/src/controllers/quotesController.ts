@@ -1,5 +1,5 @@
-import { Request, Response } from "express";
 import axios from "axios";
+import { Request, Response } from "express";
 
 interface Quote {
   quote: string;

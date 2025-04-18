@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { playSound } from "../utils/audio";
-
 import { ArrowLeft } from "react-feather";
+
+import { playSound } from "../utils/audio";
 
 type TimerMode = "work" | "break";
 
@@ -14,7 +14,11 @@ export const ModeSwitch = ({ onTimerChange }: ModeSwitchProps) => {
   const [isTakingBreak, setIsTakingBreak] = useState(false);
 
   return (
-    <div className="flex flex-col gap-2" role="region" aria-label="Timer controls">
+    <div
+      className="flex flex-col gap-2"
+      role="region"
+      aria-label="Timer controls"
+    >
       <div className="flex flex-row items-center justify-center gap-2">
         {isSwitchingTimer || isTakingBreak ? (
           <button
@@ -48,7 +52,10 @@ export const ModeSwitch = ({ onTimerChange }: ModeSwitchProps) => {
           >
             Switch Timer
           </button>
-          <div className="bg-primary h-10 w-[2px] rounded-full opacity-50" aria-hidden="true"></div>
+          <div
+            className="bg-primary h-10 w-[2px] rounded-full opacity-50"
+            aria-hidden="true"
+          ></div>
           <button
             className="css-button-3d text-primary min-w-20 px-2 text-xs sm:w-32 sm:text-sm"
             onClick={() => {

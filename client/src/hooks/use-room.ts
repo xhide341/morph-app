@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef, useCallback } from "react";
-import { RoomInfo, RoomUser, RoomActivity } from "../types/room";
+import { useCallback, useEffect, useRef, useState } from "react";
+
 import { useUserInfo } from "../contexts/user-context";
+import { RoomActivity, RoomInfo, RoomUser } from "../types/room";
 
 // const API_URL = import.meta.env.VITE_API_URL;
 const API_URL = "http://localhost:3000";

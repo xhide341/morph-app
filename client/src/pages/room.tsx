@@ -1,16 +1,16 @@
+import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { useUserInfo } from "../contexts/user-context";
-import { useEffect, useState, useCallback } from "react";
-import { useRoom } from "../hooks/use-room";
-import { RoomActivity, RoomUser } from "../types/room";
-import { useActivity } from "../hooks/use-activity";
-import { socketService } from "../services/socket-service";
 
+import { ActivityLog } from "../components/activity-log";
 import { Clock } from "../components/clock";
 import { Header } from "../components/header";
-import { ActivityLog } from "../components/activity-log";
 import { UserDisplay } from "../components/user-display";
 import { UserModal } from "../components/user-modal";
+import { useUserInfo } from "../contexts/user-context";
+import { useActivity } from "../hooks/use-activity";
+import { useRoom } from "../hooks/use-room";
+import { socketService } from "../services/socket-service";
+import { RoomActivity, RoomUser } from "../types/room";
 
 export const RoomPage = () => {
   const { roomId } = useParams<{ roomId: string }>();
@@ -52,7 +52,10 @@ export const RoomPage = () => {
   useEffect(() => {
     const loadInitialData = async () => {
       try {
-        const [activities, users] = await Promise.all([fetchActivities(), fetchRoomUsers()]);
+        const [activities, users] = await Promise.all([
+          fetchActivities(),
+          fetchRoomUsers(),
+        ]);
 
         if (activities) setActivities(activities);
         console.log("activities: ", activities);
@@ -87,14 +90,24 @@ export const RoomPage = () => {
     ? (() => {
         const timerActivities = activities
           .filter((activity: RoomActivity) =>
-            ["start_timer", "pause_timer", "change_timer", "reset_timer"].includes(activity.type),
+            [
+              "start_timer",
+              "pause_timer",
+              "change_timer",
+              "reset_timer",
+            ].includes(activity.type),
           )
-          .sort((a, b) => new Date(b.timeStamp).getTime() - new Date(a.timeStamp).getTime());
+          .sort(
+            (a, b) =>
+              new Date(b.timeStamp).getTime() - new Date(a.timeStamp).getTime(),
+          );
         return timerActivities[0];
       })()
     : null;
 
-  const handleNewActivity = (activity: Omit<RoomActivity, "id" | "timeStamp">) => {
+  const handleNewActivity = (
+    activity: Omit<RoomActivity, "id" | "timeStamp">,
+  ) => {
     if (!socketService.isConnected()) {
       console.warn("socket not connected, activity not emitted");
       return;
@@ -125,14 +138,21 @@ export const RoomPage = () => {
       role="main"
       aria-label={`Room: ${roomId || "Loading"}`}
     >
-      <UserModal isOpen={showModal} onJoin={handleJoinRoom} onSkip={handleSkip} />
+      <UserModal
+        isOpen={showModal}
+        onJoin={handleJoinRoom}
+        onSkip={handleSkip}
+      />
       <Header />
       <div
         className="mx-auto flex w-full max-w-3xl flex-col"
         role="region"
         aria-label="Timer section"
       >
-        <Clock latestActivity={latestTimerActivity} onActivityCreated={handleNewActivity} />
+        <Clock
+          latestActivity={latestTimerActivity}
+          onActivityCreated={handleNewActivity}
+        />
       </div>
       <div className="mt-6" role="region" aria-label="Activity log">
         {roomId && <ActivityLog activities={activities} />}

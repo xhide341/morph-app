@@ -1,7 +1,13 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import { SessionPage } from "./pages/session";
-import { RoomPage } from "./pages/room";
+import {
+  Navigate,
+  Route,
+  BrowserRouter as Router,
+  Routes,
+} from "react-router-dom";
+
 import { UserProvider } from "./contexts/user-context";
+import { RoomPage } from "./pages/room";
+import { SessionPage } from "./pages/session";
 
 export default function App() {
   return (

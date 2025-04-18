@@ -1,14 +1,17 @@
 import { useState } from "react";
+import { AlertCircle } from "react-feather";
 import { useNavigate } from "react-router-dom";
-import { useRoom } from "../hooks/use-room";
 import { z } from "zod";
 
 import { ThemeToggle } from "../components/theme-toggle";
-import { AlertCircle } from "react-feather";
+import { useRoom } from "../hooks/use-room";
 
 // inline room schema
 const roomSchema = z.object({
-  roomName: z.string().min(1, "Room name is required").max(20, "Room name is too long"),
+  roomName: z
+    .string()
+    .min(1, "Room name is required")
+    .max(20, "Room name is too long"),
 });
 
 // TODO: add custom UI validation
@@ -58,16 +61,20 @@ export function SessionPage() {
       role="main"
       aria-label="Session page"
     >
-      <div className="absolute top-4 right-4">
+      <div className="absolute right-4 top-4">
         <ThemeToggle />
       </div>
 
       <div className="mx-auto flex w-full max-w-xs flex-grow flex-col items-center justify-center">
         <div className="w-full space-y-6">
-          <h1 className="font-qurova text-center text-2xl font-bold tracking-wide">morph</h1>
+          <h1 className="font-qurova text-center text-2xl font-bold tracking-wide">
+            morph
+          </h1>
           <div className="text-center">
             <h1 className="mb-2 text-4xl font-bold">Welcome</h1>
-            <p className="text-foreground/70 text-sm">Enter room name to get started</p>
+            <p className="text-foreground/70 text-sm">
+              Enter room name to get started
+            </p>
           </div>
 
           <form
@@ -82,7 +89,7 @@ export function SessionPage() {
                 value={roomName}
                 onChange={(e) => setRoomName(e.target.value)}
                 placeholder="Enter room name"
-                className="bg-secondary text-foreground placeholder:text-foreground/50 focus:ring-accent w-full rounded-md p-2 text-sm focus:ring-1 focus:outline-none"
+                className="bg-secondary text-foreground placeholder:text-foreground/50 focus:ring-accent w-full rounded-md p-2 text-sm focus:outline-none focus:ring-1"
                 aria-required="true"
                 aria-invalid={!!validationError}
                 aria-describedby={validationError ? "room-error" : undefined}

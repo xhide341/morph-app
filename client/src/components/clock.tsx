@@ -1,11 +1,11 @@
-import { useState, useEffect, useRef } from "react";
-import { useQuote } from "../hooks/use-quote";
-import { useParams, useNavigate } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { Pause, Play, RotateCcw } from "react-feather";
+import { useNavigate, useParams } from "react-router-dom";
 import { RoomActivity } from "server/types/room";
-import { useUserInfo } from "../contexts/user-context";
-import { playSound } from "../utils/audio";
 
-import { Play, Pause, RotateCcw } from "react-feather";
+import { useUserInfo } from "../contexts/user-context";
+import { useQuote } from "../hooks/use-quote";
+import { playSound } from "../utils/audio";
 import ModeSwitch from "./mode-switch";
 import { ProgressBar } from "./progress-bar";
 
@@ -35,7 +35,9 @@ export const Clock = ({
   const [lastWorkTime, setLastWorkTime] = useState("25:00");
   const [lastBreakTime, setLastBreakTime] = useState("05:00");
   // interval reference for cleanup
-  const [timerInterval, setTimerInterval] = useState<NodeJS.Timeout | null>(null);
+  const [timerInterval, setTimerInterval] = useState<NodeJS.Timeout | null>(
+    null,
+  );
   // flag to prevent activity broadcast during sync
   const [isSync, setIsSync] = useState(false);
   // ref for live region announcements
@@ -46,7 +48,11 @@ export const Clock = ({
     return null;
   }
 
-  const handleTimerChange = (minutes: number, mode: TimerMode, isSync: boolean = false) => {
+  const handleTimerChange = (
+    minutes: number,
+    mode: TimerMode,
+    isSync: boolean = false,
+  ) => {
     if (timerInterval) {
       clearInterval(timerInterval);
       setTimerInterval(null);
@@ -96,7 +102,9 @@ export const Clock = ({
 
     if (isSync && latestActivity) {
       const activityTime = new Date(latestActivity.timeStamp).getTime();
-      const [min, sec] = (latestActivity.timeRemaining || "00:00").split(":").map(Number);
+      const [min, sec] = (latestActivity.timeRemaining || "00:00")
+        .split(":")
+        .map(Number);
       const originalSeconds = min * 60 + sec;
       const elapsedMs = Date.now() - activityTime;
       const elapsedSeconds = Math.floor(elapsedMs / 1000);
@@ -117,7 +125,8 @@ export const Clock = ({
       const totalSeconds = min * 60 + sec;
 
       if (totalSeconds <= 0) {
-        const resetTime = timerState.mode === "work" ? lastWorkTime : lastBreakTime;
+        const resetTime =
+          timerState.mode === "work" ? lastWorkTime : lastBreakTime;
         const [min, sec] = resetTime.split(":").map(Number);
         const resetSeconds = min * 60 + sec;
 
@@ -164,7 +173,9 @@ export const Clock = ({
       clearInterval(timerInterval);
       setTimerInterval(null);
 
-      const currentElapsed = Math.floor((Date.now() - timerState.startTime) / 1000);
+      const currentElapsed = Math.floor(
+        (Date.now() - timerState.startTime) / 1000,
+      );
       setTimerState((prev) => ({
         ...prev,
         isRunning: false,
@@ -196,7 +207,8 @@ export const Clock = ({
       clearInterval(timerInterval);
       setTimerInterval(null);
 
-      const resetTime = timerState.mode === "work" ? lastWorkTime : lastBreakTime;
+      const resetTime =
+        timerState.mode === "work" ? lastWorkTime : lastBreakTime;
       setTimerState((prev) => ({
         ...prev,
         time: resetTime,
@@ -254,7 +266,9 @@ export const Clock = ({
         break;
 
       case "change_timer":
-        const minutes = parseInt(latestActivity.timeRemaining?.split(":")[0] || "25");
+        const minutes = parseInt(
+          latestActivity.timeRemaining?.split(":")[0] || "25",
+        );
         handleTimerChange(minutes, latestActivity.timerMode || "work", true);
         break;
 
@@ -269,7 +283,9 @@ export const Clock = ({
     if (!timerState.isRunning) return;
 
     const interval = setInterval(() => {
-      const currentElapsed = Math.floor((Date.now() - timerState.startTime) / 1000);
+      const currentElapsed = Math.floor(
+        (Date.now() - timerState.startTime) / 1000,
+      );
       const totalElapsed = timerState.elapsedSeconds + currentElapsed;
       const remaining = Math.max(0, timerState.totalSeconds - totalElapsed);
 
@@ -282,7 +298,11 @@ export const Clock = ({
       if (remaining <= 0) {
         clearInterval(interval);
         setTimerInterval(null);
-        setTimerState((prev) => ({ ...prev, isRunning: false, elapsedSeconds: 0 }));
+        setTimerState((prev) => ({
+          ...prev,
+          isRunning: false,
+          elapsedSeconds: 0,
+        }));
 
         playSound("complete");
 
@@ -332,12 +352,17 @@ export const Clock = ({
       aria-label={`${timerState.mode === "work" ? "Work" : "Break"} timer`}
     >
       {/* Live region for screen reader announcements */}
-      <div ref={liveRegionRef} className="sr-only" aria-live="polite" aria-atomic="true"></div>
+      <div
+        ref={liveRegionRef}
+        className="sr-only"
+        aria-live="polite"
+        aria-atomic="true"
+      ></div>
 
       <ModeSwitch onTimerChange={handleTimerChange} />
       <div className="flex flex-col items-center justify-center">
         <h1
-          className="font-roboto text-[4rem] font-bold text-pretty md:text-[6rem] lg:text-[8rem]"
+          className="font-roboto text-pretty text-[4rem] font-bold md:text-[6rem] lg:text-[8rem]"
           aria-label={`${timerState.time} remaining`}
         >
           {timerState.time}
@@ -350,7 +375,11 @@ export const Clock = ({
           <button
             aria-label={timerState.isRunning ? "Pause timer" : "Start timer"}
             className={`css-button-3d w-24 p-4 ${timerState.isRunning ? "pressed" : ""}`}
-            onClick={timerState.isRunning ? () => handlePause(false) : () => handleStart(false)}
+            onClick={
+              timerState.isRunning
+                ? () => handlePause(false)
+                : () => handleStart(false)
+            }
             aria-pressed={timerState.isRunning}
           >
             {timerState.isRunning ? (
@@ -370,7 +399,9 @@ export const Clock = ({
         <div className="mt-12 w-full max-w-md">
           <ProgressBar
             currentTime={timerState.time}
-            totalTime={timerState.mode === "work" ? lastWorkTime : lastBreakTime}
+            totalTime={
+              timerState.mode === "work" ? lastWorkTime : lastBreakTime
+            }
             isRunning={timerState.isRunning}
           />
         </div>
@@ -380,11 +411,13 @@ export const Clock = ({
           aria-label="Daily quote"
         >
           <blockquote className="relative">
-            <p className="w-full max-w-full text-center font-sans text-sm leading-relaxed font-light sm:max-w-md sm:px-2 md:px-4 lg:px-6">
+            <p className="w-full max-w-full text-center font-sans text-sm font-light leading-relaxed sm:max-w-md sm:px-2 md:px-4 lg:px-6">
               {quote}
             </p>
           </blockquote>
-          <p className="font-base text-black-500 text-xs tracking-wide italic">— {author}</p>
+          <p className="font-base text-black-500 text-xs italic tracking-wide">
+            — {author}
+          </p>
         </div>
       </div>
     </div>

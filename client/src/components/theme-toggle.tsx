@@ -1,5 +1,6 @@
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import { ChevronDownIcon } from "@heroicons/react/16/solid";
+
 import { switchTheme } from "../utils/theme-switch.ts";
 
 export const ThemeToggle = () => {
@@ -15,7 +16,10 @@ export const ThemeToggle = () => {
           aria-expanded="false"
         >
           Theme
-          <ChevronDownIcon className="fill-background size-4" aria-hidden="true" />
+          <ChevronDownIcon
+            className="fill-background size-4"
+            aria-hidden="true"
+          />
         </MenuButton>
 
         <MenuItems
@@ -28,7 +32,7 @@ export const ThemeToggle = () => {
             <MenuItem key={theme}>
               <button
                 onClick={() => switchTheme(theme)}
-                className={`group text-background hover:bg-secondary/30 data-[focus]:bg-secondary/30 flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-xs tracking-wide capitalize peer-hover:data-[focus]:bg-transparent`}
+                className={`text-background hover:bg-secondary/30 data-[focus]:bg-secondary/30 group flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-xs capitalize tracking-wide peer-hover:data-[focus]:bg-transparent`}
                 role="menuitem"
                 aria-label={`Switch to ${theme} theme`}
               >

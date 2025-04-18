@@ -1,10 +1,16 @@
 import { useEffect, useState } from "react";
-import { RoomUser } from "../types/room";
+import { Copy, Plus } from "react-feather";
+
 import { useRoom } from "../hooks/use-room";
+import { RoomUser } from "../types/room";
 
-import { Plus, Copy } from "react-feather";
-
-export const UserDisplay = ({ users, roomId }: { users: RoomUser[]; roomId: string }) => {
+export const UserDisplay = ({
+  users,
+  roomId,
+}: {
+  users: RoomUser[];
+  roomId: string;
+}) => {
   const { shareRoom } = useRoom();
   const [roomUrl, setRoomUrl] = useState<string>("");
   const [tooltips, setTooltips] = useState<Record<string, boolean>>({});
@@ -36,27 +42,49 @@ export const UserDisplay = ({ users, roomId }: { users: RoomUser[]; roomId: stri
   };
 
   return (
-    <div className="flex flex-col items-center gap-4" role="region" aria-label="Room members">
-      <div className="flex items-center gap-2" role="list" aria-label="Active users">
+    <div
+      className="flex flex-col items-center gap-4"
+      role="region"
+      aria-label="Room members"
+    >
+      <div
+        className="flex items-center gap-2"
+        role="list"
+        aria-label="Active users"
+      >
         {activeUsers.map((user) => (
           <div
             key={user.userName}
-            className="bg-primary text-background relative flex h-10 w-10 items-center justify-center rounded-full text-center text-lg leading-none font-semibold"
-            onMouseEnter={() => setTooltips((prev) => ({ ...prev, [user.userName]: true }))}
-            onMouseLeave={() => setTooltips((prev) => ({ ...prev, [user.userName]: false }))}
+            className="bg-primary text-background relative flex h-10 w-10 items-center justify-center rounded-full text-center text-lg font-semibold leading-none"
+            onMouseEnter={() =>
+              setTooltips((prev) => ({
+                ...prev,
+                [user.userName]: true,
+              }))
+            }
+            onMouseLeave={() =>
+              setTooltips((prev) => ({
+                ...prev,
+                [user.userName]: false,
+              }))
+            }
             role="listitem"
             aria-label={`User ${user.userName}`}
           >
-            <span className="flex items-center justify-center">{user.userName.charAt(0)}</span>
+            <span className="flex items-center justify-center">
+              {user.userName.charAt(0)}
+            </span>
             {/* tooltip */}
             <div
               className={`bg-secondary absolute -top-10 left-1/2 -translate-x-1/2 rounded-xl p-1 transition-all duration-200 ${
-                tooltips[user.userName] ? "visible opacity-100" : "invisible opacity-0"
+                tooltips[user.userName]
+                  ? "visible opacity-100"
+                  : "invisible opacity-0"
               }`}
               role="tooltip"
               aria-label={`${user.userName}'s tooltip`}
             >
-              <div className="text-foreground flex items-center text-xs font-medium whitespace-nowrap">
+              <div className="text-foreground flex items-center whitespace-nowrap text-xs font-medium">
                 <p className="bg-primary/80 rounded-lg px-1.5 py-1 text-gray-800">
                   {user.userName}
                 </p>
@@ -76,12 +104,14 @@ export const UserDisplay = ({ users, roomId }: { users: RoomUser[]; roomId: stri
               tooltips["add"] ? "visible opacity-100" : "invisible opacity-0"
             }`}
             onMouseEnter={() => setTooltips((prev) => ({ ...prev, add: true }))}
-            onMouseLeave={() => setTooltips((prev) => ({ ...prev, add: false }))}
+            onMouseLeave={() =>
+              setTooltips((prev) => ({ ...prev, add: false }))
+            }
             role="tooltip"
             aria-label="Room URL tooltip"
           >
             {/* Inner div with white background */}
-            <div className="flex items-center text-xs font-thin whitespace-nowrap text-gray-800">
+            <div className="flex items-center whitespace-nowrap text-xs font-thin text-gray-800">
               <p className="bg-primary/80 rounded-lg px-1.5 py-1">{roomUrl}</p>
               <Copy
                 className="ml-1 h-4 w-4 transform cursor-pointer text-white transition-all hover:scale-105"
@@ -99,7 +129,9 @@ export const UserDisplay = ({ users, roomId }: { users: RoomUser[]; roomId: stri
           <div
             className="bg-background text-foreground border-foreground flex h-10 w-10 items-center justify-center rounded-full border border-dashed text-lg font-bold"
             onMouseEnter={() => setTooltips((prev) => ({ ...prev, add: true }))}
-            onMouseLeave={() => setTooltips((prev) => ({ ...prev, add: false }))}
+            onMouseLeave={() =>
+              setTooltips((prev) => ({ ...prev, add: false }))
+            }
             role="button"
             aria-label="Add user to room"
           >
@@ -109,8 +141,8 @@ export const UserDisplay = ({ users, roomId }: { users: RoomUser[]; roomId: stri
       </div>
       <div className="flex flex-col items-center justify-center text-center">
         <h5 className="text-xs" aria-live="polite">
-          There are currently {activeUsers.length} {activeUsers.length === 1 ? "member" : "members"}{" "}
-          in this room
+          There are currently {activeUsers.length}{" "}
+          {activeUsers.length === 1 ? "member" : "members"} in this room
         </h5>
       </div>
     </div>

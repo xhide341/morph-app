@@ -1,7 +1,7 @@
-import { motion, AnimatePresence } from "motion/react";
-import { RoomActivity } from "server/types/room";
 import { format } from "date-fns";
-import { useRef, useEffect } from "react";
+import { AnimatePresence, motion } from "motion/react";
+import { useEffect, useRef } from "react";
+import { RoomActivity } from "server/types/room";
 
 export const ActivityLog = ({ activities }: { activities: RoomActivity[] }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -43,18 +43,27 @@ export const ActivityLog = ({ activities }: { activities: RoomActivity[] }) => {
                   <span className="font-medium" aria-label="User name">
                     {activity.userName}
                   </span>
-                  <span className="text-primary" aria-label="Activity description">
+                  <span
+                    className="text-primary"
+                    aria-label="Activity description"
+                  >
                     {activity.type === "join" && "joined the room"}
                     {activity.type === "leave" && "left the room"}
                     {activity.type === "start_timer" && "started a timer"}
                     {activity.type === "pause_timer" && "paused the timer"}
-                    {activity.type === "complete_timer" && "completed the session"}
+                    {activity.type === "complete_timer" &&
+                      "completed the session"}
                     {activity.type === "reset_timer" && "stopped the timer"}
                     {activity.type === "change_timer" &&
                       `set timer to ${activity.timeRemaining?.split(":")[0]}-minute ${activity.timerMode}`}
                   </span>
-                  <span className="ml-auto text-xs text-gray-400" aria-label="Time of activity">
-                    {activity.timeStamp ? format(new Date(activity.timeStamp), "HH:mm") : "00:00"}
+                  <span
+                    className="ml-auto text-xs text-gray-400"
+                    aria-label="Time of activity"
+                  >
+                    {activity.timeStamp
+                      ? format(new Date(activity.timeStamp), "HH:mm")
+                      : "00:00"}
                   </span>
                 </div>
               </div>
