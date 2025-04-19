@@ -63,6 +63,11 @@ export class SocketIOService {
     this.io.on("connection", (socket) => {
       socket.on("join_room", async (data) => {
         const { roomId, userName } = data;
+        console.log("[SocketIO] User joining room:", {
+          roomId,
+          userName,
+          socketId: socket.id,
+        });
         this.activeUsers.set(socket.id, { roomId, userName });
         socket.join(roomId);
 
@@ -85,16 +90,31 @@ export class SocketIOService {
               throw new Error("Failed to store activity in Redis");
             }
             storedActivity = activityResult;
+            console.log("[SocketIO] Join activity stored:", {
+              roomId,
+              userName,
+              activityId: storedActivity.id,
+            });
 
             const joined = await redisService.joinRoom(roomId, userName);
             if (!joined) {
               storedActivity = null;
               throw new Error("Failed to join room in Redis");
             }
+            console.log("[SocketIO] User joined room in Redis:", {
+              roomId,
+              userName,
+              userCount: joined.userCount,
+            });
           });
 
           if (storedActivity) {
-            socket.broadcast.to(roomId).emit("activity", storedActivity);
+            // broadcast to everyone including sender
+            this.io.to(roomId).emit("activity", storedActivity);
+            console.log("[SocketIO] Join activity broadcasted:", {
+              roomId,
+              userName,
+            });
           }
         } catch (error) {
           console.error("[SocketIO] Error handling join after retries:", error);
@@ -138,6 +158,11 @@ export class SocketIOService {
         const userInfo = this.activeUsers.get(socket.id);
         if (userInfo) {
           const { roomId, userName } = userInfo;
+          console.log("[SocketIO] User disconnecting:", {
+            roomId,
+            userName,
+            socketId: socket.id,
+          });
           const leaveActivity: RoomActivity = {
             type: "leave",
             userName,
@@ -148,6 +173,11 @@ export class SocketIOService {
 
           try {
             let storedActivity: RoomActivity | null = null;
+            console.log("[SocketIO] User leaving room:", {
+              roomId,
+              userName,
+              socketId: socket.id,
+            });
             await this.retryOperation(async () => {
               const activityResult = await redisService.storeActivity(
                 roomId,
@@ -163,10 +193,19 @@ export class SocketIOService {
                 storedActivity = null;
                 throw new Error("Failed to leave room in Redis");
               }
+              console.log("[SocketIO] User left room in Redis:", {
+                roomId,
+                userName,
+                userCount: left.userCount,
+              });
             });
 
             if (storedActivity) {
               this.io.to(roomId).emit("activity", storedActivity);
+              console.log("[SocketIO] Leave activity broadcasted:", {
+                roomId,
+                userName,
+              });
             }
           } catch (error) {
             console.error(

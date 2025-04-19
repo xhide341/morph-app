@@ -84,8 +84,8 @@ export const redisService = {
         console.error("[Redis] Failed to create room:", roomId);
         return null;
       }
-
-      console.log("[Redis] Room created:", roomId);
+      const ttl = await redis.ttl(`room:${roomId}`);
+      console.log(`[Redis] TTL for ${roomId}: ${ttl}`);
       return {
         roomId,
         createdAt: timestamp,
@@ -273,10 +273,22 @@ export const redisService = {
 
       for (const key of keys) {
         const ttl = await redis.ttl(key);
-        const isMainRoom = !key.includes(":");
-        if (ttl === -1 && isMainRoom) {
+        console.log(`[Redis] TTL for ${key}: ${ttl}`);
+        if (ttl === -1) {
           const roomId = key.split(":")[1];
-          await redis.del([`room:${roomId}*`]);
+          // const result = await redis.del([
+          //   `room:${roomId}`,
+          //   `room:${roomId}:users`,
+          //   `room:${roomId}:activities`,
+          //   `room:${roomId}:url`,
+          // ]);
+          // if (result > 0) {
+          //   console.log(`[Redis] Deleted ${result} keys for room ${roomId}`);
+          // } else {
+          //   console.log(`[Redis] No keys to delete for room ${roomId}`);
+          // }
+        } else if (ttl === -2) {
+          console.log(`[Redis] Key ${key} already expired or deleted.`);
         }
       }
     } catch (error) {

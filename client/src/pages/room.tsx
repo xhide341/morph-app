@@ -18,38 +18,98 @@ export const RoomPage = () => {
   const { roomUsers, setRoomUsers, fetchRoomUsers, joinRoom } = useRoom(roomId);
   const { activities, setActivities, fetchActivities } = useActivity(roomId);
   const [showModal, setShowModal] = useState(!userName);
+  const [isConnected, setIsConnected] = useState(socketService.isConnected());
 
-  // handle connection
   useEffect(() => {
-    if (!roomId) return;
+    if (!roomId || !userName) {
+      console.log(
+        "[Room] missing roomId or userName, skipping socket connection",
+      );
+      return;
+    }
 
+    console.log("[Room] connecting socket with roomId and userName");
     socketService.connect(roomId, userName);
 
     return () => {
+      console.log("[Room] disconnecting socket");
       socketService.disconnect();
     };
   }, [roomId, userName]);
 
-  // handle activity subscriptions
+  // connect react to socket connection state
   useEffect(() => {
-    if (!socketService.isConnected()) return;
+    if (!roomId || !userName) {
+      console.log("[Room] SKIPPING SOCKET CONNECTION - missing:", {
+        roomId,
+        userName,
+      });
+      return;
+    }
 
+    function onConnect() {
+      console.log("[Room] Socket connected");
+      setIsConnected(true);
+    }
+
+    function onDisconnect() {
+      console.log("[Room] Socket disconnected");
+      setIsConnected(false);
+    }
+
+    socketService.on("connect", onConnect);
+    socketService.on("disconnect", onDisconnect);
+
+    return () => {
+      socketService.off("connect", onConnect);
+      socketService.off("disconnect", onDisconnect);
+    };
+  }, [roomId, userName]);
+
+  useEffect(() => {
+    if (!roomId || !userName) {
+      console.log("[Room] SKIPPING SOCKET CONNECTION - missing:", {
+        roomId,
+        userName,
+      });
+      return;
+    }
+
+    socketService.connect(roomId, userName);
+  }, [roomId, userName]);
+
+  // handle activity subscription and initial data load
+  useEffect(() => {
+    if (!isConnected || !roomId || !userName) {
+      console.log("[Room] SKIPPING ACTIVITY AND DATA SETUP - missing:", {
+        connected: isConnected,
+        roomId,
+        userName,
+      });
+      return;
+    }
+
+    console.log(
+      "[Room] Setting up activity subscription and loading initial data",
+    );
+
+    // Activity subscription
     const handleActivity = (activity: RoomActivity) => {
+      console.log("[Room] Received activity:", activity);
       setActivities((prev) => {
         const exists = prev.some((a) => a.id === activity.id);
-        if (exists) return prev;
+        if (exists) {
+          console.log("[Room] Activity already exists:", activity.id);
+          return prev;
+        }
+        console.log("[Room] Adding new activity:", activity.id);
         return [activity, ...prev];
       });
     };
 
     socketService.on("activity", handleActivity);
 
-    return () => {
-      socketService.off("activity", handleActivity);
-    };
-  }, [roomId, userName]);
-
-  useEffect(() => {
+    // Initial data load
     const loadInitialData = async () => {
       try {
         const [activities, users] = await Promise.all([
@@ -57,17 +117,26 @@ export const RoomPage = () => {
           fetchRoomUsers(),
         ]);
 
-        if (activities) setActivities(activities);
-        console.log("activities: ", activities);
-        if (users) setRoomUsers(users);
-        console.log("users: ", users);
+        if (activities) {
+          console.log("[Room] Setting initial activities:", activities.length);
+          setActivities(activities);
+        }
+        if (users) {
+          console.log("[Room] Setting initial users:", users.length);
+          setRoomUsers(users);
+        }
       } catch (error) {
-        console.error("Error loading initial data:", error);
+        console.error("[Room] Error loading initial data:", error);
       }
     };
 
     loadInitialData();
-  }, [roomId, userName]);
+
+    return () => {
+      console.log("[Room] Cleaning up activity subscription");
+      socketService.off("activity", handleActivity);
+    };
+  }, [roomId, userName, isConnected]);
 
   const handleJoinRoom = async (name: string) => {
     if (!roomId) return;
