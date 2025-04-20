@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Copy, Plus } from "react-feather";
+import { Plus } from "react-feather";
 
 import { useRoom } from "../hooks/use-room";
 import { RoomUser } from "../types/room";
@@ -16,6 +16,7 @@ export const UserDisplay = ({
   const [tooltips, setTooltips] = useState<Record<string, boolean>>({});
   const [copied, setCopied] = useState(false);
   const activeUsers = users || [];
+
   useEffect(() => {
     if (!roomId) return;
 
@@ -27,17 +28,12 @@ export const UserDisplay = ({
   }, [roomId]);
 
   const handleCopy = () => {
-    setTooltips((prev) => ({ ...prev, add: false }));
     if (roomUrl) {
-      navigator.clipboard
-        .writeText(roomUrl)
-        .then(() => {
-          setCopied(true);
-          setTimeout(() => setCopied(false), 2000);
-        })
-        .catch((error) => {
-          console.error("Failed to copy URL:", error);
-        });
+      setCopied(true);
+      navigator.clipboard.writeText(roomUrl).catch((error) => {
+        console.error("failed to copy url:", error);
+      });
+      setTimeout(() => setCopied(false), 3000);
     }
   };
 
@@ -76,10 +72,10 @@ export const UserDisplay = ({
             </span>
             {/* tooltip */}
             <div
-              className={`bg-secondary absolute -top-10 left-1/2 -translate-x-1/2 rounded-xl p-1 transition-all duration-200 ${
+              className={`bg-secondary absolute -top-10 left-1/2 -translate-x-1/2 rounded-xl p-1 transition-all duration-300 ease-in-out ${
                 tooltips[user.userName]
-                  ? "visible opacity-100"
-                  : "invisible opacity-0"
+                  ? "visible translate-y-0 opacity-100"
+                  : "invisible -translate-y-2 opacity-0"
               }`}
               role="tooltip"
               aria-label={`${user.userName}'s tooltip`}
@@ -100,8 +96,10 @@ export const UserDisplay = ({
         <div className="relative flex flex-col items-center justify-center gap-1">
           {/* tooltip */}
           <div
-            className={`bg-secondary absolute -top-10 left-1/2 -translate-x-1/2 rounded-xl p-1 pr-1.5 text-xs transition-all duration-200 ${
-              tooltips["add"] ? "visible opacity-100" : "invisible opacity-0"
+            className={`bg-secondary absolute -top-10 left-1/2 -translate-x-1/2 rounded-xl p-1 text-xs transition-all duration-300 ease-in-out ${
+              tooltips["add"]
+                ? "visible translate-y-0 opacity-100"
+                : "invisible -translate-y-2 opacity-0"
             }`}
             onMouseEnter={() => setTooltips((prev) => ({ ...prev, add: true }))}
             onMouseLeave={() =>
@@ -111,13 +109,14 @@ export const UserDisplay = ({
             aria-label="Room URL tooltip"
           >
             {/* Inner div with white background */}
-            <div className="flex items-center whitespace-nowrap text-xs font-thin text-gray-800">
-              <p className="bg-primary/80 rounded-lg px-1.5 py-1">{roomUrl}</p>
-              <Copy
-                className="ml-1 h-4 w-4 transform cursor-pointer text-white transition-all hover:scale-105"
+            <div className="flex cursor-pointer items-center whitespace-nowrap text-xs font-thin text-gray-800 transition-colors duration-75">
+              <p
+                className="bg-primary/80 rounded-lg px-1.5 py-1"
                 onClick={handleCopy}
-                aria-label={copied ? "URL copied" : "Copy room URL"}
-              />
+                aria-label={copied ? "URL copied!" : "Copy room URL"}
+              >
+                {copied ? "URL copied!" : roomUrl}
+              </p>
             </div>
             {/* arrow */}
             <div
@@ -127,15 +126,19 @@ export const UserDisplay = ({
           </div>
           {/* add button */}
           <div
-            className="bg-background text-foreground border-foreground flex h-10 w-10 items-center justify-center rounded-full border border-dashed text-lg font-bold"
+            className="bg-background text-foreground border-foreground/50 hover:border-primary/70 hover:bg-primary/5 group flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-dashed text-lg font-bold transition-all duration-300"
             onMouseEnter={() => setTooltips((prev) => ({ ...prev, add: true }))}
             onMouseLeave={() =>
               setTooltips((prev) => ({ ...prev, add: false }))
             }
             role="button"
             aria-label="Add user to room"
+            onMouseDown={handleCopy}
           >
-            <Plus className="h-4 w-4" aria-hidden="true" />
+            <Plus
+              className="h-4 w-4 transition-transform duration-300 group-hover:scale-125"
+              aria-hidden="true"
+            />
           </div>
         </div>
       </div>
