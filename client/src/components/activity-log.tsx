@@ -18,7 +18,7 @@ export const ActivityLog = ({ activities }: { activities: RoomActivity[] }) => {
   return (
     <div
       ref={scrollRef}
-      className="scrollbar-hide max-h-[140px] overflow-y-auto p-2"
+      className="scrollbar-hide mx-auto max-h-[140px] max-w-[90%] overflow-y-auto"
       role="log"
       aria-label="Room activity log"
       aria-live="polite"
@@ -28,7 +28,7 @@ export const ActivityLog = ({ activities }: { activities: RoomActivity[] }) => {
           {activities.map((activity) => (
             <motion.div
               key={activity.id}
-              initial={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 1, y: -0.5 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 20 }}
               transition={{
@@ -54,7 +54,7 @@ export const ActivityLog = ({ activities }: { activities: RoomActivity[] }) => {
                       "completed the session"}
                     {activity.type === "reset_timer" && "stopped the timer"}
                     {activity.type === "change_timer" &&
-                      `set timer to ${activity.timeRemaining?.split(":")[0]}-minute ${activity.timerMode}`}
+                      `set timer to ${activity.timeRemaining?.split(":")[0]} minute ${activity.timerMode}`}
                   </span>
                   <span
                     className="ml-auto text-xs text-gray-400"
