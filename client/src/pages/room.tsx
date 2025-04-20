@@ -174,6 +174,11 @@ export const RoomPage = () => {
       })()
     : null;
 
+  // sort all activities by timeStamp in ascending order so join/leave events follow correctly
+  const sortedActivities = [...activities].sort(
+    (a, b) => new Date(a.timeStamp).getTime() - new Date(b.timeStamp).getTime(),
+  );
+
   const handleNewActivity = (
     activity: Omit<RoomActivity, "id" | "timeStamp">,
   ) => {
@@ -220,7 +225,7 @@ export const RoomPage = () => {
         />
       </div>
       <div className="mt-6" role="region" aria-label="Activity log">
-        {roomId && <ActivityLog activities={activities} />}
+        {roomId && <ActivityLog activities={sortedActivities} />}
       </div>
       <div
         className="fixed bottom-4 left-1/2 -translate-x-1/2"

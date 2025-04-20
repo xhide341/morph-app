@@ -40,7 +40,7 @@ export const Clock = ({
   );
   // flag to prevent activity broadcast during sync
   const [isSync, setIsSync] = useState(false);
-  // ref for live region announcements
+  // ref for live region announcements (aria attributes)
   const liveRegionRef = useRef<HTMLDivElement>(null);
 
   if (!roomId) {
