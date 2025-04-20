@@ -6,7 +6,6 @@ import { RoomActivity } from "server/types/room";
 export const ActivityLog = ({ activities }: { activities: RoomActivity[] }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // auto scroll to bottom when activities change
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTo({
