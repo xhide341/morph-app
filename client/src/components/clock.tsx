@@ -335,7 +335,14 @@ export const Clock = ({
   // timer for document title
   useEffect(() => {
     const mode = timerState.mode === "work" ? "Work" : "Break";
-    const status = timerState.isRunning ? "timer" : "paused";
+    let status;
+    if (timerState.time === "00:00" && !timerState.isRunning) {
+      status = "completed";
+    } else if (timerState.time !== "00:00" && !timerState.isRunning) {
+      status = "paused";
+    } else {
+      status = "timer";
+    }
     document.title = `${timerState.time} - ${mode} ${status}`;
 
     return () => {
