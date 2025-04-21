@@ -10,7 +10,7 @@ export const ThemeToggle = () => {
     <div className="flex">
       <Menu>
         <MenuButton
-          className="bg-primary hover:bg-primary/90 text-background data-[focus]:outline-foreground data-[open]:bg-secondary inline-flex cursor-pointer items-center gap-1 rounded-md px-2 py-2 text-xs font-thin tracking-wide focus:outline-none data-[focus]:outline-1"
+          className="bg-primary hover:bg-primary/90 text-background data-[focus]:outline-foreground inline-flex cursor-pointer items-center gap-1 rounded-md px-2 py-2 text-xs font-thin tracking-wide focus:outline-none data-[focus]:outline-1"
           aria-label="Theme selection menu"
           aria-haspopup="true"
           aria-expanded="false"

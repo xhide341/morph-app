@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import { ActivityLog } from "../components/activity-log";
@@ -10,7 +10,7 @@ import { useUserInfo } from "../contexts/user-context";
 import { useActivity } from "../hooks/use-activity";
 import { useRoom } from "../hooks/use-room";
 import { socketService } from "../services/socket-service";
-import { RoomActivity, RoomUser } from "../types/room";
+import { RoomActivity } from "../types/room";
 
 export const RoomPage = () => {
   const { roomId } = useParams<{ roomId: string }>();
@@ -22,9 +22,7 @@ export const RoomPage = () => {
 
   useEffect(() => {
     if (!roomId || !userName) {
-      console.log(
-        "[Room] missing roomId or userName, skipping socket connection",
-      );
+      console.log("[Room] SKIPPING INITIAL CONNECT()");
       return;
     }
 
@@ -64,18 +62,6 @@ export const RoomPage = () => {
       socketService.off("connect", onConnect);
       socketService.off("disconnect", onDisconnect);
     };
-  }, [roomId, userName]);
-
-  useEffect(() => {
-    if (!roomId || !userName) {
-      console.log("[Room] SKIPPING SOCKET CONNECTION - missing:", {
-        roomId,
-        userName,
-      });
-      return;
-    }
-
-    socketService.connect(roomId, userName);
   }, [roomId, userName]);
 
   // handle activity subscription and initial data load

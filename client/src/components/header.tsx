@@ -1,6 +1,6 @@
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 
-import { ShareButton } from "./share-button";
+// import { ShareButton } from "./share-button";
 import ThemeToggle from "./theme-toggle";
 
 export const Header = () => {
@@ -28,7 +28,7 @@ export const Header = () => {
         role="navigation"
         aria-label="Room actions"
       >
-        <ShareButton roomId={roomId || ""} />
+        {/* <ShareButton roomId={roomId || ""} /> */}
         <ThemeToggle />
       </nav>
     </header>
