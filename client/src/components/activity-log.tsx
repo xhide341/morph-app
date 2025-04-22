@@ -54,7 +54,7 @@ export const ActivityLog = ({ activities }: { activities: RoomActivity[] }) => {
                       "completed the session"}
                     {activity.type === "reset_timer" && "stopped the timer"}
                     {activity.type === "change_timer" &&
-                      `set timer to ${activity.timeRemaining?.split(":")[0]} minute ${activity.timerMode}`}
+                      `set timer to ${parseInt(activity.timeRemaining?.split(":")[0] || "0")} minute${parseInt(activity.timeRemaining?.split(":")[0] || "0") !== 1 ? 's' : ''} ${activity.timerMode}`}
                   </span>
                   <span
                     className="ml-auto text-xs text-gray-400"
