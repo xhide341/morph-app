@@ -2,6 +2,7 @@ import { Navigate, useNavigate, useParams } from "react-router-dom";
 
 // import { ShareButton } from "./share-button";
 import ThemeToggle from "./theme-toggle";
+import AudioToggle from "./audio-toggle";
 
 export const Header = () => {
   const { roomId } = useParams<{ roomId: string }>();
@@ -29,6 +30,7 @@ export const Header = () => {
         aria-label="Room actions"
       >
         {/* <ShareButton roomId={roomId || ""} /> */}
+        <AudioToggle />
         <ThemeToggle />
       </nav>
     </header>
