@@ -4,6 +4,7 @@ import { defineConfig } from "vite";
 
 // https://vite.dev/config/
 export default defineConfig({
+  envDir: "../",
   base: "/",
   plugins: [react(), tailwindcss()],
   server: {
@@ -21,10 +22,4 @@ export default defineConfig({
       },
     },
   },
-  // TODO: uncomment for production
-  // build: {
-  //   outDir: "dist",
-  //   assetsDir: "assets",
-  //   sourcemap: true,
-  // },
 });
