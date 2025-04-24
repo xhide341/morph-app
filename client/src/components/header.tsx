@@ -5,6 +5,10 @@ import ThemeToggle from "./theme-toggle";
 import AudioToggle from "./audio-toggle";
 
 export const Header = () => {
+  console.log("Vite API URL:", import.meta.env.VITE_API_URL);
+  console.log("Vite WS URL:", import.meta.env.VITE_WS_URL);
+  console.log("Environment:", import.meta.env.MODE);
+
   const { roomId } = useParams<{ roomId: string }>();
   const navigate = useNavigate();
   if (!roomId) {
