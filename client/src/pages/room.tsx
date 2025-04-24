@@ -10,7 +10,7 @@ import { useUserInfo } from "../contexts/user-context";
 import { useActivity } from "../hooks/use-activity";
 import { useRoom } from "../hooks/use-room";
 import { socketService } from "../services/socket-service";
-import { RoomActivity } from "../types/room";
+import { RoomActivity, RoomUser } from "../types/room";
 
 export const RoomPage = () => {
   const { roomId } = useParams<{ roomId: string }>();
@@ -64,38 +64,14 @@ export const RoomPage = () => {
     };
   }, [roomId, userName]);
 
-  // handle activity subscription and initial data load
+  // handle activity subscription
   useEffect(() => {
     if (!isConnected || !roomId || !userName) {
-      console.log("[Room] SKIPPING ACTIVITY AND DATA SETUP - missing:", {
-        connected: isConnected,
-        roomId,
-        userName,
-      });
+      console.log("[Room] SKIPPING ACTIVITY SETUP!!");
       return;
     }
 
-    console.log(
-      "[Room] Setting up activity subscription and loading initial data",
-    );
-
-    // Activity subscription
-    const handleActivity = (activity: RoomActivity) => {
-      console.log("[Room] Received activity:", activity);
-      setActivities((prev) => {
-        const exists = prev.some((a) => a.id === activity.id);
-        if (exists) {
-          console.log("[Room] Activity already exists:", activity.id);
-          return prev;
-        }
-        console.log("[Room] Adding new activity:", activity.id);
-        return [activity, ...prev];
-      });
-    };
-
-    socketService.on("activity", handleActivity);
-
-    // Initial data load
+    console.log("LOADING INITIAL DATA!");
     const loadInitialData = async () => {
       try {
         const [activities, users] = await Promise.all([
@@ -115,6 +91,43 @@ export const RoomPage = () => {
         console.error("[Room] Error loading initial data:", error);
       }
     };
+
+    // Activity subscription
+    const handleActivity = (activity: RoomActivity) => {
+      console.log("[Room] Received activity:", activity);
+      setActivities((prev) => {
+        const exists = prev.some((a) => a.id === activity.id);
+        if (exists) {
+          console.log("[Room] Activity already exists:", activity.id);
+          return prev;
+        }
+        console.log("[Room] Adding new activity:", activity.id);
+        return [activity, ...prev];
+      });
+
+      if (activity.type === "join") {
+        setRoomUsers((prevUsers) => {
+          const exists = prevUsers.some(
+            (u) => u.userName === activity.userName,
+          );
+          if (!exists) {
+            return [
+              ...prevUsers,
+              { userName: activity.userName, joinedAt: activity.timeStamp },
+            ];
+          }
+          return prevUsers;
+        });
+      }
+
+      if (activity.type === "leave") {
+        setRoomUsers((prevUsers) =>
+          prevUsers.filter((u) => u.userName !== activity.userName),
+        );
+      }
+    };
+
+    socketService.on("activity", handleActivity);
 
     loadInitialData();
 
