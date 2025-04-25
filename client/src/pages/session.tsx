@@ -89,7 +89,7 @@ export function SessionPage() {
                 value={roomName}
                 onChange={(e) => setRoomName(e.target.value)}
                 placeholder="Enter room name"
-                className="bg-secondary text-foreground placeholder:text-foreground/50 focus:ring-accent w-full rounded-md p-2 text-sm focus:outline-none focus:ring-1"
+                className="bg-secondary text-foreground placeholder:text-foreground/50 focus:ring-primary w-full rounded-md p-2 text-sm focus:outline-none focus:ring-1"
                 aria-required="true"
                 aria-invalid={!!validationError}
                 aria-describedby={validationError ? "room-error" : undefined}
@@ -108,7 +108,7 @@ export function SessionPage() {
 
             <button
               type="submit"
-              className="bg-accent hover:bg-accent/90 text-background font-base w-full max-w-full cursor-pointer rounded-md p-2 text-sm tracking-wide"
+              className="bg-primary hover:bg-primary/90 text-background font-base w-full max-w-full cursor-pointer rounded-md p-2 text-sm tracking-wide"
               disabled={isSubmitting}
               aria-busy={isSubmitting}
             >
