@@ -14,17 +14,13 @@ export const useRoom = (roomId?: string) => {
   // room functions
   const fetchRoom = async (roomId: string) => {
     try {
-      console.log(`[fetchRoom] Fetching room with ID: ${roomId}`);
       const response = await fetch(`${API_URL}/api/room/${roomId}/info`);
 
-      console.log(`[fetchRoom] Response status: ${response.status}`);
       if (!response.ok) {
-        console.log(`[fetchRoom] Room not found: ${roomId}`);
         return null;
       }
 
       const data = await response.json();
-      console.log(`[fetchRoom] Room data:`, data);
       return data;
     } catch (error) {
       console.error("[fetchRoom] Error fetching room:", error);
@@ -33,7 +29,6 @@ export const useRoom = (roomId?: string) => {
   };
 
   const fetchRoomUsers = async (): Promise<RoomUser[] | null> => {
-    console.log("fetchRoomUsers called");
     if (!roomId) return null;
     try {
       const response = await fetch(`${API_URL}/api/room/${roomId}/users`);
@@ -49,14 +44,12 @@ export const useRoom = (roomId?: string) => {
 
   const createRoom = async (roomId: string) => {
     try {
-      console.log(`[createRoom] Creating room with ID: ${roomId}`);
       const response = await fetch(`${API_URL}/api/room/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ roomId }),
       });
 
-      console.log(`[createRoom] Response status: ${response.status}`);
       if (!response.ok) {
         console.error(`[createRoom] Failed to create room: ${response.status}`);
         const errorText = await response.text();
@@ -65,14 +58,12 @@ export const useRoom = (roomId?: string) => {
       }
 
       const text = await response.text();
-      console.log(`[createRoom] Response text: ${text}`);
       if (!text || text.trim() === "") {
         console.error("[createRoom] Empty response from create room");
         return null;
       }
 
       const data = JSON.parse(text);
-      console.log(`[createRoom] Created room data:`, data);
       setRoomInfo(data);
       return data;
     } catch (error) {

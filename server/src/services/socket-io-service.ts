@@ -7,7 +7,6 @@ import { redisService } from "./redis-service";
 export class SocketIOService {
   private static instance: SocketIOService;
   private io: SocketIOServer;
-  // track active users with their socket ids
   private activeUsers: Map<string, { roomId: string; userName: string }> =
     new Map();
 
@@ -19,7 +18,7 @@ export class SocketIOService {
             ? process.env.CORS_ORIGIN
             : "http://localhost:5173",
         methods: ["GET", "POST"],
-        credentials: false,
+        credentials: true,
       },
     });
 

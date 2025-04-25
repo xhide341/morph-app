@@ -38,14 +38,13 @@ app.use(
         : "http://localhost:5173",
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: false, // TODO: change to true in production
+    credentials: true,
   }),
 );
 app.use(express.json());
 app.use("/api/quotes", quotesRouter);
 app.use("/api/room", roomRouter);
 
-// this is for production
 server.listen(port, "0.0.0.0", () => {
   console.log(`Server running on port ${port}`);
 });

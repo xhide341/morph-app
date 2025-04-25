@@ -22,15 +22,12 @@ export const RoomPage = () => {
 
   useEffect(() => {
     if (!roomId || !userName) {
-      console.log("[Room] SKIPPING INITIAL CONNECT()");
       return;
     }
 
-    console.log("[Room] connecting socket with roomId and userName");
     socketService.connect(roomId, userName);
 
     return () => {
-      console.log("[Room] disconnecting socket");
       socketService.disconnect();
     };
   }, [roomId, userName]);
@@ -38,20 +35,14 @@ export const RoomPage = () => {
   // connect react to socket connection state
   useEffect(() => {
     if (!roomId || !userName) {
-      console.log("[Room] SKIPPING SOCKET CONNECTION - missing:", {
-        roomId,
-        userName,
-      });
       return;
     }
 
     function onConnect() {
-      console.log("[Room] Socket connected");
       setIsConnected(true);
     }
 
     function onDisconnect() {
-      console.log("[Room] Socket disconnected");
       setIsConnected(false);
     }
 
@@ -67,11 +58,9 @@ export const RoomPage = () => {
   // handle activity subscription
   useEffect(() => {
     if (!isConnected || !roomId || !userName) {
-      console.log("[Room] SKIPPING ACTIVITY SETUP!!");
       return;
     }
 
-    console.log("LOADING INITIAL DATA!");
     const loadInitialData = async () => {
       try {
         const [activities, users] = await Promise.all([
@@ -80,11 +69,9 @@ export const RoomPage = () => {
         ]);
 
         if (activities) {
-          console.log("[Room] Setting initial activities:", activities.length);
           setActivities(activities);
         }
         if (users) {
-          console.log("[Room] Setting initial users:", users.length);
           setRoomUsers(users);
         }
       } catch (error) {
@@ -94,14 +81,11 @@ export const RoomPage = () => {
 
     // Activity subscription
     const handleActivity = (activity: RoomActivity) => {
-      console.log("[Room] Received activity:", activity);
       setActivities((prev) => {
         const exists = prev.some((a) => a.id === activity.id);
         if (exists) {
-          console.log("[Room] Activity already exists:", activity.id);
           return prev;
         }
-        console.log("[Room] Adding new activity:", activity.id);
         return [activity, ...prev];
       });
 
@@ -132,7 +116,6 @@ export const RoomPage = () => {
     loadInitialData();
 
     return () => {
-      console.log("[Room] Cleaning up activity subscription");
       socketService.off("activity", handleActivity);
     };
   }, [roomId, userName, isConnected]);
