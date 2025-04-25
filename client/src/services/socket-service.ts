@@ -1,6 +1,6 @@
 import { Socket, io } from "socket.io-client";
 
-const WS_URL = "http://localhost:3000";
+const WS_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 export class SocketService {
   private static instance: SocketService;
