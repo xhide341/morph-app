@@ -1,40 +1,92 @@
-# 🕰️ Pomodoro App - MVP Plan
+# 🕰️ MORPH - Collaborative Pomodoro Timer
 
-## 🚀 Project Overview
+## 🎯 Project Overview
 
-A **Minimal Viable Product (MVP)** for a Pomodoro app using **React, Express, Node.js** with real-time features.  
-The goal is to create a functional Pomodoro timer with **basic customization** and **room-based collaboration**.
+MORPH is a real-time collaborative Pomodoro timer that helps teams stay focused together.
+Built as a practice for me to explore and experience:
 
----
+- Real-time collaboration with Socket.IO
+- Barebones React without meta-frameworks
+- Native fetch API (no Axios/HTTP clients)
+- Monorepo architecture patterns
 
-## ✅ MVP Scope
+## ✨ Features
 
-### **📌 Core Features (Must-Have)**
+- **⏱️ Flexible Timer Options**
 
-- ✅ **Pomodoro Timer** – Countdown logic with start/pause/reset
-- ✅ **Session Customization** – Change default 25-minute timer
-- ✅ **Room Creation** – Create and join focus rooms
-- ✅ **Theme Variants** – Theme toggle (stored in localStorage)
-- ✅ **Quote of the Day** – Daily quote from an API
+  - Work sessions: 25/50 minutes
+  - Break sessions: 5/15 minutes
+  - Real-time sync across all room participants
 
-### **🚀 Optional Enhancements (After MVP)**
+- **🎨 Theme Variants**
 
-- 🔹 **Session History** – Track past focus sessions
-- 🔹 **Notifications** – Sound/vibration when session ends
+  - Multiple theme options (Forest, Ocean, Coffee, Lavender)
+  - Theme is persisted with localStorage and username is persisted with sessionStorage
 
----
+- **🤝 Collaborative Rooms**
+
+  - Create/join focus rooms
+  - Real-time participant tracking
+  - Shared timer controls
+  - Activity log
+
+- **💭 Daily Motivation**
+  - Quote of the day feature
+  - Refreshes daily (Free API)
 
 ## 🛠️ Tech Stack
 
-- **Frontend:** Vite + React-Ts + TailwindCSS
-- **Backend:** Express + Node.js
-- **Real-time:** Socket.IO
-- **State & Cache:** Redis
+### Frontend
 
----
+- React
+- TypeScript
+- TailwindCSS
+- Socket.IO Client
+- Vite
 
-## 📂 Folder Structure
+### Backend
 
-- **client:** React + Vite + TailwindCSS
-- **server:** Express + Node.js
-- **common:** Shared types and utilities
+- Node.js
+- Express
+- Socket.IO
+- Redis (for state management)
+- TypeScript
+
+### Infrastructure
+
+- **Client:** Vercel (for optimal static file serving)
+- **Server:** Render (for persistent backend)
+- **Database:** Redis Cloud
+
+## 🏗️ Architecture
+
+```
+monorepo/
+├── client/          # React frontend
+├── server/          # Express backend
+```
+
+## 💡 Learning Outcomes
+
+This project served as a practical exploration of:
+
+- Building real-time features with Socket.
+- State synchronization across multiple clients (I did not rely on global state libraries like Zustand)
+- Working with React library (Firsthand experience without a framework)
+- Using browser-native fetch API for HTTP requests (Barebones fetching without axios or fetchApi)
+- Managing a monorepo structure (without a 'common' folder)
+- Deploying to multiple platforms (Vercel + Render)
+
+## 🚀 Deployment
+
+- **Frontend:** [morph-app-plum.vercel.app](https://morph-app-plum.vercel.app)
+- **Backend:** [morph-app.onrender.com](https://morph-app.onrender.com)
+
+## 📝 Development Notes
+
+- I used pnpm for package management, as usual.
+- I did not spend a dime, everything used in this project are free tiers. (Vercel, Render, Redis hobbyist tiers)
+- I did try barebones Websocket API but I spent alot of time managing fallbacks and creating my own event listeners so I opted for SocketIO instead.
+- I used Redis just because I want to experience how good it is for temporary caching/storage.
+- Also learned alot of best coding practices for combining sockets with database especially with really challenging edge cases.
+- I made the design simple since my focus is mainly about implementing more on the backend and how they interact with react hooks. I would make it cooler with animations but its not a priority for me.
