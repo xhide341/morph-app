@@ -10,7 +10,7 @@ import { useUserInfo } from "../contexts/user-context";
 import { useActivity } from "../hooks/use-activity";
 import { useRoom } from "../hooks/use-room";
 import { socketService } from "../services/socket-service";
-import { RoomActivity, RoomUser } from "../types/room";
+import { RoomActivity } from "../types/room";
 
 export const RoomPage = () => {
   const { roomId } = useParams<{ roomId: string }>();
@@ -20,6 +20,7 @@ export const RoomPage = () => {
   const [showModal, setShowModal] = useState(!userName);
   const [isConnected, setIsConnected] = useState(socketService.isConnected());
 
+  // connect to socket
   useEffect(() => {
     if (!roomId || !userName) {
       return;
@@ -32,7 +33,7 @@ export const RoomPage = () => {
     };
   }, [roomId, userName]);
 
-  // connect react to socket connection state
+  // handle socket connection
   useEffect(() => {
     if (!roomId || !userName) {
       return;
@@ -79,7 +80,6 @@ export const RoomPage = () => {
       }
     };
 
-    // Activity subscription
     const handleActivity = (activity: RoomActivity) => {
       setActivities((prev) => {
         const exists = prev.some((a) => a.id === activity.id);

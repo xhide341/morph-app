@@ -3,6 +3,7 @@ import { AlertCircle } from "react-feather";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 
+import { LoadingSpinner } from "../components/loading-spinner";
 import { ThemeToggle } from "../components/theme-toggle";
 import { useRoom } from "../hooks/use-room";
 
@@ -30,18 +31,15 @@ export function SessionPage() {
     try {
       const roomId = roomName.trim().toLowerCase();
 
-      // 1. Validate with zod
       const { roomName: validatedRoom } = roomSchema.parse({
         roomName: roomId,
       });
 
-      // 2. Try to create room (server handles existence check)
       const room = await createRoom(validatedRoom);
       if (!room) {
         navigate(`/room/${validatedRoom}`);
       }
 
-      // 3. Navigate to room
       navigate(`/room/${validatedRoom}`);
     } catch (error) {
       console.error("[Session] Error:", error);
@@ -108,11 +106,17 @@ export function SessionPage() {
 
             <button
               type="submit"
-              className="bg-primary hover:bg-primary/90 text-background font-base w-full max-w-full cursor-pointer rounded-md p-2 text-sm tracking-wide"
+              className="bg-primary hover:bg-primary/90 text-background font-base flex w-full max-w-full cursor-pointer items-center justify-center gap-2 rounded-md p-2 text-sm tracking-wide"
               disabled={isSubmitting}
               aria-busy={isSubmitting}
             >
-              {isSubmitting ? "Creating..." : "Continue"}
+              {isSubmitting ? (
+                <>
+                  <LoadingSpinner size="sm" className="text-background" />
+                </>
+              ) : (
+                "Continue"
+              )}
             </button>
           </form>
         </div>

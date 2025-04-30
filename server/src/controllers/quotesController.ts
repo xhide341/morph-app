@@ -7,7 +7,7 @@ interface Quote {
 }
 
 // Server-side cache
-const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
+const CACHE_DURATION = 24 * 60 * 60 * 1000;
 const cache = {
   data: null as Quote | null,
   lastFetched: 0,
@@ -15,7 +15,6 @@ const cache = {
 
 export const getToday = async (req: Request, res: Response) => {
   try {
-    // Check if valid cached quote
     const isCacheValid =
       cache.data && Date.now() - cache.lastFetched < CACHE_DURATION;
 
@@ -24,15 +23,13 @@ export const getToday = async (req: Request, res: Response) => {
       return;
     }
 
-    // Fetch new quote if cache is invalid
-    const { data } = await axios.get("https://qapi.vercel.app/api/random");
+    const { data } = await axios.get("https://zenquotes.io/api/today");
     cache.data = data;
     cache.lastFetched = Date.now();
 
     res.json(cache.data);
   } catch (error) {
     console.error("ZenQuotes Error:", error);
-    // Return cached quote as fallback if available
     if (cache.data) {
       res.json(cache.data);
       return;
