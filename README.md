@@ -1,7 +1,5 @@
 # 🕰️ MORPH - Collaborative Pomodoro Timer
 
-## 🎯 Project Overview
-
 MORPH is a real-time collaborative Pomodoro timer that helps teams stay focused together.
 Built as a practice for me to explore and experience:
 
